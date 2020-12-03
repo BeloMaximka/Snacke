@@ -167,7 +167,7 @@ void DrawMap() {
 
 	HPEN pen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
-	SelectObject(ConsoleDisplay, pen);
+	//SelectObject(ConsoleDisplay, pen);
 	SelectObject(ConsoleDisplay, brush);
 	//Rectangle(ConsoleDisplay, 0, 0, MapWidth * TileSize + TileSize, MapHeight * TileSize + TileSize);
 	for (int y = 0; y < MapHeight; y++)
@@ -204,7 +204,7 @@ void DrawMap() {
 				pen = CreatePen(PS_SOLID, 1, RGB(100, 100, 100));
 				brush = CreateSolidBrush(RGB(100, 100, 100));
 			}
-			SelectObject(ConsoleDisplay, pen);
+			//SelectObject(ConsoleDisplay, pen);
 			SelectObject(ConsoleDisplay, brush);
 			Rectangle(ConsoleDisplay, x * TileSize, y * TileSize, x * TileSize + TileSize, y * TileSize + TileSize);
 			DeleteObject(pen);
@@ -316,7 +316,7 @@ int main()
 		OldSnakeHead = SnakeHead;
 		MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 		DrawMap();
-		//Sleep(100);
+		Sleep(100);
 	}
 	DrawMap();
 	system("pause");
