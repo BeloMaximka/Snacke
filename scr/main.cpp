@@ -286,8 +286,12 @@ int main()
 	int HeadPosY = MapHeight / 2;
 	Map[HeadPosY][HeadPosX] = SnakeHead;
 	Map[HeadPosY][HeadPosX - 1] = SnakeHead;
+	Map[HeadPosY][HeadPosX] = SnakeHead;
+	Map[HeadPosY][HeadPosX - 2] = SnakeHead;
+	Map[HeadPosY][HeadPosX] = SnakeHead;
+	Map[HeadPosY][HeadPosX - 3] = SnakeHead;
 	int TailPosY = HeadPosY;
-	int TailPosX = HeadPosX - 2;
+	int TailPosX = HeadPosX - 4;
 	Map[TailPosY][TailPosX] = SnakeHead;
 
 	//Timer init
@@ -297,31 +301,69 @@ int main()
 
 	// Main loop
 	while (true)
-	{
+	{		
 		if (_kbhit())
 		{
-			int Keycode = _getch();
-			if (Keycode == 224) Keycode = _getch();
-			//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-			if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+			if (_kbhit())
 			{
-				SnakeHead = TILE_SNAKE_UP;
+				int Keycode = _getch();
+				if (Keycode == 224) Keycode = _getch();
+				//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+				if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+				{
+					SnakeHead = TILE_SNAKE_UP;
+				}
+				else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+				{
+					SnakeHead = TILE_SNAKE_DOWN;
+				}
+				else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
+				{
+					SnakeHead = TILE_SNAKE_LEFT;
+				}
+				else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
+				{
+					SnakeHead = TILE_SNAKE_RIGHT;
+				}
+				if (SnakeHead != OldSnakeHead)
+				{
+					OldSnakeHead = SnakeHead;
+					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
+					DrawMap();
+					Sleep(100);
+				}
 			}
-			else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+			if (_kbhit())
 			{
-				SnakeHead = TILE_SNAKE_DOWN;
+				int Keycode = _getch();
+				if (Keycode == 224) Keycode = _getch();
+				FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+				if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+				{
+					SnakeHead = TILE_SNAKE_UP;
+				}
+				else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+				{
+					SnakeHead = TILE_SNAKE_DOWN;
+				}
+				else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
+				{
+					SnakeHead = TILE_SNAKE_LEFT;
+				}
+				else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
+				{
+					SnakeHead = TILE_SNAKE_RIGHT;
+				}
+				if (SnakeHead != OldSnakeHead)
+				{
+					OldSnakeHead = SnakeHead;
+					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
+					DrawMap();
+					Sleep(100);
+				}
 			}
-			else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
-			{
-				SnakeHead = TILE_SNAKE_LEFT;
-			}
-			else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
-			{
-				SnakeHead = TILE_SNAKE_RIGHT;
-			}
-		}
-		
-		if (CheckTimerEnd(&UpdateTimer))
+		}		
+		else if (CheckTimerEnd(&UpdateTimer))
 		{
 			// Перезапускаем таймер
 			StartTimer(&UpdateTimer);
@@ -329,6 +371,7 @@ int main()
 			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 			DrawMap();
 		}
+		
 
 	}
 	DrawMap();
