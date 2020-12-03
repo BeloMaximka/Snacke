@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <Windows.h>
 #include <conio.h>
+#include "cpptimer.h"
 using namespace std;
 #pragma comment(lib,"msimg32.lib")
 // Глобальные переменные
@@ -161,7 +162,7 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 }
 void DrawMap() {
 	int TileSize = 15;
-	
+
 	//HANDLE Console = GetStdHandle(STD_OUTPUT_HANDLE);
 	//SetConsoleCursorPosition(Console, { 0,0 });
 
@@ -197,7 +198,7 @@ void DrawMap() {
 			else if (Map[y][x] == TILE_SNAKE_RIGHT)
 			{
 				pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 255));
-				brush = CreateSolidBrush(RGB(0, 255, 255));				
+				brush = CreateSolidBrush(RGB(0, 255, 255));
 			}
 			else
 			{
@@ -213,11 +214,11 @@ void DrawMap() {
 		}
 		//cout << endl;
 	}
-	
-	
+
+
 }
 void GameInit() {
-	
+
 	// Махинации с консолью
 	SetConsoleTitle(TEXT("AMAZE!"));
 
@@ -241,7 +242,7 @@ void GameInit() {
 	system("mode con cols=115 lines=52");
 
 	// Центрируем консоль
-	RECT rectClient, rectWindow;	
+	RECT rectClient, rectWindow;
 	GetClientRect(ConsoleWindow, &rectClient);
 	GetWindowRect(ConsoleWindow, &rectWindow);
 	int posx, posy;
@@ -289,13 +290,19 @@ int main()
 	int TailPosX = HeadPosX - 2;
 	Map[TailPosY][TailPosX] = SnakeHead;
 
+	//Timer init
+	timer UpdateTimer;
+	UpdateTimer.DurationMiliSeconds = 100;
+	StartTimer(&UpdateTimer);
+
 	// Main loop
 	while (true)
 	{
-		while (_kbhit())
+		if (_kbhit())
 		{
 			int Keycode = _getch();
 			if (Keycode == 224) Keycode = _getch();
+			//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 			if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
 			{
 				SnakeHead = TILE_SNAKE_UP;
@@ -313,10 +320,16 @@ int main()
 				SnakeHead = TILE_SNAKE_RIGHT;
 			}
 		}
-		OldSnakeHead = SnakeHead;
-		MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
-		DrawMap();
-		Sleep(100);
+		
+		if (CheckTimerEnd(&UpdateTimer))
+		{
+			// Перезапускаем таймер
+			StartTimer(&UpdateTimer);
+			OldSnakeHead = SnakeHead;
+			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
+			DrawMap();
+		}
+
 	}
 	DrawMap();
 	system("pause");
