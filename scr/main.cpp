@@ -373,9 +373,7 @@ int main()
 		//	DrawMap();
 		//}
 		else
-		{
-			// Перезапускаем таймер
-			StartTimer(&UpdateTimer);
+		{			
 			OldSnakeHead = SnakeHead;
 			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 			DrawMap();
