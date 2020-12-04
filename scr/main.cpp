@@ -295,8 +295,9 @@ int main()
 	Map[TailPosY][TailPosX] = SnakeHead;
 
 	//Timer init
+	int UpdateDelayMiliseconds = 500;
 	timer UpdateTimer;
-	UpdateTimer.DurationMiliSeconds = 100;
+	UpdateTimer.DurationMiliseconds = UpdateDelayMiliseconds;
 	StartTimer(&UpdateTimer);
 
 	// Main loop
@@ -330,7 +331,7 @@ int main()
 					OldSnakeHead = SnakeHead;
 					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 					DrawMap();
-					Sleep(100);
+					Sleep(UpdateDelayMiliseconds);
 				}
 			}
 			if (_kbhit())
@@ -359,17 +360,26 @@ int main()
 					OldSnakeHead = SnakeHead;
 					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 					DrawMap();
-					Sleep(100);
+					Sleep(UpdateDelayMiliseconds);
 				}
 			}
 		}		
-		else if (CheckTimerEnd(&UpdateTimer))
+		//else if (CheckTimerEnd(&UpdateTimer))
+		//{
+		//	// Перезапускаем таймер
+		//	StartTimer(&UpdateTimer);
+		//	OldSnakeHead = SnakeHead;
+		//	MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
+		//	DrawMap();
+		//}
+		else
 		{
 			// Перезапускаем таймер
 			StartTimer(&UpdateTimer);
 			OldSnakeHead = SnakeHead;
 			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 			DrawMap();
+			Sleep(UpdateDelayMiliseconds);
 		}
 		
 
