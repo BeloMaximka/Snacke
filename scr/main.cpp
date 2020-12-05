@@ -8,6 +8,7 @@ using namespace std;
 int MapHeight = 50;
 int MapWidth = 50;
 int** Map;
+int TileSize = 16;
 // Дескриптор вывода данных
 HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 // Дескриптов окна
@@ -15,6 +16,7 @@ HWND ConsoleWindow = GetConsoleWindow();
 // Дескриптов дисплея
 HDC ConsoleDisplay = GetDC(ConsoleWindow);
 //----------------------
+
 enum Keys
 {
 	GMKEY_LEFT = 75,
@@ -29,7 +31,8 @@ enum Tiles
 	TILE_SNAKE_UP,
 	TILE_SNAKE_DOWN,
 	TILE_SNAKE_LEFT,
-	TILE_SNAKE_RIGHT
+	TILE_SNAKE_RIGHT,
+	TILE_FOOD
 };
 enum Directions
 {
@@ -38,8 +41,87 @@ enum Directions
 	DIR_UP = -2,
 	DIR_DOWN = 2
 };
+const int ColorsAmount = 2;
+HPEN Pens[ColorsAmount];
+HBRUSH Brushes[ColorsAmount];
+enum Colors
+{
+	GCLR_BLACK,
+	GCLR_WHITE,
+};
+void InitColors() {
+	//GCLR_BLACK
+	Pens[0] = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+	Brushes[0] = CreateSolidBrush(RGB(0, 0, 0));
+	//GCLR_WHITE
+	Pens[1] = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
+	Brushes[1] = CreateSolidBrush(RGB(255, 255, 255));
+}
 bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int NewHead) {
+	// Добавляем новый сегмент головы
+	Map[HeadPosY][HeadPosX] = NewHead;
+	if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_UP)
+	{
+		if (HeadPosY - 1 < 0)
+		{
+			HeadPosY = MapHeight - 1;
+		}
+		else if (Map[HeadPosY - 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY - 1][HeadPosX] == TILE_FOOD)
+		{
+			HeadPosY--;
 
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_DOWN)
+	{
+		if (HeadPosY + 1 >= MapHeight)
+		{
+			HeadPosY = 0;
+		}
+		else if (Map[HeadPosY + 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY + 1][HeadPosX] == TILE_FOOD)
+		{
+			HeadPosY++;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_LEFT)
+	{
+		if (HeadPosX - 1 < 0)
+		{
+			HeadPosX = MapWidth - 1;
+		}
+		else if (Map[HeadPosY][HeadPosX - 1] == TILE_EMPTY || Map[HeadPosY][HeadPosX - 1] == TILE_FOOD)
+		{
+			HeadPosX--;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_RIGHT)
+	{
+		if (HeadPosX + 1 >= MapWidth)
+		{
+			HeadPosX = 0;
+		}
+		else if (Map[HeadPosY][HeadPosX + 1] == TILE_EMPTY || Map[HeadPosY][HeadPosX - 1] == TILE_FOOD)
+		{
+			HeadPosX++;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	Map[HeadPosY][HeadPosX] = NewHead;
 	// Определяем новый конец
 	if (Map[TailPosY][TailPosX] == TILE_SNAKE_UP)
 	{
@@ -95,80 +177,108 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 		}
 
 	}
-	// Добавляем новый сегмент головы
-	Map[HeadPosY][HeadPosX] = NewHead;
-	if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_UP)
-	{
-		if (HeadPosY - 1 < 0)
-		{
-			HeadPosY = MapHeight - 1;
-		}
-		else if (Map[HeadPosY - 1][HeadPosX] == TILE_EMPTY)
-		{
-			HeadPosY--;
+	return true;
+}
+void DrawTile(int PosX, int PosY, int TileID) {
 
-		}
-		else
-		{
-			return false;
-		}
-	}
-	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_DOWN)
+}
+void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int SegmentNumber) {
+	PosX = PosX*TileSize + TileSize / 2;
+	PosY = PosY*TileSize + TileSize / 2;
+	int Width = TileSize * (0.5 + ((double)SegmentNumber / SegmentsAmount) / 2);
+	SelectObject(ConsoleDisplay, Pens[GCLR_WHITE]);
+	SelectObject(ConsoleDisplay, Brushes[GCLR_WHITE]);
+	if (TileID == TILE_SNAKE_UP)
 	{
-		if (HeadPosY + 1 >= MapHeight)
-		{
-			HeadPosY = 0;
-		}
-		else if (Map[HeadPosY + 1][HeadPosX] == TILE_EMPTY)
-		{
-			HeadPosY++;
-		}
-		else
-		{
-			return false;
-		}
+		Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 2, PosX + Width / 2, PosY + TileSize / 4);
 	}
-	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_LEFT)
+	else if (TileID == TILE_SNAKE_DOWN)
 	{
-		if (HeadPosX - 1 < 0)
-		{
-			HeadPosX = MapWidth - 1;
-		}
-		else if (Map[HeadPosY][HeadPosX - 1] == TILE_EMPTY)
-		{
-			HeadPosX--;
-		}
-		else
-		{
-			return false;
-		}
+		Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 4, PosX + Width / 2, PosY + TileSize / 2);
 	}
-	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_RIGHT)
+	else if (TileID == TILE_SNAKE_LEFT)
 	{
-		if (HeadPosX + 1 >= MapWidth)
-		{
-			HeadPosX = 0;
-		}
-		else if (Map[HeadPosY][HeadPosX + 1] == TILE_EMPTY)
-		{
-			HeadPosX++;
-		}
-		else
-		{
-			return false;
-		}
+		Rectangle(ConsoleDisplay, PosX - TileSize / 2, PosY - Width / 2, PosX + TileSize / 4, PosY + Width / 2);
 	}
-	Map[HeadPosY][HeadPosX] = NewHead;
+	else if (TileID == TILE_SNAKE_RIGHT)
+	{
+		Rectangle(ConsoleDisplay, PosX - TileSize / 4, PosY - Width / 2, PosX + TileSize / 2, PosY + Width / 2);
+	}
+}
+void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailTile, int SegmentsAmount) {
+	int SegmentNumber = 0;
+	int SegmentTile = TailTile;
+	while (true)
+	{
+		SegmentNumber++;
+		DrawSnakeBodyPart(TailPosX, TailPosY, SegmentTile, SegmentsAmount, SegmentNumber);
+		if (TailPosX == HeadPosX && TailPosY == HeadPosY)
+		{
+			break;
+		}
+		if (SegmentTile == TILE_SNAKE_UP)
+		{			
+			if (TailPosY - 1 < 0)
+			{
+				TailPosY = MapHeight - 1;
+
+			}
+			else
+			{
+				TailPosY--;
+			}
+			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_DOWN, SegmentsAmount, SegmentNumber);
+		}
+		else if (SegmentTile == TILE_SNAKE_DOWN)
+		{			
+			if (TailPosY + 1 >= MapHeight)
+			{
+				TailPosY = 0;
+
+			}
+			else
+			{
+				TailPosY++;
+			}
+			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_UP, SegmentsAmount, SegmentNumber);
+		}
+		else if (SegmentTile == TILE_SNAKE_LEFT)
+		{			
+			if (TailPosX - 1 < 0)
+			{
+				TailPosX = MapWidth - 1;
+
+			}
+			else
+			{
+				TailPosX--;
+			}
+			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_RIGHT, SegmentsAmount, SegmentNumber);
+		}
+		else if (SegmentTile == TILE_SNAKE_RIGHT)
+		{			
+			if (TailPosX + 1 >= MapWidth)
+			{
+				TailPosX = 0;
+
+			}
+			else
+			{
+				TailPosX++;
+			}
+			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_LEFT, SegmentsAmount, SegmentNumber);			
+		}
+		SegmentTile = Map[TailPosY][TailPosX];
+	}
 }
 void DrawMap() {
-	int TileSize = 15;
 
 	//HANDLE Console = GetStdHandle(STD_OUTPUT_HANDLE);
 	//SetConsoleCursorPosition(Console, { 0,0 });
 
 	HPEN pen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
-	//SelectObject(ConsoleDisplay, pen);
+	SelectObject(ConsoleDisplay, pen);
 	SelectObject(ConsoleDisplay, brush);
 	//Rectangle(ConsoleDisplay, 0, 0, MapWidth * TileSize + TileSize, MapHeight * TileSize + TileSize);
 	for (int y = 0; y < MapHeight; y++)
@@ -180,7 +290,7 @@ void DrawMap() {
 				pen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
 				brush = CreateSolidBrush(RGB(255, 255, 255));
 			}
-			else if (Map[y][x] == TILE_SNAKE_UP)
+			/*else if (Map[y][x] == TILE_SNAKE_UP)
 			{
 				pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 255));
 				brush = CreateSolidBrush(RGB(0, 255, 255));
@@ -199,7 +309,7 @@ void DrawMap() {
 			{
 				pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 255));
 				brush = CreateSolidBrush(RGB(0, 255, 255));
-			}
+			}*/
 			else
 			{
 				pen = CreatePen(PS_SOLID, 1, RGB(100, 100, 100));
@@ -213,12 +323,14 @@ void DrawMap() {
 			//Sleep(10);
 		}
 		//cout << endl;
-	}
-
+	}	
+	ShowWindow(ConsoleWindow, SW_SHOW);
 
 }
 void GameInit() {
 
+	//Инициализация цветов
+	InitColors();
 	// Махинации с консолью
 	SetConsoleTitle(TEXT("AMAZE!"));
 
@@ -280,29 +392,31 @@ int main()
 		}
 	}
 	// Snake init
+	int SnakeSegmentsCount = 8;
 	int SnakeHead = TILE_SNAKE_RIGHT;
 	int OldSnakeHead = SnakeHead;
 	int HeadPosX = MapWidth / 2;
 	int HeadPosY = MapHeight / 2;
 	Map[HeadPosY][HeadPosX] = SnakeHead;
-	Map[HeadPosY][HeadPosX - 1] = SnakeHead;
-	Map[HeadPosY][HeadPosX] = SnakeHead;
-	Map[HeadPosY][HeadPosX - 2] = SnakeHead;
-	Map[HeadPosY][HeadPosX] = SnakeHead;
+	Map[HeadPosY][HeadPosX - 1] = SnakeHead;	
+	Map[HeadPosY][HeadPosX - 2] = SnakeHead;	
 	Map[HeadPosY][HeadPosX - 3] = SnakeHead;
+	Map[HeadPosY][HeadPosX - 4] = SnakeHead;
+	Map[HeadPosY][HeadPosX - 5] = SnakeHead;
+	Map[HeadPosY][HeadPosX - 6] = SnakeHead;
 	int TailPosY = HeadPosY;
-	int TailPosX = HeadPosX - 4;
+	int TailPosX = HeadPosX - 7;
 	Map[TailPosY][TailPosX] = SnakeHead;
 
 	//Timer init
-	int UpdateDelayMiliseconds = 500;
+	int UpdateDelayMiliseconds = 100;
 	timer UpdateTimer;
 	UpdateTimer.DurationMiliseconds = UpdateDelayMiliseconds;
 	StartTimer(&UpdateTimer);
 
 	// Main loop
 	while (true)
-	{		
+	{
 		if (_kbhit())
 		{
 			if (_kbhit())
@@ -331,6 +445,7 @@ int main()
 					OldSnakeHead = SnakeHead;
 					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 					DrawMap();
+					DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 					Sleep(UpdateDelayMiliseconds);
 				}
 			}
@@ -360,10 +475,11 @@ int main()
 					OldSnakeHead = SnakeHead;
 					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 					DrawMap();
+					DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 					Sleep(UpdateDelayMiliseconds);
 				}
 			}
-		}		
+		}
 		//else if (CheckTimerEnd(&UpdateTimer))
 		//{
 		//	// Перезапускаем таймер
@@ -373,13 +489,14 @@ int main()
 		//	DrawMap();
 		//}
 		else
-		{			
+		{
 			OldSnakeHead = SnakeHead;
 			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
 			DrawMap();
+			DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 			Sleep(UpdateDelayMiliseconds);
 		}
-		
+
 
 	}
 	DrawMap();
