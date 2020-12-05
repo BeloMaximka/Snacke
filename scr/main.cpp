@@ -41,13 +41,15 @@ enum Directions
 	DIR_UP = -2,
 	DIR_DOWN = 2
 };
-const int ColorsAmount = 2;
+const int ColorsAmount = 4;
 HPEN Pens[ColorsAmount];
 HBRUSH Brushes[ColorsAmount];
 enum Colors
 {
 	GCLR_BLACK,
 	GCLR_WHITE,
+	GCLR_DARKBLUE,
+	GCLR_YELLOW
 };
 void InitColors() {
 	//GCLR_BLACK
@@ -56,6 +58,25 @@ void InitColors() {
 	//GCLR_WHITE
 	Pens[1] = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
 	Brushes[1] = CreateSolidBrush(RGB(255, 255, 255));
+	//GCLR_DARKBLUE
+	Pens[2] = CreatePen(PS_SOLID, 1, RGB(61, 83, 87));
+	Brushes[2] = CreateSolidBrush(RGB(61, 83, 87));
+	//GCLR_YELLOW
+	Pens[3] = CreatePen(PS_SOLID, 1, RGB(214, 191, 142));
+	Brushes[3] = CreateSolidBrush(RGB(214, 191, 142));
+}
+void DrawTile(int PosX, int PosY, int TileID) {
+	if (TileID == TILE_WALL)
+	{
+		SelectObject(ConsoleDisplay, Pens[GCLR_YELLOW]);
+		SelectObject(ConsoleDisplay, Brushes[GCLR_YELLOW]);
+	}
+	else
+	{
+		SelectObject(ConsoleDisplay, Pens[GCLR_BLACK]);
+		SelectObject(ConsoleDisplay, Brushes[GCLR_DARKBLUE]);
+	}
+	Rectangle(ConsoleDisplay, PosX * TileSize, PosY * TileSize, PosX * TileSize + TileSize, PosY * TileSize + TileSize);
 }
 bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int NewHead) {
 	// Добавляем новый сегмент головы
@@ -69,7 +90,6 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 		else if (Map[HeadPosY - 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY - 1][HeadPosX] == TILE_FOOD)
 		{
 			HeadPosY--;
-
 		}
 		else
 		{
@@ -121,10 +141,11 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 			return false;
 		}
 	}
-	Map[HeadPosY][HeadPosX] = NewHead;
+	Map[HeadPosY][HeadPosX] = NewHead;	
+	DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 	// Определяем новый конец
 	if (Map[TailPosY][TailPosX] == TILE_SNAKE_UP)
-	{
+	{		
 		// Удаляем конец хвоста
 		Map[TailPosY][TailPosX] = TILE_EMPTY;
 		if (TailPosY - 1 < 0)
@@ -175,19 +196,16 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 		{
 			TailPosX++;
 		}
-
 	}
+	
 	return true;
-}
-void DrawTile(int PosX, int PosY, int TileID) {
-
 }
 void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int SegmentNumber) {
 	PosX = PosX*TileSize + TileSize / 2;
 	PosY = PosY*TileSize + TileSize / 2;
 	int Width = TileSize * (0.5 + ((double)SegmentNumber / SegmentsAmount) / 2);
-	SelectObject(ConsoleDisplay, Pens[GCLR_WHITE]);
-	SelectObject(ConsoleDisplay, Brushes[GCLR_WHITE]);
+	SelectObject(ConsoleDisplay, Pens[GCLR_YELLOW]);
+	SelectObject(ConsoleDisplay, Brushes[GCLR_YELLOW]);
 	if (TileID == TILE_SNAKE_UP)
 	{
 		Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 2, PosX + Width / 2, PosY + TileSize / 4);
@@ -208,9 +226,10 @@ void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int S
 void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailTile, int SegmentsAmount) {
 	int SegmentNumber = 0;
 	int SegmentTile = TailTile;
+	DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 	while (true)
 	{
-		SegmentNumber++;
+		SegmentNumber++;		
 		DrawSnakeBodyPart(TailPosX, TailPosY, SegmentTile, SegmentsAmount, SegmentNumber);
 		if (TailPosX == HeadPosX && TailPosY == HeadPosY)
 		{
@@ -227,6 +246,7 @@ void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailT
 			{
 				TailPosY--;
 			}
+			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_DOWN, SegmentsAmount, SegmentNumber);
 		}
 		else if (SegmentTile == TILE_SNAKE_DOWN)
@@ -240,6 +260,7 @@ void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailT
 			{
 				TailPosY++;
 			}
+			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_UP, SegmentsAmount, SegmentNumber);
 		}
 		else if (SegmentTile == TILE_SNAKE_LEFT)
@@ -253,6 +274,7 @@ void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailT
 			{
 				TailPosX--;
 			}
+			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_RIGHT, SegmentsAmount, SegmentNumber);
 		}
 		else if (SegmentTile == TILE_SNAKE_RIGHT)
@@ -266,65 +288,20 @@ void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailT
 			{
 				TailPosX++;
 			}
+			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_LEFT, SegmentsAmount, SegmentNumber);			
 		}
 		SegmentTile = Map[TailPosY][TailPosX];
 	}
 }
 void DrawMap() {
-
-	//HANDLE Console = GetStdHandle(STD_OUTPUT_HANDLE);
-	//SetConsoleCursorPosition(Console, { 0,0 });
-
-	HPEN pen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
-	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
-	SelectObject(ConsoleDisplay, pen);
-	SelectObject(ConsoleDisplay, brush);
-	//Rectangle(ConsoleDisplay, 0, 0, MapWidth * TileSize + TileSize, MapHeight * TileSize + TileSize);
 	for (int y = 0; y < MapHeight; y++)
 	{
 		for (int x = 0; x < MapWidth; x++)
 		{
-			if (Map[y][x] == TILE_WALL)
-			{
-				pen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
-				brush = CreateSolidBrush(RGB(255, 255, 255));
-			}
-			/*else if (Map[y][x] == TILE_SNAKE_UP)
-			{
-				pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 255));
-				brush = CreateSolidBrush(RGB(0, 255, 255));
-			}
-			else if (Map[y][x] == TILE_SNAKE_DOWN)
-			{
-				pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 255));
-				brush = CreateSolidBrush(RGB(0, 255, 255));
-			}
-			else if (Map[y][x] == TILE_SNAKE_LEFT)
-			{
-				pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 255));
-				brush = CreateSolidBrush(RGB(0, 255, 255));
-			}
-			else if (Map[y][x] == TILE_SNAKE_RIGHT)
-			{
-				pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 255));
-				brush = CreateSolidBrush(RGB(0, 255, 255));
-			}*/
-			else
-			{
-				pen = CreatePen(PS_SOLID, 1, RGB(100, 100, 100));
-				brush = CreateSolidBrush(RGB(100, 100, 100));
-			}
-			//SelectObject(ConsoleDisplay, pen);
-			SelectObject(ConsoleDisplay, brush);
-			Rectangle(ConsoleDisplay, x * TileSize, y * TileSize, x * TileSize + TileSize, y * TileSize + TileSize);
-			DeleteObject(pen);
-			DeleteObject(brush);
-			//Sleep(10);
-		}
-		//cout << endl;
-	}	
-	ShowWindow(ConsoleWindow, SW_SHOW);
+			DrawTile(x, y, Map[y][x]);
+		}		
+	}		
 
 }
 void GameInit() {
@@ -413,7 +390,8 @@ int main()
 	timer UpdateTimer;
 	UpdateTimer.DurationMiliseconds = UpdateDelayMiliseconds;
 	StartTimer(&UpdateTimer);
-
+	DrawMap();
+	DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 	// Main loop
 	while (true)
 	{
@@ -443,8 +421,7 @@ int main()
 				if (SnakeHead != OldSnakeHead)
 				{
 					OldSnakeHead = SnakeHead;
-					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
-					DrawMap();
+					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);					
 					DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 					Sleep(UpdateDelayMiliseconds);
 				}
@@ -473,8 +450,7 @@ int main()
 				if (SnakeHead != OldSnakeHead)
 				{
 					OldSnakeHead = SnakeHead;
-					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
-					DrawMap();
+					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);					
 					DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 					Sleep(UpdateDelayMiliseconds);
 				}
@@ -491,8 +467,7 @@ int main()
 		else
 		{
 			OldSnakeHead = SnakeHead;
-			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
-			DrawMap();
+			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);			
 			DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 			Sleep(UpdateDelayMiliseconds);
 		}
