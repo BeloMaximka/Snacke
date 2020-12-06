@@ -94,7 +94,7 @@ void DrawTile(int PosX, int PosY, int TileID) {
 bool SpawnFood() {
 	int FoodPosX;
 	int FoodPosY;
-	while (true)
+	for (int i = 0; i < MapHeight*MapWidth; i++)
 	{
 		FoodPosY = rand() % MapHeight;
 		FoodPosX = rand() % MapWidth;
@@ -105,6 +105,77 @@ bool SpawnFood() {
 			return true;
 		}
 	}
+	if (rand()%2)
+	{
+		if (rand()%2)
+		{
+			// двигаемся с левого верхнего угла
+			for (int y = 0; y < MapHeight; y++)
+			{
+				for (int x = 0; x < MapWidth; x++)
+				{
+					if (Map[y][x] == TILE_EMPTY)
+					{
+						Map[y][x] = TILE_FOOD;
+						DrawTile(x, y, TILE_FOOD);
+						return true;
+					}
+				}
+			}
+		}
+		else
+		{
+			// я правого верхнего угла
+			for (int y = 0; y < MapHeight; y++)
+			{
+				for (int x = MapWidth = 1; x > 0; x--)
+				{
+					if (Map[y][x] == TILE_EMPTY)
+					{
+						Map[y][x] = TILE_FOOD;
+						DrawTile(x, y, TILE_FOOD);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		if (rand() % 2)
+		{
+			// двигаемся с левого нижнего угла
+			for (int y = MapHeight - 1; y > 0; y--)
+			{
+				for (int x = 0; x < MapWidth; x++)
+				{
+					if (Map[y][x] == TILE_EMPTY)
+					{
+						Map[y][x] = TILE_FOOD;
+						DrawTile(x, y, TILE_FOOD);
+						return true;
+					}
+				}
+			}
+		}
+		else
+		{
+			// двигаемся с правого нижнего угла
+			for (int y = MapHeight - 1; y > 0; y--)
+			{
+				for (int x = MapWidth = 1; x > 0; x--)
+				{
+					if (Map[y][x] == TILE_EMPTY)
+					{
+						Map[y][x] = TILE_FOOD;
+						DrawTile(x, y, TILE_FOOD);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }
 bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int NewHead, int& SegmentsCount) {	
 	// Поворачиваем сегмент перед головой
@@ -450,7 +521,7 @@ int main()
 	Map[TailPosY][TailPosX] = SnakeHead;
 	SpawnFood();
 	//Timer init
-	int UpdateDelayMiliseconds = 300;
+	int UpdateDelayMiliseconds = 500;
 	timer UpdateTimer;
 	UpdateTimer.DurationMiliseconds = UpdateDelayMiliseconds;
 	StartTimer(&UpdateTimer);
