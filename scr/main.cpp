@@ -509,12 +509,13 @@ int main()
 	}
 	while (true)
 	{
-		// Snake init
+		// Snake init		
 		int SnakeSegmentsCount = 5;
 		int SnakeHead = TILE_SNAKE_RIGHT;
 		int OldSnakeHead = SnakeHead;
-		int HeadPosX = 1;
+		int HeadPosX = 4;
 		int HeadPosY = 1;
+		// Временно
 		Map[HeadPosY][HeadPosX] = SnakeHead;
 		Map[HeadPosY][HeadPosX - 1] = SnakeHead;
 		Map[HeadPosY][HeadPosX - 2] = SnakeHead;
