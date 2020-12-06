@@ -5,8 +5,8 @@
 using namespace std;
 #pragma comment(lib,"msimg32.lib")
 // Глобальные переменные
-int MapHeight = 50;
-int MapWidth = 50;
+int MapHeight = 5;
+int MapWidth = 5;
 int** Map;
 int TileSize = 16;
 // Дескриптор вывода данных
@@ -91,7 +91,7 @@ void DrawTile(int PosX, int PosY, int TileID) {
 	}
 	
 }
-void SpawnFood() {
+bool SpawnFood() {
 	int FoodPosX;
 	int FoodPosY;
 	while (true)
@@ -102,27 +102,29 @@ void SpawnFood() {
 		{
 			Map[FoodPosY][FoodPosX] = TILE_FOOD;
 			DrawTile(FoodPosX, FoodPosY, TILE_FOOD);
-			break;
+			return true;
 		}
 	}
 }
-bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int NewHead, int& SegmentsCount) {
-	bool FoodEaten = false;
+bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int NewHead, int& SegmentsCount) {	
 	// Поворачиваем сегмент перед головой
 	Map[HeadPosY][HeadPosX] = NewHead;
 	if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_UP)
 	{
 		if (HeadPosY - 1 < 0)
-		{
-			HeadPosY = MapHeight - 1;
-		}
-		else if (Map[HeadPosY - 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY - 1][HeadPosX] == TILE_FOOD)
-		{
-			if (Map[HeadPosY - 1][HeadPosX] == TILE_FOOD)
+		{			
+			if (Map[MapHeight - 1][HeadPosX] == TILE_EMPTY || Map[MapHeight - 1][HeadPosX] == TILE_FOOD)
 			{
-				FoodEaten = true;
+				HeadPosY = MapHeight - 1;
+			}
+			else
+			{
+				return false;
 			}
 			
+		}
+		else if (Map[HeadPosY - 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY - 1][HeadPosX] == TILE_FOOD)
+		{			
 			HeadPosY--;
 		}
 		else
@@ -134,14 +136,17 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 	{
 		if (HeadPosY + 1 >= MapHeight)
 		{
-			HeadPosY = 0;
+			if (Map[0][HeadPosX] == TILE_EMPTY || Map[0][HeadPosX] == TILE_FOOD)
+			{
+				HeadPosY = 0;
+			}
+			else
+			{
+				return false;
+			}			
 		}
 		else if (Map[HeadPosY + 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY + 1][HeadPosX] == TILE_FOOD)
-		{
-			if (Map[HeadPosY + 1][HeadPosX] == TILE_FOOD)
-			{
-				FoodEaten = true;
-			}			
+		{		
 			HeadPosY++;
 		}
 		else
@@ -151,16 +156,19 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 	}
 	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_LEFT)
 	{
-		if (HeadPosX - 1 < 0)
+		if (HeadPosX - 1 < 0 )
 		{
-			HeadPosX = MapWidth - 1;
+			if (Map[HeadPosY][MapWidth - 1] == TILE_EMPTY || Map[HeadPosY][MapWidth - 1] == TILE_FOOD)
+			{
+				HeadPosX = MapWidth - 1;
+			}
+			else
+			{
+				return false;
+			}			
 		}
 		else if (Map[HeadPosY][HeadPosX - 1] == TILE_EMPTY || Map[HeadPosY][HeadPosX - 1] == TILE_FOOD)
-		{
-			if (Map[HeadPosY][HeadPosX - 1] == TILE_FOOD)
-			{
-				FoodEaten = true;
-			}			
+		{			
 			HeadPosX--;
 		}
 		else
@@ -172,14 +180,17 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 	{
 		if (HeadPosX + 1 >= MapWidth)
 		{
-			HeadPosX = 0;
+			if (Map[HeadPosY][0] == TILE_EMPTY || Map[HeadPosY][0] == TILE_FOOD)
+			{
+				HeadPosX = 0;
+			}
+			else
+			{
+				return false;
+			}			
 		}
 		else if (Map[HeadPosY][HeadPosX + 1] == TILE_EMPTY || Map[HeadPosY][HeadPosX + 1] == TILE_FOOD)
-		{
-			if (Map[HeadPosY][HeadPosX + 1] == TILE_FOOD)
-			{
-				FoodEaten = true;
-			}			
+		{		
 			HeadPosX++;
 		}
 		else
@@ -187,14 +198,17 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 			return false;
 		}
 	}
-	// Добавляем сегмент головы
-	Map[HeadPosY][HeadPosX] = NewHead;	
-	if (FoodEaten)
+	if (Map[HeadPosY][HeadPosX] == TILE_FOOD)
 	{
 		SpawnFood();
 		SegmentsCount++;
+		// Добавляем сегмент головы
+		Map[HeadPosY][HeadPosX] = NewHead;
 		return true;
 	}
+	// Добавляем сегмент головы
+	Map[HeadPosY][HeadPosX] = NewHead;	
+	
 	DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 	// Определяем новый конец
 	if (Map[TailPosY][TailPosX] == TILE_SNAKE_UP)
@@ -422,24 +436,21 @@ int main()
 		}
 	}
 	// Snake init
-	int SnakeSegmentsCount = 8;
+	int SnakeSegmentsCount = 5;
 	int SnakeHead = TILE_SNAKE_RIGHT;
 	int OldSnakeHead = SnakeHead;
-	int HeadPosX = MapWidth / 2;
-	int HeadPosY = MapHeight / 2;
+	int HeadPosX = 0;
+	int HeadPosY = 0;
 	Map[HeadPosY][HeadPosX] = SnakeHead;
 	Map[HeadPosY][HeadPosX - 1] = SnakeHead;	
 	Map[HeadPosY][HeadPosX - 2] = SnakeHead;	
 	Map[HeadPosY][HeadPosX - 3] = SnakeHead;
-	Map[HeadPosY][HeadPosX - 4] = SnakeHead;
-	Map[HeadPosY][HeadPosX - 5] = SnakeHead;
-	Map[HeadPosY][HeadPosX - 6] = SnakeHead;
 	int TailPosY = HeadPosY;
-	int TailPosX = HeadPosX - 7;
+	int TailPosX = HeadPosX - 4;
 	Map[TailPosY][TailPosX] = SnakeHead;
 	SpawnFood();
 	//Timer init
-	int UpdateDelayMiliseconds = 30;
+	int UpdateDelayMiliseconds = 300;
 	timer UpdateTimer;
 	UpdateTimer.DurationMiliseconds = UpdateDelayMiliseconds;
 	StartTimer(&UpdateTimer);
