@@ -5,8 +5,8 @@
 using namespace std;
 #pragma comment(lib,"msimg32.lib")
 // Глобальные переменные
-int MapHeight = 5;
-int MapWidth = 5;
+int MapHeight = 15;
+int MapWidth = 15;
 int** Map;
 int TileSize = 16;
 // Дескриптор вывода данных
@@ -503,113 +503,136 @@ int main()
 			{
 				Map[y][x] = TILE_EMPTY;
 			}
+			// это пременно
 			Map[y][x] = TILE_EMPTY;
 		}
 	}
-	// Snake init
-	int SnakeSegmentsCount = 5;
-	int SnakeHead = TILE_SNAKE_RIGHT;
-	int OldSnakeHead = SnakeHead;
-	int HeadPosX = 0;
-	int HeadPosY = 0;
-	Map[HeadPosY][HeadPosX] = SnakeHead;
-	Map[HeadPosY][HeadPosX - 1] = SnakeHead;	
-	Map[HeadPosY][HeadPosX - 2] = SnakeHead;	
-	Map[HeadPosY][HeadPosX - 3] = SnakeHead;
-	int TailPosY = HeadPosY;
-	int TailPosX = HeadPosX - 4;
-	Map[TailPosY][TailPosX] = SnakeHead;
-	SpawnFood();
-	//Timer init
-	int UpdateDelayMiliseconds = 500;
-	timer UpdateTimer;
-	UpdateTimer.DurationMiliseconds = UpdateDelayMiliseconds;
-	StartTimer(&UpdateTimer);
-	DrawMap();
-	DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
-	// Main loop
 	while (true)
 	{
-		if (_kbhit())
+		// Snake init
+		int SnakeSegmentsCount = 5;
+		int SnakeHead = TILE_SNAKE_RIGHT;
+		int OldSnakeHead = SnakeHead;
+		int HeadPosX = 1;
+		int HeadPosY = 1;
+		Map[HeadPosY][HeadPosX] = SnakeHead;
+		Map[HeadPosY][HeadPosX - 1] = SnakeHead;
+		Map[HeadPosY][HeadPosX - 2] = SnakeHead;
+		Map[HeadPosY][HeadPosX - 3] = SnakeHead;
+		int TailPosY = HeadPosY;
+		int TailPosX = HeadPosX - 4;
+		Map[TailPosY][TailPosX] = SnakeHead;
+		SpawnFood();
+		//Timer init
+		int UpdateDelayMiliseconds = 300;				
+		DrawMap();
+		DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+		// Main loop
+		while (true)
 		{
 			if (_kbhit())
 			{
-				int Keycode = _getch();
-				if (Keycode == 224) Keycode = _getch();
-				//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-				if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+				if (_kbhit())
 				{
-					SnakeHead = TILE_SNAKE_UP;
+					int Keycode = _getch();
+					if (Keycode == 224) Keycode = _getch();
+					//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+					if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+					{
+						SnakeHead = TILE_SNAKE_UP;
+					}
+					else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+					{
+						SnakeHead = TILE_SNAKE_DOWN;
+					}
+					else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
+					{
+						SnakeHead = TILE_SNAKE_LEFT;
+					}
+					else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
+					{
+						SnakeHead = TILE_SNAKE_RIGHT;
+					}
+					if (SnakeHead != OldSnakeHead)
+					{
+						OldSnakeHead = SnakeHead;
+						if (!MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount))
+						{
+							DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+							break;
+						}
+						DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+						Sleep(UpdateDelayMiliseconds);
+					}
 				}
-				else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+				if (_kbhit())
 				{
-					SnakeHead = TILE_SNAKE_DOWN;
-				}
-				else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
-				{
-					SnakeHead = TILE_SNAKE_LEFT;
-				}
-				else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
-				{
-					SnakeHead = TILE_SNAKE_RIGHT;
-				}
-				if (SnakeHead != OldSnakeHead)
-				{
-					OldSnakeHead = SnakeHead;
-					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount);
-					DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
-					Sleep(UpdateDelayMiliseconds);
+					int Keycode = _getch();
+					if (Keycode == 224) Keycode = _getch();
+					// чистим буфер, чтобы не задать огромное количетсво действий напереёд
+					FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+					if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+					{
+						SnakeHead = TILE_SNAKE_UP;
+					}
+					else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+					{
+						SnakeHead = TILE_SNAKE_DOWN;
+					}
+					else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
+					{
+						SnakeHead = TILE_SNAKE_LEFT;
+					}
+					else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
+					{
+						SnakeHead = TILE_SNAKE_RIGHT;
+					}
+					if (SnakeHead != OldSnakeHead)
+					{
+						OldSnakeHead = SnakeHead;
+						if (!MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount))
+						{
+							DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+							break;
+						}
+						DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+						Sleep(UpdateDelayMiliseconds);
+					}
 				}
 			}
-			if (_kbhit())
+			//else if (CheckTimerEnd(&UpdateTimer))
+			//{
+			//	// Перезапускаем таймер
+			//	StartTimer(&UpdateTimer);
+			//	OldSnakeHead = SnakeHead;
+			//	MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
+			//	DrawMap();
+			//}
+			else
 			{
-				int Keycode = _getch();
-				if (Keycode == 224) Keycode = _getch();
-				FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-				if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+				OldSnakeHead = SnakeHead;				
+				if (!MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount))
 				{
-					SnakeHead = TILE_SNAKE_UP;
-				}
-				else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
-				{
-					SnakeHead = TILE_SNAKE_DOWN;
-				}
-				else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
-				{
-					SnakeHead = TILE_SNAKE_LEFT;
-				}
-				else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
-				{
-					SnakeHead = TILE_SNAKE_RIGHT;
-				}
-				if (SnakeHead != OldSnakeHead)
-				{
-					OldSnakeHead = SnakeHead;
-					MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount);
 					DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
-					Sleep(UpdateDelayMiliseconds);
+					break;
 				}
+				DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+				Sleep(UpdateDelayMiliseconds);
 			}
 		}
-		//else if (CheckTimerEnd(&UpdateTimer))
-		//{
-		//	// Перезапускаем таймер
-		//	StartTimer(&UpdateTimer);
-		//	OldSnakeHead = SnakeHead;
-		//	MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
-		//	DrawMap();
-		//}
-		else
-		{			
-			OldSnakeHead = SnakeHead;
-			MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount);
-			DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
-			Sleep(UpdateDelayMiliseconds);
-		}
-
-
+		Beep(500, 700);
+		Beep(300, 700);
+		Beep(200, 700);
+		for (int y = 0; y < MapHeight; y++)
+		{
+			Map[y] = new int[MapWidth];
+			for (int x = 0; x < MapWidth; x++)
+			{				
+				Map[y][x] = TILE_EMPTY;
+			}
+		}		
 	}
-	DrawMap();
+	
 	system("pause");
 
 }
