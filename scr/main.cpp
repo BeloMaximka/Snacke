@@ -8,7 +8,7 @@ using namespace std;
 int MapHeight = 15;
 int MapWidth = 15;
 int** Map;
-int TileSize = 16;
+int TileSize = 32;
 // Дескриптор вывода данных
 HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 // Дескриптов окна
@@ -41,7 +41,7 @@ enum Directions
 	DIR_UP = -2,
 	DIR_DOWN = 2
 };
-const int ColorsAmount = 5;
+const int ColorsAmount = 6;
 HPEN Pens[ColorsAmount];
 HBRUSH Brushes[ColorsAmount];
 enum Colors
@@ -50,7 +50,8 @@ enum Colors
 	GCLR_WHITE,	
 	GCLR_YELLOW,
 	GCLR_RED,
-	GCLR_GREEN
+	GCLR_GREEN,
+	GCLR_DARKGREEN
 };
 void InitColors() {
 	//GCLR_BLACK
@@ -68,6 +69,9 @@ void InitColors() {
 	//GCLR_GREEN
 	Pens[4] = CreatePen(PS_SOLID, 1, RGB(76, 115, 21));	
 	Brushes[4] = CreateSolidBrush(RGB(76, 115, 21));
+	//GCLR_DARKGREEN
+	Pens[5] = CreatePen(PS_SOLID, 1, RGB(42, 64, 11));
+	Brushes[5] = CreateSolidBrush(RGB(42, 64, 11));
 }
 void DrawTile(int PosX, int PosY, int TileID) {
 	if (TileID == TILE_WALL)
@@ -344,21 +348,70 @@ void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int S
 	int Width = TileSize * (0.5 + ((double)SegmentNumber / SegmentsAmount) / 2);
 	SelectObject(ConsoleDisplay, Pens[GCLR_GREEN]);
 	SelectObject(ConsoleDisplay, Brushes[GCLR_GREEN]);
+	POINT PolyPoints[4];
 	if (TileID == TILE_SNAKE_UP)
 	{
 		Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 2, PosX + Width / 2, PosY + TileSize / 4);
+
+		PolyPoints[0].x = PosX - Width / 2;
+		PolyPoints[0].y = (PosY * 2 - TileSize / 4)/2;		
+		PolyPoints[1].x = PosX;
+		PolyPoints[1].y = PosY + TileSize / 4;		
+		PolyPoints[2].x = PosX + Width / 2-1;
+		PolyPoints[2].y = (PosY * 2 - TileSize / 4) / 2;		
+		PolyPoints[3].x = PosX;
+		PolyPoints[3].y = PosY - TileSize / 2;		
+		SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
+		SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
+		Polygon(ConsoleDisplay, PolyPoints, 4);
 	}
 	else if (TileID == TILE_SNAKE_DOWN)
 	{
 		Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 4, PosX + Width / 2, PosY + TileSize / 2);
+
+		PolyPoints[0].x = PosX - Width / 2;
+		PolyPoints[0].y = (PosY * 2 + TileSize / 4) / 2;
+		PolyPoints[1].x = PosX;
+		PolyPoints[1].y = PosY + TileSize / 2-1;
+		PolyPoints[2].x = PosX + Width / 2 - 1;
+		PolyPoints[2].y = (PosY * 2 + TileSize / 4) / 2;
+		PolyPoints[3].x = PosX;
+		PolyPoints[3].y = PosY - TileSize / 4;
+		SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
+		SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
+		Polygon(ConsoleDisplay, PolyPoints, 4);
 	}
 	else if (TileID == TILE_SNAKE_LEFT)
 	{
 		Rectangle(ConsoleDisplay, PosX - TileSize / 2, PosY - Width / 2, PosX + TileSize / 4, PosY + Width / 2);
+
+		PolyPoints[0].x = PosX - TileSize / 2;
+		PolyPoints[0].y = PosY;
+		PolyPoints[1].x = (PosX * 2 - TileSize / 4) / 2;
+		PolyPoints[1].y = PosY + Width / 2-1;
+		PolyPoints[2].x = PosX + TileSize / 4-1;
+		PolyPoints[2].y = PosY;
+		PolyPoints[3].x = (PosX * 2 - TileSize / 4) / 2;
+		PolyPoints[3].y = PosY - Width / 2;
+		SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
+		SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
+		Polygon(ConsoleDisplay, PolyPoints, 4);
 	}
 	else if (TileID == TILE_SNAKE_RIGHT)
 	{
 		Rectangle(ConsoleDisplay, PosX - TileSize / 4, PosY - Width / 2, PosX + TileSize / 2, PosY + Width / 2);
+
+		PolyPoints[0].x = PosX - TileSize / 4;
+		PolyPoints[0].y = PosY;
+		PolyPoints[1].x = (PosX*2 + TileSize / 4) / 2;
+		PolyPoints[1].y = PosY + Width / 2 - 1;
+		PolyPoints[2].x = PosX + TileSize / 2-1;
+		PolyPoints[2].y = PosY;
+		PolyPoints[3].x = (PosX * 2 + TileSize / 4) / 2;
+		PolyPoints[3].y = PosY - Width / 2;
+		SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
+		SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
+		Polygon(ConsoleDisplay, PolyPoints, 4);
 	}
 }
 void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailTile, int SegmentsAmount) {
