@@ -8,7 +8,7 @@ using namespace std;
 int MapHeight = 15;
 int MapWidth = 15;
 int** Map;
-int TileSize = 64;
+int TileSize = 32;
 // Дескриптор вывода данных
 HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 // Дескриптов окна
@@ -41,7 +41,7 @@ enum Directions
 	DIR_UP = -2,
 	DIR_DOWN = 2
 };
-const int ColorsAmount = 7;
+const int ColorsAmount = 9;
 HPEN Pens[ColorsAmount];
 HBRUSH Brushes[ColorsAmount];
 enum Colors
@@ -52,7 +52,9 @@ enum Colors
 	GCLR_RED,
 	GCLR_GREEN,
 	GCLR_DARKGREEN,
-	GCLR_DARKYELLOW
+	GCLR_DARKYELLOW,
+	GCLR_BROWN,
+	GCLR_LIGHTRED
 };
 void InitColors() {
 	//GCLR_BLACK
@@ -65,8 +67,8 @@ void InitColors() {
 	Pens[2] = CreatePen(PS_SOLID, 1, RGB(214, 191, 142));
 	Brushes[2] = CreateSolidBrush(RGB(214, 191, 142));
 	//GCLR_RED
-	Pens[3] = CreatePen(PS_SOLID, 1, RGB(227, 46, 46));
-	Brushes[3] = CreateSolidBrush(RGB(227, 46, 46));
+	Pens[3] = CreatePen(PS_SOLID, 1, RGB(194, 42, 4));
+	Brushes[3] = CreateSolidBrush(RGB(194, 42, 4));
 	//GCLR_GREEN
 	Pens[4] = CreatePen(PS_SOLID, 1, RGB(76, 115, 21));	
 	Brushes[4] = CreateSolidBrush(RGB(76, 115, 21));
@@ -76,6 +78,12 @@ void InitColors() {
 	//GCLR_DARKYELLOW
 	Pens[6] = CreatePen(PS_SOLID, 1, RGB(211, 205, 0));
 	Brushes[6] = CreateSolidBrush(RGB(211, 205, 0));
+	//GCLR_BROWN
+	Pens[7] = CreatePen(PS_SOLID, 1, RGB(89, 48, 26));
+	Brushes[7] = CreateSolidBrush(RGB(89, 48, 26));
+	//GCLR_LIGHTRED
+	Pens[8] = CreatePen(PS_SOLID, 1, RGB(189, 93, 74));
+	Brushes[8] = CreateSolidBrush(RGB(189, 93, 74));
 }
 void DrawTile(int PosX, int PosY, int TileID) {
 	if (TileID == TILE_WALL)
@@ -85,14 +93,38 @@ void DrawTile(int PosX, int PosY, int TileID) {
 		Rectangle(ConsoleDisplay, PosX * TileSize, PosY * TileSize, PosX * TileSize + TileSize, PosY * TileSize + TileSize);
 	}
 	if (TileID == TILE_FOOD)
-	{
+	{		
+		// Выбираем коричневый цвет для обводки
+		SelectObject(ConsoleDisplay, Pens[GCLR_BROWN]);
+		// Выбираем коричневый цвет для заполнения
+		SelectObject(ConsoleDisplay, Brushes[GCLR_BROWN]);
+		// Рисуем палочку
+		Rectangle(ConsoleDisplay, PosX * TileSize + TileSize / 2 - TileSize / 16, PosY * TileSize + TileSize / 16, PosX * TileSize + TileSize / 2 + TileSize / 16, PosY * TileSize + TileSize);
+		// Выбираем красный цвет для обводки
 		SelectObject(ConsoleDisplay, Pens[GCLR_RED]);
+		// Выбираем красный цвет для заполнения
 		SelectObject(ConsoleDisplay, Brushes[GCLR_RED]);
-		Ellipse(ConsoleDisplay, PosX * TileSize, PosY * TileSize, PosX * TileSize + TileSize, PosY * TileSize + TileSize);
+		// Рисуем левую дольку
+		Ellipse(ConsoleDisplay, PosX * TileSize + TileSize/16, PosY * TileSize + TileSize*0.2, PosX * TileSize + TileSize/1.6, PosY * TileSize + TileSize);
+		// Рисуем правую дольку
+		Ellipse(ConsoleDisplay, PosX * TileSize +TileSize - TileSize / 16, PosY * TileSize + TileSize *0.2, PosX * TileSize +TileSize- TileSize / 1.6, PosY * TileSize + TileSize);
+		// Выбираем зеленый цвет для обводки
+		SelectObject(ConsoleDisplay, Pens[GCLR_GREEN]);
+		// Выбираем зеленый цвет для заполнения
+		SelectObject(ConsoleDisplay, Brushes[GCLR_GREEN]);
+		// Рисуем листок
+		Ellipse(ConsoleDisplay, PosX * TileSize + TileSize/2 - TileSize / 16, PosY * TileSize, PosX * TileSize + TileSize  -TileSize / 16, PosY * TileSize + TileSize/6);
+		// Выбираем красный цвет для обводки
+		SelectObject(ConsoleDisplay, Pens[GCLR_LIGHTRED]);
+		// Выбираем красный цвет для заполнения
+		SelectObject(ConsoleDisplay, Brushes[GCLR_LIGHTRED]);
+		// Рисуем блик
+		Ellipse(ConsoleDisplay, PosX * TileSize + TileSize / 2.5, PosY * TileSize + TileSize / 1.8, PosX * TileSize + TileSize / 2.5 - TileSize / 6, PosY * TileSize + TileSize / 2 - TileSize / 5);
+		
 	}
 	else
 	{
-		//SelectObject(ConsoleDisplay, Pens[GCLR_BLACK]);
+		
 		SelectObject(ConsoleDisplay, Pens[GCLR_YELLOW]);
 		SelectObject(ConsoleDisplay, Brushes[GCLR_YELLOW]);
 		Rectangle(ConsoleDisplay, PosX * TileSize, PosY * TileSize, PosX * TileSize + TileSize, PosY * TileSize + TileSize);
@@ -279,14 +311,17 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 	}
 	if (Map[HeadPosY][HeadPosX] == TILE_FOOD)
 	{
-		SpawnFood();
-		SegmentsCount++;
 		// Добавляем сегмент головы
 		Map[HeadPosY][HeadPosX] = NewHead;
+		SpawnFood();
+		SegmentsCount++;
 		return true;
 	}
-	// Добавляем сегмент головы
-	Map[HeadPosY][HeadPosX] = NewHead;	
+	else
+	{
+		// Добавляем сегмент головы
+		Map[HeadPosY][HeadPosX] = NewHead;
+	}	
 	
 	DrawTile(TailPosX, TailPosY, TILE_EMPTY);
 	// Определяем новый конец
@@ -505,9 +540,7 @@ void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int S
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
-		}
-		
-		
+		}		
 	}
 }
 void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailTile, int SegmentsAmount) {
@@ -593,6 +626,9 @@ void DrawMap() {
 }
 void GameInit() {
 
+	// Рандом
+	srand(time(0));
+	rand();
 	//Инициализация цветов
 	InitColors();
 	// Махинации с консолью
@@ -674,7 +710,7 @@ int main()
 		Map[TailPosY][TailPosX] = SnakeHead;
 		SpawnFood();
 		//Timer init
-		int UpdateDelayMiliseconds = 300;				
+		int UpdateDelayMiliseconds = 100;				
 		DrawMap();
 		DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
 		// Main loop
