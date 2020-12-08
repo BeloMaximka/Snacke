@@ -24,6 +24,9 @@
     <ClInclude Include="scr\render.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="scr\structenum.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="scr\main.cpp">

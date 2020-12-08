@@ -142,6 +142,7 @@
     <ClInclude Include="scr\cpptimer.h" />
     <ClInclude Include="scr\includes.h" />
     <ClInclude Include="scr\render.h" />
+    <ClInclude Include="scr\structenum.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="scr\main.cpp" />
