@@ -1,13 +1,29 @@
-﻿#include <iostream>
-#include <Windows.h>
-#include <conio.h>
-#include "cpptimer.h"
+﻿#include "includes.h"
 using namespace std;
-#pragma comment(lib,"msimg32.lib")
+struct pos
+{
+	int x;
+	int y;	
+};
+struct map
+{
+	int** Tiles;
+	int Height;
+	int Width;
+};
+struct snake
+{
+	pos HeadPos;
+	pos TailPos;
+	int Segments;
+	int Head;
+	int OldHead;	
+};
 // Глобальные переменные
-int MapHeight = 15;
-int MapWidth = 15;
-int** Map;
+map Map = { nullptr,15,15 };
+//int MapHeight = 15;
+//int MapWidth = 15;
+//int** Map;
 int TileSize = 32;
 // Дескриптор вывода данных
 HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -134,13 +150,13 @@ void DrawTile(int PosX, int PosY, int TileID) {
 bool SpawnFood() {
 	int FoodPosX;
 	int FoodPosY;
-	for (int i = 0; i < MapHeight*MapWidth; i++)
+	for (int i = 0; i < Map.Height*Map.Width; i++)
 	{
-		FoodPosY = rand() % MapHeight;
-		FoodPosX = rand() % MapWidth;
-		if (Map[FoodPosY][FoodPosX] == TILE_EMPTY)
+		FoodPosY = rand() % Map.Height;
+		FoodPosX = rand() % Map.Width;
+		if (Map.Tiles[FoodPosY][FoodPosX] == TILE_EMPTY)
 		{
-			Map[FoodPosY][FoodPosX] = TILE_FOOD;
+			Map.Tiles[FoodPosY][FoodPosX] = TILE_FOOD;
 			DrawTile(FoodPosX, FoodPosY, TILE_FOOD);
 			return true;
 		}
@@ -150,13 +166,13 @@ bool SpawnFood() {
 		if (rand()%2)
 		{
 			// двигаемся с левого верхнего угла
-			for (int y = 0; y < MapHeight; y++)
+			for (int y = 0; y < Map.Height; y++)
 			{
-				for (int x = 0; x < MapWidth; x++)
+				for (int x = 0; x < Map.Width; x++)
 				{
-					if (Map[y][x] == TILE_EMPTY)
+					if (Map.Tiles[y][x] == TILE_EMPTY)
 					{
-						Map[y][x] = TILE_FOOD;
+						Map.Tiles[y][x] = TILE_FOOD;
 						DrawTile(x, y, TILE_FOOD);
 						return true;
 					}
@@ -166,13 +182,13 @@ bool SpawnFood() {
 		else
 		{
 			// я правого верхнего угла
-			for (int y = 0; y < MapHeight; y++)
+			for (int y = 0; y < Map.Height; y++)
 			{
-				for (int x = MapWidth = 1; x > 0; x--)
+				for (int x = Map.Width = 1; x > 0; x--)
 				{
-					if (Map[y][x] == TILE_EMPTY)
+					if (Map.Tiles[y][x] == TILE_EMPTY)
 					{
-						Map[y][x] = TILE_FOOD;
+						Map.Tiles[y][x] = TILE_FOOD;
 						DrawTile(x, y, TILE_FOOD);
 						return true;
 					}
@@ -185,13 +201,13 @@ bool SpawnFood() {
 		if (rand() % 2)
 		{
 			// двигаемся с левого нижнего угла
-			for (int y = MapHeight - 1; y > 0; y--)
+			for (int y = Map.Height - 1; y > 0; y--)
 			{
-				for (int x = 0; x < MapWidth; x++)
+				for (int x = 0; x < Map.Width; x++)
 				{
-					if (Map[y][x] == TILE_EMPTY)
+					if (Map.Tiles[y][x] == TILE_EMPTY)
 					{
-						Map[y][x] = TILE_FOOD;
+						Map.Tiles[y][x] = TILE_FOOD;
 						DrawTile(x, y, TILE_FOOD);
 						return true;
 					}
@@ -201,13 +217,13 @@ bool SpawnFood() {
 		else
 		{
 			// двигаемся с правого нижнего угла
-			for (int y = MapHeight - 1; y > 0; y--)
+			for (int y = Map.Height - 1; y > 0; y--)
 			{
-				for (int x = MapWidth = 1; x > 0; x--)
+				for (int x = Map.Width = 1; x > 0; x--)
 				{
-					if (Map[y][x] == TILE_EMPTY)
+					if (Map.Tiles[y][x] == TILE_EMPTY)
 					{
-						Map[y][x] = TILE_FOOD;
+						Map.Tiles[y][x] = TILE_FOOD;
 						DrawTile(x, y, TILE_FOOD);
 						return true;
 					}
@@ -217,16 +233,16 @@ bool SpawnFood() {
 	}
 	return false;
 }
-bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int NewHead, int& SegmentsCount) {	
+bool MoveSnake(snake& Snake) {	
 	// Поворачиваем сегмент перед головой
-	Map[HeadPosY][HeadPosX] = NewHead;
-	if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_UP)
+	Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
+	if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_UP)
 	{
-		if (HeadPosY - 1 < 0)
+		if (Snake.HeadPos.y - 1 < 0)
 		{			
-			if (Map[MapHeight - 1][HeadPosX] == TILE_EMPTY || Map[MapHeight - 1][HeadPosX] == TILE_FOOD)
+			if (Map.Tiles[Map.Height - 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Map.Height - 1][Snake.HeadPos.x] == TILE_FOOD)
 			{
-				HeadPosY = MapHeight - 1;
+				Snake.HeadPos.y = Map.Height - 1;
 			}
 			else
 			{
@@ -234,156 +250,156 @@ bool MoveSnake(int& HeadPosX, int& HeadPosY, int& TailPosX, int& TailPosY, int N
 			}
 			
 		}
-		else if (Map[HeadPosY - 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY - 1][HeadPosX] == TILE_FOOD)
+		else if (Map.Tiles[Snake.HeadPos.y - 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y - 1][Snake.HeadPos.x] == TILE_FOOD)
 		{			
-			HeadPosY--;
+			Snake.HeadPos.y--;
 		}
 		else
 		{
 			return false;
 		}
 	}
-	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_DOWN)
+	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_DOWN)
 	{
-		if (HeadPosY + 1 >= MapHeight)
+		if (Snake.HeadPos.y + 1 >= Map.Height)
 		{
-			if (Map[0][HeadPosX] == TILE_EMPTY || Map[0][HeadPosX] == TILE_FOOD)
+			if (Map.Tiles[0][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[0][Snake.HeadPos.x] == TILE_FOOD)
 			{
-				HeadPosY = 0;
+				Snake.HeadPos.y = 0;
 			}
 			else
 			{
 				return false;
 			}			
 		}
-		else if (Map[HeadPosY + 1][HeadPosX] == TILE_EMPTY || Map[HeadPosY + 1][HeadPosX] == TILE_FOOD)
+		else if (Map.Tiles[Snake.HeadPos.y + 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y + 1][Snake.HeadPos.x] == TILE_FOOD)
 		{		
-			HeadPosY++;
+			Snake.HeadPos.y++;
 		}
 		else
 		{
 			return false;
 		}
 	}
-	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_LEFT)
+	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_LEFT)
 	{
-		if (HeadPosX - 1 < 0 )
+		if (Snake.HeadPos.x - 1 < 0 )
 		{
-			if (Map[HeadPosY][MapWidth - 1] == TILE_EMPTY || Map[HeadPosY][MapWidth - 1] == TILE_FOOD)
+			if (Map.Tiles[Snake.HeadPos.y][Map.Width - 1] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][Map.Width - 1] == TILE_FOOD)
 			{
-				HeadPosX = MapWidth - 1;
+				Snake.HeadPos.x = Map.Width - 1;
 			}
 			else
 			{
 				return false;
 			}			
 		}
-		else if (Map[HeadPosY][HeadPosX - 1] == TILE_EMPTY || Map[HeadPosY][HeadPosX - 1] == TILE_FOOD)
+		else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 1] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 1] == TILE_FOOD)
 		{			
-			HeadPosX--;
+			Snake.HeadPos.x--;
 		}
 		else
 		{
 			return false;
 		}
 	}
-	else if (Map[HeadPosY][HeadPosX] == TILE_SNAKE_RIGHT)
+	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_RIGHT)
 	{
-		if (HeadPosX + 1 >= MapWidth)
+		if (Snake.HeadPos.x + 1 >= Map.Width)
 		{
-			if (Map[HeadPosY][0] == TILE_EMPTY || Map[HeadPosY][0] == TILE_FOOD)
+			if (Map.Tiles[Snake.HeadPos.y][0] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][0] == TILE_FOOD)
 			{
-				HeadPosX = 0;
+				Snake.HeadPos.x = 0;
 			}
 			else
 			{
 				return false;
 			}			
 		}
-		else if (Map[HeadPosY][HeadPosX + 1] == TILE_EMPTY || Map[HeadPosY][HeadPosX + 1] == TILE_FOOD)
+		else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x + 1] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x + 1] == TILE_FOOD)
 		{		
-			HeadPosX++;
+			Snake.HeadPos.x++;
 		}
 		else
 		{
 			return false;
 		}
 	}
-	if (Map[HeadPosY][HeadPosX] == TILE_FOOD)
+	if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_FOOD)
 	{
 		// Добавляем сегмент головы
-		Map[HeadPosY][HeadPosX] = NewHead;
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
 		SpawnFood();
-		SegmentsCount++;
+		Snake.Segments++;
 		return true;
 	}
 	else
 	{
 		// Добавляем сегмент головы
-		Map[HeadPosY][HeadPosX] = NewHead;
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
 	}	
 	
-	DrawTile(TailPosX, TailPosY, TILE_EMPTY);
+	DrawTile(Snake.TailPos.x, Snake.TailPos.y, TILE_EMPTY);
 	// Определяем новый конец
-	if (Map[TailPosY][TailPosX] == TILE_SNAKE_UP)
+	if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP)
 	{		
 		// Удаляем конец хвоста
-		Map[TailPosY][TailPosX] = TILE_EMPTY;
-		if (TailPosY - 1 < 0)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		if (Snake.TailPos.y - 1 < 0)
 		{
-			TailPosY = MapHeight - 1;
+			Snake.TailPos.y = Map.Height - 1;
 		}
 		else
 		{
-			TailPosY--;
+			Snake.TailPos.y--;
 		}
 
 	}
-	else if (Map[TailPosY][TailPosX] == TILE_SNAKE_DOWN)
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN)
 	{
 		// Удаляем конец хвоста
-		Map[TailPosY][TailPosX] = TILE_EMPTY;
-		if (TailPosY + 1 >= MapHeight)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		if (Snake.TailPos.y + 1 >= Map.Height)
 		{
-			TailPosY = 0;
+			Snake.TailPos.y = 0;
 		}
 		else
 		{
-			TailPosY++;
+			Snake.TailPos.y++;
 		}
 	}
-	else if (Map[TailPosY][TailPosX] == TILE_SNAKE_LEFT)
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT)
 	{
 		// Удаляем конец хвоста
-		Map[TailPosY][TailPosX] = TILE_EMPTY;
-		if (TailPosX - 1 < 0)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		if (Snake.TailPos.x - 1 < 0)
 		{
-			TailPosX = MapWidth - 1;
+			Snake.TailPos.x = Map.Width - 1;
 		}
 		else
 		{
-			TailPosX--;
+			Snake.TailPos.x--;
 		}
 	}
-	else if (Map[TailPosY][TailPosX] == TILE_SNAKE_RIGHT)
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT)
 	{
 		// Удаляем конец хвоста
-		Map[TailPosY][TailPosX] = TILE_EMPTY;
-		if (TailPosX + 1 >= MapWidth)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		if (Snake.TailPos.x + 1 >= Map.Width)
 		{
-			TailPosX = 0;
+			Snake.TailPos.x = 0;
 		}
 		else
 		{
-			TailPosX++;
+			Snake.TailPos.x++;
 		}
 	}
 	
 	return true;
 }
-void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int SegmentNumber) {
-	PosX = PosX*TileSize + TileSize / 2;
-	PosY = PosY*TileSize + TileSize / 2;
+void DrawSnakeBodyPart(pos Pos, int TileID, int SegmentsAmount, int SegmentNumber) {
+	Pos.x = Pos.x*TileSize + TileSize / 2;
+	Pos.y = Pos.y *TileSize + TileSize / 2;
 	int Width;
 	Width = TileSize * (0.5 + ((double)SegmentNumber / SegmentsAmount) / 4);
 	SelectObject(ConsoleDisplay, Pens[GCLR_GREEN]);
@@ -391,37 +407,37 @@ void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int S
 	POINT PolyPoints[4];
 	if (TileID == TILE_SNAKE_UP)
 	{
-		PolyPoints[0].x = PosX - Width / 2;
-		PolyPoints[0].y = (PosY * 2 - TileSize / 4) / 2;
-		PolyPoints[1].x = PosX;
-		PolyPoints[1].y = PosY + TileSize / 4;
-		PolyPoints[2].x = PosX + Width / 2 - 1;
-		PolyPoints[2].y = (PosY * 2 - TileSize / 4) / 2;
-		PolyPoints[3].x = PosX;
-		PolyPoints[3].y = PosY - TileSize / 2;
+		PolyPoints[0].x = Pos.x - Width / 2;
+		PolyPoints[0].y = (Pos.y * 2 - TileSize / 4) / 2;
+		PolyPoints[1].x = Pos.x;
+		PolyPoints[1].y = Pos.y + TileSize / 4;
+		PolyPoints[2].x = Pos.x + Width / 2 - 1;
+		PolyPoints[2].y = (Pos.y * 2 - TileSize / 4) / 2;
+		PolyPoints[3].x = Pos.x;
+		PolyPoints[3].y = Pos.y - TileSize / 2;
 		if (SegmentNumber==SegmentsAmount)
 		{
-			Ellipse(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 2, PosX + Width / 2, PosY + TileSize / 4);
+			Ellipse(ConsoleDisplay, Pos.x - Width / 2, Pos.y - TileSize / 2, Pos.x + Width / 2, Pos.y + TileSize / 4);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 			// глазки
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKYELLOW]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKYELLOW]);
-			Ellipse(ConsoleDisplay, PosX - Width / 2 + TileSize / 16, PosY - TileSize / 2 + TileSize / 8, PosX - Width / 2 + TileSize/4, PosY - TileSize / 2 + TileSize/3);
-			Ellipse(ConsoleDisplay, PosX + Width / 2 - TileSize / 16, PosY - TileSize / 2 + TileSize / 8, PosX + Width / 2 - TileSize / 4, PosY - TileSize / 2 + TileSize / 3);
+			Ellipse(ConsoleDisplay, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize/4, Pos.y - TileSize / 2 + TileSize/3);
+			Ellipse(ConsoleDisplay, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
 		}
 		else if (SegmentNumber == 1)
 		{
-			Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 2, PosX + Width / 2, PosY - TileSize / 4);
-			Ellipse(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 2, PosX + Width / 2, PosY + TileSize / 4);
+			Rectangle(ConsoleDisplay, Pos.x - Width / 2, Pos.y - TileSize / 2, Pos.x + Width / 2, Pos.y - TileSize / 4);
+			Ellipse(ConsoleDisplay, Pos.x - Width / 2, Pos.y - TileSize / 2, Pos.x + Width / 2, Pos.y + TileSize / 4);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 		}
 		else
 		{
-			Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 2, PosX + Width / 2, PosY + TileSize / 4);
+			Rectangle(ConsoleDisplay, Pos.x - Width / 2, Pos.y - TileSize / 2, Pos.x + Width / 2, Pos.y + TileSize / 4);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
@@ -429,37 +445,37 @@ void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int S
 	}
 	else if (TileID == TILE_SNAKE_DOWN)
 	{
-		PolyPoints[0].x = PosX - Width / 2;
-		PolyPoints[0].y = (PosY * 2 + TileSize / 4) / 2;
-		PolyPoints[1].x = PosX;
-		PolyPoints[1].y = PosY + TileSize / 2 - 1;
-		PolyPoints[2].x = PosX + Width / 2 - 1;
-		PolyPoints[2].y = (PosY * 2 + TileSize / 4) / 2;
-		PolyPoints[3].x = PosX;
-		PolyPoints[3].y = PosY - TileSize / 4;
+		PolyPoints[0].x = Pos.x - Width / 2;
+		PolyPoints[0].y = (Pos.y * 2 + TileSize / 4) / 2;
+		PolyPoints[1].x = Pos.x;
+		PolyPoints[1].y = Pos.y + TileSize / 2 - 1;
+		PolyPoints[2].x = Pos.x + Width / 2 - 1;
+		PolyPoints[2].y = (Pos.y * 2 + TileSize / 4) / 2;
+		PolyPoints[3].x = Pos.x;
+		PolyPoints[3].y = Pos.y - TileSize / 4;
 		if (SegmentNumber == SegmentsAmount)
 		{
-			Ellipse(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 4, PosX + Width / 2, PosY + TileSize / 2);
+			Ellipse(ConsoleDisplay, Pos.x - Width / 2, Pos.y - TileSize / 4, Pos.x + Width / 2, Pos.y + TileSize / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 			// глазки
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKYELLOW]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKYELLOW]);
-			Ellipse(ConsoleDisplay, PosX - Width / 2 + TileSize / 16, PosY + TileSize / 2 - TileSize / 8, PosX - Width / 2 + TileSize / 4, PosY + TileSize / 2 - TileSize / 3);
-			Ellipse(ConsoleDisplay, PosX + Width / 2 - TileSize / 16, PosY + TileSize / 2 - TileSize / 8, PosX + Width / 2 - TileSize / 4, PosY + TileSize / 2 - TileSize / 3);
+			Ellipse(ConsoleDisplay, Pos.x - Width / 2 + TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
+			Ellipse(ConsoleDisplay, Pos.x + Width / 2 - TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
 		}
 		else if (SegmentNumber == 1)
 		{
-			Rectangle(ConsoleDisplay, PosX - Width / 2, PosY, PosX + Width / 2, PosY + TileSize / 2);
-			Ellipse(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 4, PosX + Width / 2, PosY + TileSize / 2);
+			Rectangle(ConsoleDisplay, Pos.x - Width / 2, Pos.y, Pos.x + Width / 2, Pos.y + TileSize / 2);
+			Ellipse(ConsoleDisplay, Pos.x - Width / 2, Pos.y - TileSize / 4, Pos.x + Width / 2, Pos.y + TileSize / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 		}
 		else
 		{
-			Rectangle(ConsoleDisplay, PosX - Width / 2, PosY - TileSize / 4, PosX + Width / 2, PosY + TileSize / 2);
+			Rectangle(ConsoleDisplay, Pos.x - Width / 2, Pos.y - TileSize / 4, Pos.x + Width / 2, Pos.y + TileSize / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
@@ -467,37 +483,37 @@ void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int S
 	}
 	else if (TileID == TILE_SNAKE_LEFT)
 	{
-		PolyPoints[0].x = PosX - TileSize / 2;
-		PolyPoints[0].y = PosY;
-		PolyPoints[1].x = (PosX * 2 - TileSize / 4) / 2;
-		PolyPoints[1].y = PosY + Width / 2 - 1;
-		PolyPoints[2].x = PosX + TileSize / 4 - 1;
-		PolyPoints[2].y = PosY;
-		PolyPoints[3].x = (PosX * 2 - TileSize / 4) / 2;
-		PolyPoints[3].y = PosY - Width / 2;
+		PolyPoints[0].x = Pos.x - TileSize / 2;
+		PolyPoints[0].y = Pos.y;
+		PolyPoints[1].x = (Pos.x * 2 - TileSize / 4) / 2;
+		PolyPoints[1].y = Pos.y + Width / 2 - 1;
+		PolyPoints[2].x = Pos.x + TileSize / 4 - 1;
+		PolyPoints[2].y = Pos.y;
+		PolyPoints[3].x = (Pos.x * 2 - TileSize / 4) / 2;
+		PolyPoints[3].y = Pos.y - Width / 2;
 		if (SegmentNumber == SegmentsAmount)
 		{
-			Ellipse(ConsoleDisplay, PosX - TileSize / 2, PosY - Width / 2, PosX + TileSize / 4, PosY + Width / 2);
+			Ellipse(ConsoleDisplay, Pos.x - TileSize / 2, Pos.y - Width / 2, Pos.x + TileSize / 4, Pos.y + Width / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 			// глазки
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKYELLOW]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKYELLOW]);			
-			Ellipse(ConsoleDisplay, PosX - TileSize / 2 + TileSize / 8, PosY - Width / 2 + TileSize / 16, PosX - TileSize / 2 + TileSize / 3, PosY - Width / 2 + TileSize / 4);
-			Ellipse(ConsoleDisplay, PosX - TileSize / 2 + TileSize / 8, PosY + Width / 2 - TileSize / 16, PosX - TileSize / 2 + TileSize / 3, PosY + Width / 2 - TileSize / 4);
+			Ellipse(ConsoleDisplay, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
+			Ellipse(ConsoleDisplay, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
 		}
 		else if (SegmentNumber == 1)
 		{
-			Rectangle(ConsoleDisplay, PosX - TileSize / 2, PosY - Width / 2, PosX, PosY + Width / 2);
-			Ellipse(ConsoleDisplay, PosX - TileSize / 2, PosY - Width / 2, PosX + TileSize / 4, PosY + Width / 2);
+			Rectangle(ConsoleDisplay, Pos.x - TileSize / 2, Pos.y - Width / 2, Pos.x, Pos.y + Width / 2);
+			Ellipse(ConsoleDisplay, Pos.x - TileSize / 2, Pos.y - Width / 2, Pos.x + TileSize / 4, Pos.y + Width / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 		}
 		else
 		{
-			Rectangle(ConsoleDisplay, PosX - TileSize / 2, PosY - Width / 2, PosX + TileSize / 4, PosY + Width / 2);
+			Rectangle(ConsoleDisplay, Pos.x - TileSize / 2, Pos.y - Width / 2, Pos.x + TileSize / 4, Pos.y + Width / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
@@ -506,120 +522,120 @@ void DrawSnakeBodyPart(int PosX, int PosY, int TileID, int SegmentsAmount, int S
 	}
 	else if (TileID == TILE_SNAKE_RIGHT)
 	{
-		PolyPoints[0].x = PosX - TileSize / 4;
-		PolyPoints[0].y = PosY;
-		PolyPoints[1].x = (PosX * 2 + TileSize / 4) / 2;
-		PolyPoints[1].y = PosY + Width / 2 - 1;
-		PolyPoints[2].x = PosX + TileSize / 2 - 1;
-		PolyPoints[2].y = PosY;
-		PolyPoints[3].x = (PosX * 2 + TileSize / 4) / 2;
-		PolyPoints[3].y = PosY - Width / 2;
+		PolyPoints[0].x = Pos.x - TileSize / 4;
+		PolyPoints[0].y = Pos.y;
+		PolyPoints[1].x = (Pos.x * 2 + TileSize / 4) / 2;
+		PolyPoints[1].y = Pos.y + Width / 2 - 1;
+		PolyPoints[2].x = Pos.x + TileSize / 2 - 1;
+		PolyPoints[2].y = Pos.y;
+		PolyPoints[3].x = (Pos.x * 2 + TileSize / 4) / 2;
+		PolyPoints[3].y = Pos.y - Width / 2;
 		if (SegmentNumber == SegmentsAmount)
 		{
-			Ellipse(ConsoleDisplay, PosX - TileSize / 4, PosY - Width / 2, PosX + TileSize / 2, PosY + Width / 2);
+			Ellipse(ConsoleDisplay, Pos.x - TileSize / 4, Pos.y - Width / 2, Pos.x + TileSize / 2, Pos.y + Width / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 			// глазки
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKYELLOW]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKYELLOW]);
-			Ellipse(ConsoleDisplay, PosX + TileSize / 2 - TileSize / 8, PosY - Width / 2 + TileSize / 16, PosX + TileSize / 2 - TileSize / 3, PosY - Width / 2 + TileSize / 4);
-			Ellipse(ConsoleDisplay, PosX + TileSize / 2 - TileSize / 8, PosY + Width / 2 - TileSize / 16, PosX + TileSize / 2 - TileSize / 3, PosY + Width / 2 - TileSize / 4);
+			Ellipse(ConsoleDisplay, Pos.x + TileSize / 2 - TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
+			Ellipse(ConsoleDisplay, Pos.x + TileSize / 2 - TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
 		}
 		else if (SegmentNumber == 1)
 		{
-			Rectangle(ConsoleDisplay, PosX, PosY - Width / 2, PosX + TileSize / 2, PosY + Width / 2);
-			Ellipse(ConsoleDisplay, PosX - TileSize / 4, PosY - Width / 2, PosX + TileSize / 2, PosY + Width / 2);
+			Rectangle(ConsoleDisplay, Pos.x, Pos.y - Width / 2, Pos.x + TileSize / 2, Pos.y + Width / 2);
+			Ellipse(ConsoleDisplay, Pos.x - TileSize / 4, Pos.y - Width / 2, Pos.x + TileSize / 2, Pos.y + Width / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 		}
 		else
 		{
-			Rectangle(ConsoleDisplay, PosX - TileSize / 4, PosY - Width / 2, PosX + TileSize / 2, PosY + Width / 2);
+			Rectangle(ConsoleDisplay, Pos.x - TileSize / 4, Pos.y - Width / 2, Pos.x + TileSize / 2, Pos.y + Width / 2);
 			SelectObject(ConsoleDisplay, Pens[GCLR_DARKGREEN]);
 			SelectObject(ConsoleDisplay, Brushes[GCLR_DARKGREEN]);
 			Polygon(ConsoleDisplay, PolyPoints, 4);
 		}		
 	}
 }
-void DrawSnake(int HeadPosX, int HeadPosY, int TailPosX, int TailPosY, int TailTile, int SegmentsAmount) {
+void DrawSnake(snake& Snake, int TailTile) {
 	int SegmentNumber = 0;
 	int SegmentTile = TailTile;
-	DrawTile(TailPosX, TailPosY, TILE_EMPTY);
+	pos DrawPos = Snake.TailPos;
+	DrawTile(DrawPos.x, DrawPos.y, TILE_EMPTY);
 	while (true)
 	{
 		SegmentNumber++;		
-		DrawSnakeBodyPart(TailPosX, TailPosY, SegmentTile, SegmentsAmount, SegmentNumber);
-		if (TailPosX == HeadPosX && TailPosY == HeadPosY)
+		DrawSnakeBodyPart(DrawPos, SegmentTile, Snake.Segments, SegmentNumber);
+		if (DrawPos.x == Snake.HeadPos.x && DrawPos.y == Snake.HeadPos.y)
 		{
 			break;
 		}
 		if (SegmentTile == TILE_SNAKE_UP)
 		{			
-			if (TailPosY - 1 < 0)
+			if (DrawPos.y - 1 < 0)
 			{
-				TailPosY = MapHeight - 1;
+				DrawPos.y = Map.Height - 1;
 
 			}
 			else
 			{
-				TailPosY--;
+				DrawPos.y--;
 			}
-			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
-			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_DOWN, SegmentsAmount, SegmentNumber);
+			DrawTile(DrawPos.x, DrawPos.y, TILE_EMPTY);
+			DrawSnakeBodyPart(DrawPos, TILE_SNAKE_DOWN, Snake.Segments, SegmentNumber);
 		}
 		else if (SegmentTile == TILE_SNAKE_DOWN)
 		{			
-			if (TailPosY + 1 >= MapHeight)
+			if (DrawPos.y + 1 >= Map.Height)
 			{
-				TailPosY = 0;
+				DrawPos.y = 0;
 
 			}
 			else
 			{
-				TailPosY++;
+				DrawPos.y++;
 			}
-			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
-			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_UP, SegmentsAmount, SegmentNumber);
+			DrawTile(DrawPos.x, DrawPos.y, TILE_EMPTY);
+			DrawSnakeBodyPart(DrawPos, TILE_SNAKE_UP, Snake.Segments, SegmentNumber);
 		}
 		else if (SegmentTile == TILE_SNAKE_LEFT)
 		{			
-			if (TailPosX - 1 < 0)
+			if (DrawPos.x - 1 < 0)
 			{
-				TailPosX = MapWidth - 1;
+				DrawPos.x = Map.Width - 1;
 
 			}
 			else
 			{
-				TailPosX--;
+				DrawPos.x--;
 			}
-			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
-			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_RIGHT, SegmentsAmount, SegmentNumber);
+			DrawTile(DrawPos.x, DrawPos.y, TILE_EMPTY);
+			DrawSnakeBodyPart(DrawPos, TILE_SNAKE_RIGHT, Snake.Segments, SegmentNumber);
 		}
 		else if (SegmentTile == TILE_SNAKE_RIGHT)
 		{			
-			if (TailPosX + 1 >= MapWidth)
+			if (DrawPos.x + 1 >= Map.Width)
 			{
-				TailPosX = 0;
-
+				DrawPos.x = 0;
 			}
 			else
 			{
-				TailPosX++;
+				DrawPos.x++;
 			}
-			DrawTile(TailPosX, TailPosY, TILE_EMPTY);
-			DrawSnakeBodyPart(TailPosX, TailPosY, TILE_SNAKE_LEFT, SegmentsAmount, SegmentNumber);			
+			DrawTile(DrawPos.x, DrawPos.y, TILE_EMPTY);
+			DrawSnakeBodyPart(DrawPos, TILE_SNAKE_LEFT, Snake.Segments, SegmentNumber);
 		}
-		SegmentTile = Map[TailPosY][TailPosX];
+		SegmentTile = Map.Tiles[DrawPos.y][DrawPos.x];
 	}
 }
 void DrawMap() {
-	for (int y = 0; y < MapHeight; y++)
+	for (int y = 0; y < Map.Height; y++)
 	{
-		for (int x = 0; x < MapWidth; x++)
+		for (int x = 0; x < Map.Width; x++)
 		{
-			DrawTile(x, y, Map[y][x]);
+			DrawTile(x, y, Map.Tiles[y][x]);
 		}		
 	}		
 
@@ -674,45 +690,45 @@ int main()
 	GameInit();
 	// Map init
 
-	Map = new int* [MapHeight];
-	for (int y = 0; y < MapHeight; y++)
+	Map.Tiles = new int* [Map.Height];
+	for (int y = 0; y < Map.Height; y++)
 	{
-		Map[y] = new int[MapWidth];
-		for (int x = 0; x < MapWidth; x++)
+		Map.Tiles[y] = new int[Map.Width];
+		for (int x = 0; x < Map.Width; x++)
 		{
-			if (x == 0 || y == 0 || x == MapWidth - 1 || y == MapHeight - 1)
+			if (x == 0 || y == 0 || x == Map.Width - 1 || y == Map.Height - 1)
 			{
-				Map[y][x] = TILE_WALL;
+				Map.Tiles[y][x] = TILE_WALL;
 			}
 			else
 			{
-				Map[y][x] = TILE_EMPTY;
+				Map.Tiles[y][x] = TILE_EMPTY;
 			}
 			// это пременно
-			Map[y][x] = TILE_EMPTY;
+			Map.Tiles[y][x] = TILE_EMPTY;
 		}
 	}
 	while (true)
 	{
 		// Snake init		
-		int SnakeSegmentsCount = 5;
-		int SnakeHead = TILE_SNAKE_RIGHT;
-		int OldSnakeHead = SnakeHead;
-		int HeadPosX = 4;
-		int HeadPosY = 1;
+		snake Snake;
+		Snake.Segments = 5;
+		Snake.Head = TILE_SNAKE_RIGHT;
+		Snake.OldHead = Snake.Head;
+		Snake.HeadPos = { 4,1 };
 		// Временно
-		Map[HeadPosY][HeadPosX] = SnakeHead;
-		Map[HeadPosY][HeadPosX - 1] = SnakeHead;
-		Map[HeadPosY][HeadPosX - 2] = SnakeHead;
-		Map[HeadPosY][HeadPosX - 3] = SnakeHead;
-		int TailPosY = HeadPosY;
-		int TailPosX = HeadPosX - 4;
-		Map[TailPosY][TailPosX] = SnakeHead;
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 1] = Snake.Head;
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 2] = Snake.Head;
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 3] = Snake.Head;
+		Snake.TailPos.y = Snake.HeadPos.y;
+		Snake.TailPos.x = Snake.HeadPos.x - 4;
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = Snake.Head;
 		SpawnFood();
 		//Timer init
 		int UpdateDelayMiliseconds = 100;				
 		DrawMap();
-		DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+		DrawSnake(Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 		// Main loop
 		while (true)
 		{
@@ -723,31 +739,31 @@ int main()
 					int Keycode = _getch();
 					if (Keycode == 224) Keycode = _getch();
 					//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-					if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+					if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
 					{
-						SnakeHead = TILE_SNAKE_UP;
+						Snake.Head = TILE_SNAKE_UP;
 					}
-					else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+					else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP)
 					{
-						SnakeHead = TILE_SNAKE_DOWN;
+						Snake.Head = TILE_SNAKE_DOWN;
 					}
-					else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
+					else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT)
 					{
-						SnakeHead = TILE_SNAKE_LEFT;
+						Snake.Head = TILE_SNAKE_LEFT;
 					}
-					else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
+					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
 					{
-						SnakeHead = TILE_SNAKE_RIGHT;
+						Snake.Head = TILE_SNAKE_RIGHT;
 					}
-					if (SnakeHead != OldSnakeHead)
+					if (Snake.Head != Snake.OldHead)
 					{
-						OldSnakeHead = SnakeHead;
-						if (!MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount))
+						Snake.OldHead = Snake.Head;
+						if (!MoveSnake(Snake))
 						{
-							DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+							DrawSnake(Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 							break;
 						}
-						DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+						DrawSnake(Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 						Sleep(UpdateDelayMiliseconds);
 					}
 				}
@@ -757,31 +773,31 @@ int main()
 					if (Keycode == 224) Keycode = _getch();
 					// чистим буфер, чтобы не задать огромное количетсво действий напереёд
 					FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-					if (Keycode == GMKEY_UP && OldSnakeHead != TILE_SNAKE_DOWN)
+					if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
 					{
-						SnakeHead = TILE_SNAKE_UP;
+						Snake.Head = TILE_SNAKE_UP;
 					}
-					else if (Keycode == GMKEY_DOWN && OldSnakeHead != TILE_SNAKE_UP)
+					else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP)
 					{
-						SnakeHead = TILE_SNAKE_DOWN;
+						Snake.Head = TILE_SNAKE_DOWN;
 					}
-					else if (Keycode == GMKEY_LEFT && OldSnakeHead != TILE_SNAKE_RIGHT)
+					else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT)
 					{
-						SnakeHead = TILE_SNAKE_LEFT;
+						Snake.Head = TILE_SNAKE_LEFT;
 					}
-					else if (Keycode == GMKEY_RIGHT && OldSnakeHead != TILE_SNAKE_LEFT)
+					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
 					{
-						SnakeHead = TILE_SNAKE_RIGHT;
+						Snake.Head = TILE_SNAKE_RIGHT;
 					}
-					if (SnakeHead != OldSnakeHead)
+					if (Snake.Head != Snake.OldHead)
 					{
-						OldSnakeHead = SnakeHead;
-						if (!MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount))
+						Snake.OldHead = Snake.Head;
+						if (!MoveSnake(Snake))
 						{
-							DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+							DrawSnake(Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 							break;
 						}
-						DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+						DrawSnake(Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 						Sleep(UpdateDelayMiliseconds);
 					}
 				}
@@ -796,25 +812,25 @@ int main()
 			//}
 			else
 			{
-				OldSnakeHead = SnakeHead;				
-				if (!MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead, SnakeSegmentsCount))
+				Snake.OldHead = Snake.Head;
+				if (!MoveSnake(Snake))
 				{
-					DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+					DrawSnake(Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 					break;
 				}
-				DrawSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, Map[TailPosY][TailPosX], SnakeSegmentsCount);
+				DrawSnake(Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 				Sleep(UpdateDelayMiliseconds);
 			}
 		}
 		Beep(500, 700);
 		Beep(300, 700);
 		Beep(200, 700);
-		for (int y = 0; y < MapHeight; y++)
+		for (int y = 0; y < Map.Height; y++)
 		{
-			Map[y] = new int[MapWidth];
-			for (int x = 0; x < MapWidth; x++)
+			Map.Tiles[y] = new int[Map.Width];
+			for (int x = 0; x < Map.Width; x++)
 			{				
-				Map[y][x] = TILE_EMPTY;
+				Map.Tiles[y][x] = TILE_EMPTY;
 			}
 		}		
 	}

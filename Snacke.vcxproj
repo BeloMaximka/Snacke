@@ -140,6 +140,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="scr\cpptimer.h" />
+    <ClInclude Include="scr\includes.h" />
+    <ClInclude Include="scr\render.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="scr\main.cpp" />
