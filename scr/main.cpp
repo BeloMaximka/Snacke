@@ -1,6 +1,5 @@
 ﻿#include "includes.h"
 using namespace std;
-// Глобальные переменные
 #define TILESIZE 32
 
 void MapInit(map& Map, int MapHeight, int MapWidth) {
@@ -151,61 +150,87 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 	// Поворачиваем сегмент перед головой
 	Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
+	// Если голова смотрит вверх
 	if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_UP)
 	{
+		// Если змейка находится на границе карты
 		if (Snake.HeadPos.y - 1 < 0)
 		{
+			// Если на другом конце карты путсто или еда
 			if (Map.Tiles[Map.Height - 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Map.Height - 1][Snake.HeadPos.x] == TILE_FOOD)
 			{
+				// Смещаем координаты следующего сегменты - новой головы
 				Snake.HeadPos.y = Map.Height - 1;
 			}
+			// Если не пустота и не еда
 			else
 			{
+				// Впереди препятствие, движение невозможно - возвращаем false
 				return false;
 			}
 
 		}
+		// Если сверху путсто или еда
 		else if (Map.Tiles[Snake.HeadPos.y - 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y - 1][Snake.HeadPos.x] == TILE_FOOD)
 		{
+			// Смещаем координаты следующего сегменты - новой головы
 			Snake.HeadPos.y--;
 		}
+		// Если не пустота и не еда
 		else
 		{
+			// Впереди препятствие, движение невозможно - возвращаем false
 			return false;
 		}
 	}
+	// Если голова смотрит вниз
 	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_DOWN)
 	{
+		// Если змейка находится на границе карты
 		if (Snake.HeadPos.y + 1 >= Map.Height)
 		{
+			// Если на другом конце карты путсто или еда
 			if (Map.Tiles[0][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[0][Snake.HeadPos.x] == TILE_FOOD)
 			{
+				// Смещаем координаты следующего сегменты - новой головы
 				Snake.HeadPos.y = 0;
 			}
+			// Если не пустота и не еда
 			else
 			{
+				// Впереди препятствие, движение невозможно - возвращаем false
 				return false;
 			}
 		}
+		// Если сверху путсто или еда
 		else if (Map.Tiles[Snake.HeadPos.y + 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y + 1][Snake.HeadPos.x] == TILE_FOOD)
 		{
+			// Смещаем координаты следующего сегменты - новой головы
 			Snake.HeadPos.y++;
 		}
+		// Если не пустота и не еда
 		else
 		{
+			// Впереди препятствие, движение невозможно - возвращаем false
 			return false;
 		}
 	}
+	// Если голова смотрит влево
 	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_LEFT)
 	{
+		// Если змейка находится на границе карты
 		if (Snake.HeadPos.x - 1 < 0)
 		{
+			// Если на другом конце карты путсто или еда
 			if (Map.Tiles[Snake.HeadPos.y][Map.Width - 1] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][Map.Width - 1] == TILE_FOOD)
 			{
+				// Смещаем координаты следующего сегменты - новой головы
 				Snake.HeadPos.x = Map.Width - 1;
 			}
+			// Если не пустота и не еда
 			else
 			{
+				// Впереди препятствие, движение невозможно - возвращаем false
 				return false;
 			}
 		}
