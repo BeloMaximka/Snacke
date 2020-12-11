@@ -1,7 +1,21 @@
 ﻿#include "includes.h"
 using namespace std;
 #define TILESIZE 32
-
+#define WINDOW_STATE_MAXIMIZED 1
+#define WINDOW_STATE_MINIMIZED 2
+bool WindowMaximized(drawtools& DrawTools) {
+	WINDOWPLACEMENT WinPlacement;
+	GetWindowPlacement(DrawTools.Console.cHWND, &WinPlacement);
+	if (DrawTools.WindowState == WINDOW_STATE_MINIMIZED && WinPlacement.showCmd == WINDOW_STATE_MAXIMIZED)
+	{
+		DrawTools.WindowState = WINDOW_STATE_MAXIMIZED;
+		return true;
+	}
+	else
+	{
+		DrawTools.WindowState = WinPlacement.showCmd;
+	}
+}
 void MapInit(map& Map, int MapHeight, int MapWidth) {
 	Map.Height = MapHeight;
 	Map.Width = MapWidth;
@@ -23,6 +37,26 @@ void MapInit(map& Map, int MapHeight, int MapWidth) {
 			Map.Tiles[y][x] = TILE_EMPTY;
 		}
 	}
+}
+// Настройка логического шрифта
+void InitFont(HFONT& HFont) {
+	LOGFONTA Font; // Создаем шрифт, вручную задаем ему параметры	
+	Font.lfHeight = TILESIZE; // Высота	
+	//Font.lfWidth = TILESIZE; // Ширина	
+	Font.lfEscapement = 0; // Наклон строки текста
+	Font.lfOrientation = 0; // Поворот букв 
+	Font.lfWeight = 0; // Толщина, 0 - базовое значение
+	Font.lfItalic = false; // Курсив
+	Font.lfUnderline = false; // Нижнее подчёркивание
+	Font.lfStrikeOut = false; // Зачеркнутость
+	Font.lfCharSet= RUSSIAN_CHARSET; // Набор символов
+	Font.lfOutPrecision = OUT_DEFAULT_PRECIS; // Точность вывода
+	Font.lfClipPrecision = CLIP_DEFAULT_PRECIS; // Точность отсечения
+	Font.lfQuality = ANTIALIASED_QUALITY; // Качество
+	Font.lfPitchAndFamily = DEFAULT_PITCH| FF_DONTCARE; // Не так важно, что это
+	Font.lfFaceName[LF_FACESIZE]; // Название шрифта
+	strcpy_s(Font.lfFaceName, "Calibri"); // Копируем строку
+	HFont = CreateFontIndirectA(&Font); // Передаем полученный фон в параметр по ссылке
 }
 void InitPalette(palette& Palette) {
 	//GCLR_BLACK
@@ -148,143 +182,108 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 	return false;
 }
 bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
-	// Поворачиваем сегмент перед головой
+	//--------------РАБОТА С ГОЛОВОЙ--------------
+	// Поворачиваем сегмент перед новой головой
 	Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
+	// Позиция новой головы
+	pos NewHeadPos = Snake.HeadPos;	
+	// Определяем позицию новой головы
 	// Если голова смотрит вверх
-	if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_UP)
+	if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_UP)
 	{
 		// Если змейка находится на границе карты
-		if (Snake.HeadPos.y - 1 < 0)
+		if (NewHeadPos.y - 1 < 0)
 		{
-			// Если на другом конце карты путсто или еда
-			if (Map.Tiles[Map.Height - 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Map.Height - 1][Snake.HeadPos.x] == TILE_FOOD)
-			{
-				// Смещаем координаты следующего сегменты - новой головы
-				Snake.HeadPos.y = Map.Height - 1;
-			}
-			// Если не пустота и не еда
-			else
-			{
-				// Впереди препятствие, движение невозможно - возвращаем false
-				return false;
-			}
-
+			// Перекидываем позицию на другой конец карты
+			NewHeadPos.y = Map.Height - 1;
 		}
-		// Если сверху путсто или еда
-		else if (Map.Tiles[Snake.HeadPos.y - 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y - 1][Snake.HeadPos.x] == TILE_FOOD)
-		{
-			// Смещаем координаты следующего сегменты - новой головы
-			Snake.HeadPos.y--;
-		}
-		// Если не пустота и не еда
 		else
 		{
-			// Впереди препятствие, движение невозможно - возвращаем false
-			return false;
+			// Смещаем позицию новой головы вверх
+			NewHeadPos.y--;
 		}
 	}
 	// Если голова смотрит вниз
-	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_DOWN)
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_DOWN)
 	{
 		// Если змейка находится на границе карты
-		if (Snake.HeadPos.y + 1 >= Map.Height)
+		if (NewHeadPos.y + 1 >= Map.Height)
 		{
-			// Если на другом конце карты путсто или еда
-			if (Map.Tiles[0][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[0][Snake.HeadPos.x] == TILE_FOOD)
-			{
-				// Смещаем координаты следующего сегменты - новой головы
-				Snake.HeadPos.y = 0;
-			}
-			// Если не пустота и не еда
-			else
-			{
-				// Впереди препятствие, движение невозможно - возвращаем false
-				return false;
-			}
+			// Перекидываем позицию на другой конец карты
+			NewHeadPos.y = 0;
 		}
-		// Если сверху путсто или еда
-		else if (Map.Tiles[Snake.HeadPos.y + 1][Snake.HeadPos.x] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y + 1][Snake.HeadPos.x] == TILE_FOOD)
-		{
-			// Смещаем координаты следующего сегменты - новой головы
-			Snake.HeadPos.y++;
-		}
-		// Если не пустота и не еда
 		else
-		{
-			// Впереди препятствие, движение невозможно - возвращаем false
-			return false;
+		{			
+			// Смещаем позицию новой головы вниз
+			NewHeadPos.y++;
 		}
 	}
 	// Если голова смотрит влево
-	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_LEFT)
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_LEFT)
 	{
 		// Если змейка находится на границе карты
-		if (Snake.HeadPos.x - 1 < 0)
+		if (NewHeadPos.x - 1 < 0)
 		{
-			// Если на другом конце карты путсто или еда
-			if (Map.Tiles[Snake.HeadPos.y][Map.Width - 1] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][Map.Width - 1] == TILE_FOOD)
-			{
-				// Смещаем координаты следующего сегменты - новой головы
-				Snake.HeadPos.x = Map.Width - 1;
-			}
-			// Если не пустота и не еда
-			else
-			{
-				// Впереди препятствие, движение невозможно - возвращаем false
-				return false;
-			}
-		}
-		else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 1] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 1] == TILE_FOOD)
-		{
-			Snake.HeadPos.x--;
+			// Перекидываем позицию на другой конец карты
+			NewHeadPos.x = Map.Width - 1;
 		}
 		else
 		{
-			return false;
-		}
+			// Смещаем позицию новой головы влево
+			NewHeadPos.x--;
+		}		
 	}
-	else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_SNAKE_RIGHT)
+	// Если голова смотрит влево
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_RIGHT)
 	{
 		if (Snake.HeadPos.x + 1 >= Map.Width)
 		{
-			if (Map.Tiles[Snake.HeadPos.y][0] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][0] == TILE_FOOD)
-			{
-				Snake.HeadPos.x = 0;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x + 1] == TILE_EMPTY || Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x + 1] == TILE_FOOD)
-		{
-			Snake.HeadPos.x++;
+			// Перекидываем позицию на другой конец карты
+			NewHeadPos.x = 0;
 		}
 		else
 		{
-			return false;
+			// Смещаем позицию новой головы вправо
+			NewHeadPos.x++;
 		}
 	}
-	if (Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] == TILE_FOOD)
+	// Если на пути змейки препятствие (т.е не пусто и не еда)
+	if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_EMPTY && Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_FOOD)
+	{		
+		// Движение невозможно - возращаем false
+		return false;
+	}	
+	// Если на пути еда
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_FOOD)
 	{
+		// Обновляем позицию головы змейки
+		Snake.HeadPos = NewHeadPos;
 		// Добавляем сегмент головы
 		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
-		SpawnFood(DrawTools, Map);
+		// Увеличиваем количество сегментов
 		Snake.Segments++;
+		// Создаём ещё одну еду
+		SpawnFood(DrawTools, Map);
+		// Останавливаем функцию здесь, чтобы не хвост не удалился
 		return true;
 	}
+	// Если на пути пусто
 	else
 	{
+		// Обновляем позицию головы змейки
+		Snake.HeadPos = NewHeadPos;
 		// Добавляем сегмент головы
 		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
 	}
-
+	//--------------РАБОТА С ХВОСТОМ--------------
+	// Закрашиваем удаляемый хвост пустой клеткой
 	DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY);
 	// Определяем новый конец
 	if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP)
 	{
-		// Удаляем конец хвоста
+		// Заменяем удаляемый конец хвоста на пустоту
 		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		// Если 
 		if (Snake.TailPos.y - 1 < 0)
 		{
 			Snake.TailPos.y = Map.Height - 1;
@@ -337,7 +336,7 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 
 	return true;
 }
-void GameInit(drawtools& DrawTools) {
+void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	// Дескриптов консоли
 	DrawTools.Console.cHANDLE = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Дескриптов окна
@@ -346,11 +345,17 @@ void GameInit(drawtools& DrawTools) {
 	DrawTools.Console.cHDC = GetDC(DrawTools.Console.cHWND);
 	// Размер плиток
 	DrawTools.TileSize = TILESIZE;
+	// Состояние окна (свернутое, развернутое)
+	WINDOWPLACEMENT WinPlacement;
+	GetWindowPlacement(DrawTools.Console.cHWND, &WinPlacement);
+	DrawTools.WindowState = WinPlacement.showCmd;
 	// Рандом
 	srand(time(0));
 	rand();
 	//Инициализация цветов
 	InitPalette(DrawTools.Palette);
+	//Инициализация шрифта
+	InitFont(DrawTools.Font);
 	// Махинации с консолью
 	SetConsoleTitle(TEXT("SNACKE!"));
 
@@ -364,15 +369,21 @@ void GameInit(drawtools& DrawTools) {
 	CONSOLE_FONT_INFOEX CFI;
 	CFI.cbSize = sizeof CFI;
 	CFI.nFont = 0;
-	CFI.dwFontSize.X = 12;
+	CFI.dwFontSize.X = 8;
 	CFI.dwFontSize.Y = 16;
 	CFI.FontFamily = FF_DONTCARE;
 	CFI.FontWeight = FW_NORMAL;
-	wcscpy_s(CFI.FaceName, L"Terminal");
+	wcscpy_s(CFI.FaceName, L"Consolas");
 	SetCurrentConsoleFontEx(DrawTools.Console.cHANDLE, FALSE, &CFI);
 	// Задаем размеры буфера консоли
-	system("mode con cols=115 lines=52");
-
+	std::string ConBufferStr = "mode con cols=";
+	char ItoaBuffer[5];
+	_itoa_s(2.0 * DrawTools.TileSize / CFI.dwFontSize.Y * MapWidth, ItoaBuffer, 10);
+	ConBufferStr += ItoaBuffer;
+	ConBufferStr += " lines=";
+	_itoa_s(1.0 * DrawTools.TileSize / CFI.dwFontSize.Y * MapWidth + 3, ItoaBuffer, 10);
+	ConBufferStr += ItoaBuffer;
+	system(ConBufferStr.c_str());
 	// Центрируем консоль
 	RECT rectClient, rectWindow;
 	GetClientRect(DrawTools.Console.cHWND, &rectClient);
@@ -381,7 +392,8 @@ void GameInit(drawtools& DrawTools) {
 	posx = GetSystemMetrics(SM_CXSCREEN) / 2 - (rectWindow.right - rectWindow.left) / 2;
 	posy = GetSystemMetrics(SM_CYSCREEN) / 2 - (rectWindow.bottom - rectWindow.top) / 2;
 	MoveWindow(DrawTools.Console.cHWND, posx, posy, rectWindow.right - rectWindow.left, rectWindow.bottom - rectWindow.top, TRUE);
-	SetWindowLong(DrawTools.Console.cHWND, GWL_STYLE, GetWindowLong(DrawTools.Console.cHWND, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
+	//MoveWindow(DrawTools.Console.cHWND, posx, posy, 500, 500, TRUE);
+	SetWindowLong(DrawTools.Console.cHWND, GWL_STYLE, GetWindowLong(DrawTools.Console.cHWND, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);	
 
 	// Прячем курсор
 	CONSOLE_CURSOR_INFO Cursor;
@@ -389,38 +401,148 @@ void GameInit(drawtools& DrawTools) {
 	Cursor.dwSize = 100;
 	SetConsoleCursorInfo(DrawTools.Console.cHANDLE, &Cursor);
 }
-int main()
-{
-	drawtools DrawTools;
-	GameInit(DrawTools);
-	// Map init
-	map Map;
-	MapInit(Map, 15, 15);
-
+void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments) {
+	pos PlacePos = HeadPos;
+	pos PlaceDir = { 0,0 };
+	if (DirTile == TILE_SNAKE_UP)
+	{
+		PlaceDir.y = 1;
+	}
+	else if (DirTile == TILE_SNAKE_DOWN)
+	{
+		PlaceDir.y = -1;
+	}
+	else if (DirTile == TILE_SNAKE_LEFT)
+	{
+		PlaceDir.x = 1;
+	}
+	else if (DirTile == TILE_SNAKE_RIGHT)
+	{
+		PlaceDir.x = -1;
+	}
+	if (PlaceDir.y != 0 && Segments >= Map.Height)
+	{
+		Segments = Map.Height - 1;
+	}
+	else if (Segments >= Map.Width)
+	{
+		Segments = Map.Width - 1;
+	}
+	for (int i = 0; i < Segments-1; i++)
+	{
+		Map.Tiles[PlacePos.y][PlacePos.x] = DirTile;
+		if (PlacePos.x + PlaceDir.x < 0)
+		{
+			PlacePos.x = Map.Width - 1;
+		}
+		else if (PlacePos.x + PlaceDir.x >= Map.Width)
+		{
+			PlacePos.x = 0;
+		}
+		else
+		{
+			PlacePos.x += PlaceDir.x;
+		}
+		if (PlacePos.y + PlaceDir.y < 0)
+		{
+			PlacePos.y = Map.Height - 1;
+		}
+		else if (PlacePos.y + PlaceDir.y >= Map.Height)
+		{
+			PlacePos.y = 0;
+		}
+		else
+		{
+			PlacePos.y += PlaceDir.y;
+		}
+	}
+	Map.Tiles[PlacePos.y][PlacePos.x] = DirTile;
+	Snake.Head = DirTile;
+	Snake.HeadPos = HeadPos;
+	Snake.OldHead = DirTile;
+	Snake.Segments = Segments;
+	Snake.TailPos = PlacePos;
+}
+void SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
+	// Пазуа до первого нажатия
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+	while (true)
+	{
+		int Keycode = _getch();
+		if (Keycode == 224) Keycode = _getch();
+		if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
+		{
+			Snake.Head = TILE_SNAKE_UP;
+			Snake.OldHead = Snake.Head;
+			if (!MoveSnake(DrawTools, Map, Snake))
+			{
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+				//dead
+			}
+			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);			
+			break;
+		}
+		else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP)
+		{
+			Snake.Head = TILE_SNAKE_DOWN;
+			Snake.OldHead = Snake.Head;
+			if (!MoveSnake(DrawTools, Map, Snake))
+			{
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+				//dead
+			}
+			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);			
+			break;
+		}
+		else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT)
+		{
+			Snake.Head = TILE_SNAKE_LEFT;
+			Snake.OldHead = Snake.Head;
+			if (!MoveSnake(DrawTools, Map, Snake))
+			{
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+				//dead
+			}
+			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);			
+			break;
+		}
+		else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
+		{
+			Snake.Head = TILE_SNAKE_RIGHT;
+			Snake.OldHead = Snake.Head;
+			if (!MoveSnake(DrawTools, Map, Snake))
+			{
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+				//dead
+			}
+			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);			
+			break;
+		}
+	}
+}
+void SnakeMainGame(drawtools& DrawTools, map& Map) {
 	while (true)
 	{
 		// Snake init		
 		snake Snake;
-		Snake.Segments = 5;
-		Snake.Head = TILE_SNAKE_RIGHT;
-		Snake.OldHead = Snake.Head;
-		Snake.HeadPos = { 4,1 };
-		// Временно
-		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
-		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 1] = Snake.Head;
-		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 2] = Snake.Head;
-		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x - 3] = Snake.Head;
-		Snake.TailPos.y = Snake.HeadPos.y;
-		Snake.TailPos.x = Snake.HeadPos.x - 4;
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = Snake.Head;
+		int SnakeSpawnSegments = 3;
+		pos SnakeSpawnPos = { SnakeSpawnSegments,Map.Height / 2 };
+		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments);
 		SpawnFood(DrawTools, Map);
 		//Timer init
-		int UpdateDelayMiliseconds = 500;
+		int UpdateDelayMiliseconds = 100;
 		DrawMap(DrawTools, Map);
 		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+		SnakeFirstStep(DrawTools, Map, Snake);
+		Sleep(UpdateDelayMiliseconds);
 		// Main loop
 		while (true)
 		{
+			if (WindowMaximized(DrawTools))
+			{
+				DrawMap(DrawTools, Map);
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+			}
 			if (_kbhit())
 			{
 				if (_kbhit())
@@ -491,14 +613,6 @@ int main()
 					}
 				}
 			}
-			//else if (CheckTimerEnd(&UpdateTimer))
-			//{
-			//	// Перезапускаем таймер
-			//	StartTimer(&UpdateTimer);
-			//	OldSnakeHead = SnakeHead;
-			//	MoveSnake(HeadPosX, HeadPosY, TailPosX, TailPosY, SnakeHead);
-			//	DrawMap();
-			//}
 			else
 			{
 				Snake.OldHead = Snake.Head;
@@ -523,7 +637,87 @@ int main()
 			}
 		}
 	}
+}
+void RenderText(drawtools& DrawTools, const char* Text, pos Pos, int FontSize, int BackClr, int TxtClr, bool Centered) {
+	HWND cHWND = GetConsoleWindow(); // дескриптор окна, используемый консолью
+	HDC cHDC = GetDC(GetConsoleWindow()); // данные типа HDC представляют собой 32-разрядное целое беззнаковое число.
+	LOGFONTA Font; // Создаем шрифт, вручную задаем ему параметры	
+	Font.lfHeight = FontSize; // Высота	
+	//Font.lfWidth = FontSize/2; // Ширина	
+	Font.lfEscapement = 0; // Наклон строки текста
+	Font.lfOrientation = 0; // Поворот букв 
+	Font.lfWeight = 0; // Толщина, 0 - базовое значение
+	Font.lfItalic = false; // Курсив
+	Font.lfUnderline = false; // Нижнее подчёркивание
+	Font.lfStrikeOut = false; // Зачеркнутость
+	Font.lfCharSet = RUSSIAN_CHARSET; // Набор символов
+	Font.lfOutPrecision = OUT_DEFAULT_PRECIS; // Точность вывода
+	Font.lfClipPrecision = CLIP_DEFAULT_PRECIS; // Точность отсечения
+	Font.lfQuality = ANTIALIASED_QUALITY; // Качество
+	Font.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // Не так важно, что это
+	Font.lfFaceName[LF_FACESIZE]; // Название шрифта
+	strcpy_s(Font.lfFaceName, "Calibri"); // Копируем название
+	
+	SetTextColor(cHDC, DrawTools.Palette.Colors[TxtClr]); // цвет текста
+	SetBkMode(cHDC, TRANSPARENT); // прозрачный цвет фона
+	//SetBkColor(cNDC, DrawTools.Palette.Colors[BackClr]); // цвет фона
 
+
+	SelectObject(cHDC, CreateFontIndirectA(&Font)); // выбор объекта с настройками отображения
+	if (Centered)
+	{
+		SetTextAlign(cHDC, TA_CENTER);
+	}
+	TextOutA(cHDC, Pos.x, Pos.y, Text, strlen(Text)); // вывод текста на экран
+
+	ReleaseDC(cHWND, cHDC);
+}
+void DrawTextLines(drawtools& DrawTools, std::string* TextLines, int TextLinesCount, pos Pos, int FontSize, int BackClr, int TxtClr, bool Centered) {	
+	if (Centered)
+	{
+		if (TextLinesCount%2)
+		{
+			Pos.y -= TextLinesCount * FontSize;
+		}
+		else
+		{
+
+			Pos.y -= FontSize + (TextLinesCount - 1) * FontSize;
+		}
+	}
+	for (int i = 0; i < TextLinesCount; i++)
+	{	
+		RenderText(DrawTools, TextLines[i].c_str(), Pos, FontSize, BackClr, TxtClr, Centered);
+		Pos.y += FontSize * 2;
+	}
+}
+
+int main()
+{	
+	// Map init
+	map Map;
+	MapInit(Map, 15, 15);
+	//
+	drawtools DrawTools;
+	GameInit(DrawTools, Map.Height, Map.Width);
+	int StringsCount = 7;
+	WINDOWPLACEMENT Test;
+	GetWindowPlacement(DrawTools.Console.cHWND, &Test);
+	RECT rectClient, rectWindow;
+	GetClientRect(DrawTools.Console.cHWND, &rectClient);
+	GetWindowRect(DrawTools.Console.cHWND, &rectWindow);
+	int posx, posy;
+	posx = GetSystemMetrics(SM_CXSCREEN) / 2 - (rectWindow.right - rectWindow.left) / 2;
+	posy = GetSystemMetrics(SM_CYSCREEN) / 2 - (rectWindow.bottom - rectWindow.top) / 2;
+	MoveWindow(DrawTools.Console.cHWND, posx, posy, rectWindow.right - rectWindow.left, rectWindow.bottom - rectWindow.top, TRUE);
+	
+	//
+	string Strings[] = { "Hello", "Darnkess", "My" , "Old","Friend", "LolKek", "What" };
+	SetTextAlign(DrawTools.Console.cHDC, TA_CENTER);
+	DrawTextLines(DrawTools, Strings, StringsCount, { (rectWindow.right - rectWindow.left)/2,(rectWindow.bottom - rectWindow.top)/2 }, TILESIZE, GCLR_BLACK, GCLR_WHITE, true);
+	GetWindowPlacement(DrawTools.Console.cHWND, &Test);
+	//DrawTextLines(DrawTools, Strings, StringsCount, { 0,0 }, TILESIZE, GCLR_WHITE, GCLR_WHITE, true);
+	//Sleep(INFINITE);
 	system("pause");
-
+	SnakeMainGame(DrawTools, Map);
 }

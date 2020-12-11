@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <conio.h>
 #include <vector>
+#include <string>
 
 #include "structenum.h"
 #include "render.h"

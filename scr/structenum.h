@@ -32,10 +32,12 @@ struct palette
 	std::vector<COLORREF> Colors;
 };
 struct drawtools
-{
+{	
 	palette Palette;
 	console Console;
+	HFONT Font;
 	int TileSize;
+	int WindowState;
 };
 enum Keys
 {
