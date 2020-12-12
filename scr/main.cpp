@@ -3,6 +3,7 @@ using namespace std;
 #define TILESIZE 32
 #define WINDOW_STATE_MAXIMIZED 1
 #define WINDOW_STATE_MINIMIZED 2
+#define INFO_BAR_SIZE 3
 bool WindowMaximized(drawtools& DrawTools) {
 	WINDOWPLACEMENT WinPlacement;
 	GetWindowPlacement(DrawTools.Console.cHWND, &WinPlacement);
@@ -14,6 +15,7 @@ bool WindowMaximized(drawtools& DrawTools) {
 	else
 	{
 		DrawTools.WindowState = WinPlacement.showCmd;
+		return false;
 	}
 }
 void MapInit(map& Map, int MapHeight, int MapWidth) {
@@ -638,7 +640,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		}
 	}
 }
-void RenderText(drawtools& DrawTools, const char* Text, pos Pos, int FontSize, int BackClr, int TxtClr, bool Centered) {
+void RenderText(drawtools& DrawTools, const char* Text, pos Pos, int FontSize, int Thickness, int BackClr, int TxtClr, bool Centered) {
 	HWND cHWND = GetConsoleWindow(); // дескриптор окна, используемый консолью
 	HDC cHDC = GetDC(GetConsoleWindow()); // данные типа HDC представляют собой 32-разрядное целое беззнаковое число.
 	LOGFONTA Font; // Создаем шрифт, вручную задаем ему параметры	
@@ -646,7 +648,7 @@ void RenderText(drawtools& DrawTools, const char* Text, pos Pos, int FontSize, i
 	//Font.lfWidth = FontSize/2; // Ширина	
 	Font.lfEscapement = 0; // Наклон строки текста
 	Font.lfOrientation = 0; // Поворот букв 
-	Font.lfWeight = 0; // Толщина, 0 - базовое значение
+	Font.lfWeight = Thickness; // Толщина, 0 - базовое значение
 	Font.lfItalic = false; // Курсив
 	Font.lfUnderline = false; // Нижнее подчёркивание
 	Font.lfStrikeOut = false; // Зачеркнутость
@@ -656,7 +658,7 @@ void RenderText(drawtools& DrawTools, const char* Text, pos Pos, int FontSize, i
 	Font.lfQuality = ANTIALIASED_QUALITY; // Качество
 	Font.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // Не так важно, что это
 	Font.lfFaceName[LF_FACESIZE]; // Название шрифта
-	strcpy_s(Font.lfFaceName, "Calibri"); // Копируем название
+	strcpy_s(Font.lfFaceName, "Impact"); // Копируем название
 	
 	SetTextColor(cHDC, DrawTools.Palette.Colors[TxtClr]); // цвет текста
 	SetBkMode(cHDC, TRANSPARENT); // прозрачный цвет фона
@@ -666,13 +668,14 @@ void RenderText(drawtools& DrawTools, const char* Text, pos Pos, int FontSize, i
 	SelectObject(cHDC, CreateFontIndirectA(&Font)); // выбор объекта с настройками отображения
 	if (Centered)
 	{
+		Pos.y -= FontSize / 2;
 		SetTextAlign(cHDC, TA_CENTER);
 	}
 	TextOutA(cHDC, Pos.x, Pos.y, Text, strlen(Text)); // вывод текста на экран
 
 	ReleaseDC(cHWND, cHDC);
 }
-void DrawTextLines(drawtools& DrawTools, std::string* TextLines, int TextLinesCount, pos Pos, int FontSize, int BackClr, int TxtClr, bool Centered) {	
+void DrawTextLines(drawtools& DrawTools, std::string* TextLines, int TextLinesCount, pos Pos, int FontSize, int Thickness, int BackClr, int TxtClr, bool Centered) {
 	if (Centered)
 	{
 		if (TextLinesCount%2)
@@ -687,11 +690,95 @@ void DrawTextLines(drawtools& DrawTools, std::string* TextLines, int TextLinesCo
 	}
 	for (int i = 0; i < TextLinesCount; i++)
 	{	
-		RenderText(DrawTools, TextLines[i].c_str(), Pos, FontSize, BackClr, TxtClr, Centered);
+		RenderText(DrawTools, TextLines[i].c_str(), Pos, FontSize, Thickness, BackClr, TxtClr, Centered);
 		Pos.y += FontSize * 2;
 	}
 }
+void MainMenu(drawtools& DrawTools, map& Map) {
+	HDC& cHDC = DrawTools.Console.cHDC;
+	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
+	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
+	int TileSize = DrawTools.TileSize;
+	// Рисуем фон
+	SelectObject(cHDC, Pens[GCLR_YELLOW]);
+	SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height + INFO_BAR_SIZE) * DrawTools.TileSize);
+	// Рисуем текста	
+	RECT ClientRect, WindowRect;
+	GetClientRect(DrawTools.Console.cHWND, &ClientRect);
+	GetWindowRect(DrawTools.Console.cHWND, &WindowRect);
+	//pos WindowCenterPos = { (WindowRect.right - WindowRect.left) / 2,(WindowRect.bottom - WindowRect.top) / 2 + (WindowRect.bottom - WindowRect.top) / 4 };
+	pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 4 };
+	pos WindowCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 8 ) + (WindowRect.bottom - WindowRect.top))/2 };
+	
+	//pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , 0 };
+	RenderText(DrawTools, "SNACKE!", MainTitlePos, (WindowRect.bottom - WindowRect.top) / 4, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+	int StringsCount = 3;
+	string Strings[] = { "Play", "Settings", "Exit"};
+	
+	DrawTextLines(DrawTools, Strings, StringsCount, WindowCenterPos, TileSize, 0, GCLR_BLACK, GCLR_GREEN, true);
+	//
+	int SelectedButtonNum = 0;
+	pos ActiveButtonPos = WindowCenterPos;
+	if (StringsCount % 2)
+	{
+		ActiveButtonPos.y -= StringsCount * TileSize;
+	}
+	else
+	{
 
+		ActiveButtonPos.y -= TileSize + (StringsCount - 1) * TileSize;
+	}
+	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	
+	Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
+	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize,0, GCLR_BLACK, GCLR_DARKGREEN, true);
+	while (true)
+	{
+		if (WindowMaximized(DrawTools))
+		{
+			Sleep(100);
+			Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height+INFO_BAR_SIZE) * DrawTools.TileSize);
+			DrawTextLines(DrawTools, Strings, StringsCount, WindowCenterPos, TileSize, GCLR_BLACK, 0, GCLR_GREEN, true);
+			Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
+			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+		}
+		if (_kbhit())
+		{
+			int Keycode = _getch();
+			if (Keycode == 224) Keycode = _getch();			
+			if (Keycode == GMKEY_UP && SelectedButtonNum > 0)
+			{
+				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_GREEN, true);
+				SelectedButtonNum--;
+				ActiveButtonPos.y -= TileSize * 2;
+				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+			}
+			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount)
+			{
+				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_GREEN, true);
+				SelectedButtonNum++;
+				ActiveButtonPos.y += TileSize * 2;
+				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+			}
+			else if (Keycode == GMKEY_ENTER)
+			{
+				if (SelectedButtonNum == BTN_PLAY)
+				{
+					SnakeMainGame(DrawTools, Map);
+				}
+				if (SelectedButtonNum == BTN_EXIT)
+				{
+					exit(0);
+				}
+			}
+		}	
+		Sleep(1);
+	}
+}
 int main()
 {	
 	// Map init
@@ -699,25 +786,9 @@ int main()
 	MapInit(Map, 15, 15);
 	//
 	drawtools DrawTools;
-	GameInit(DrawTools, Map.Height, Map.Width);
-	int StringsCount = 7;
-	WINDOWPLACEMENT Test;
-	GetWindowPlacement(DrawTools.Console.cHWND, &Test);
-	RECT rectClient, rectWindow;
-	GetClientRect(DrawTools.Console.cHWND, &rectClient);
-	GetWindowRect(DrawTools.Console.cHWND, &rectWindow);
-	int posx, posy;
-	posx = GetSystemMetrics(SM_CXSCREEN) / 2 - (rectWindow.right - rectWindow.left) / 2;
-	posy = GetSystemMetrics(SM_CYSCREEN) / 2 - (rectWindow.bottom - rectWindow.top) / 2;
-	MoveWindow(DrawTools.Console.cHWND, posx, posy, rectWindow.right - rectWindow.left, rectWindow.bottom - rectWindow.top, TRUE);
-	
+	GameInit(DrawTools, Map.Height, Map.Width);	
 	//
-	string Strings[] = { "Hello", "Darnkess", "My" , "Old","Friend", "LolKek", "What" };
-	SetTextAlign(DrawTools.Console.cHDC, TA_CENTER);
-	DrawTextLines(DrawTools, Strings, StringsCount, { (rectWindow.right - rectWindow.left)/2,(rectWindow.bottom - rectWindow.top)/2 }, TILESIZE, GCLR_BLACK, GCLR_WHITE, true);
-	GetWindowPlacement(DrawTools.Console.cHWND, &Test);
-	//DrawTextLines(DrawTools, Strings, StringsCount, { 0,0 }, TILESIZE, GCLR_WHITE, GCLR_WHITE, true);
-	//Sleep(INFINITE);
+	MainMenu(DrawTools, Map);
 	system("pause");
 	SnakeMainGame(DrawTools, Map);
 }

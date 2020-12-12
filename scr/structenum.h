@@ -39,12 +39,20 @@ struct drawtools
 	int TileSize;
 	int WindowState;
 };
+
+enum MainMenuButtons
+{
+	BTN_PLAY,
+	BTN_SETTINGS,
+	BTN_EXIT
+};
 enum Keys
 {
 	GMKEY_LEFT = 75,
 	GMKEY_RIGHT = 77,
 	GMKEY_UP = 72,
 	GMKEY_DOWN = 80,
+	GMKEY_ENTER = 13,
 };
 enum Tiles
 {
