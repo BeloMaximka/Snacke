@@ -33,29 +33,29 @@ void MapInit(map& Map, int MapHeight, int MapWidth) {
 				Map.Tiles[y][x] = TILE_EMPTY;
 			}
 			// это пременно
-			Map.Tiles[y][x] = TILE_EMPTY;
+			//Map.Tiles[y][x] = TILE_EMPTY;
 		}
 	}
 }
 // Настройка логического шрифта
-void InitFont(HFONT& HFont) {
+void InitFont(HFONT& HFont, int FontSize, int Thickness) {
 	LOGFONTA Font; // Создаем шрифт, вручную задаем ему параметры	
-	Font.lfHeight = TILESIZE; // Высота	
-	//Font.lfWidth = TILESIZE; // Ширина	
+	Font.lfHeight = FontSize; // Высота	
+	//Font.lfWidth = FontSize/2; // Ширина	
 	Font.lfEscapement = 0; // Наклон строки текста
 	Font.lfOrientation = 0; // Поворот букв 
-	Font.lfWeight = 0; // Толщина, 0 - базовое значение
+	Font.lfWeight = Thickness; // Толщина, 0 - базовое значение
 	Font.lfItalic = false; // Курсив
 	Font.lfUnderline = false; // Нижнее подчёркивание
 	Font.lfStrikeOut = false; // Зачеркнутость
-	Font.lfCharSet= RUSSIAN_CHARSET; // Набор символов
+	Font.lfCharSet = RUSSIAN_CHARSET; // Набор символов
 	Font.lfOutPrecision = OUT_DEFAULT_PRECIS; // Точность вывода
 	Font.lfClipPrecision = CLIP_DEFAULT_PRECIS; // Точность отсечения
 	Font.lfQuality = ANTIALIASED_QUALITY; // Качество
-	Font.lfPitchAndFamily = DEFAULT_PITCH| FF_DONTCARE; // Не так важно, что это
+	Font.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // Не так важно, что это
 	Font.lfFaceName[LF_FACESIZE]; // Название шрифта
-	strcpy_s(Font.lfFaceName, "Calibri"); // Копируем строку
-	HFont = CreateFontIndirectA(&Font); // Передаем полученный фон в параметр по ссылке
+	strcpy_s(Font.lfFaceName, "Impact"); // Копируем название
+	HFont = CreateFontIndirectA(&Font);
 }
 void InitPalette(palette& Palette) {
 	//GCLR_BLACK
@@ -66,10 +66,24 @@ void InitPalette(palette& Palette) {
 	Palette.Colors.push_back(RGB(255, 255, 255));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_WHITE]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_WHITE]));
-	//GCLR_YELLOW
+	//GCLR_LIGHTBURLYWOOD
 	Palette.Colors.push_back(RGB(214, 191, 142));
-	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_YELLOW]));
-	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_YELLOW]));
+	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_LIGHTBURLYWOOD]));
+	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_LIGHTBURLYWOOD]));
+	//GCLR_BURLYWOOD
+	Palette.Colors.push_back(RGB(201, 180, 133));
+	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_BURLYWOOD]));
+	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_BURLYWOOD]));
+	//GCLR_DARKBURLYWOOD
+	Palette.Colors.push_back(RGB(150, 134, 99));
+	//Palette.Colors.push_back(RGB(112, 100, 74));
+	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKBURLYWOOD]));
+	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKBURLYWOOD]));
+	//GCLR_DARKWOOD	
+	//Palette.Colors.push_back(RGB(112, 100, 74));
+	Palette.Colors.push_back(RGB(125, 112, 82));
+	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKWOOD]));
+	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKWOOD]));
 	//GCLR_RED
 	Palette.Colors.push_back(RGB(194, 42, 4));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_RED]));
@@ -99,7 +113,7 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 	pos FoodPos;
 	for (int i = 0; i < Map.Height * Map.Width; i++)
 	{
-		FoodPos.y = rand() % Map.Height;
+		FoodPos.y = rand() % Map.Height;		
 		FoodPos.x = rand() % Map.Width;
 		if (Map.Tiles[FoodPos.y][FoodPos.x] == TILE_EMPTY)
 		{
@@ -352,9 +366,7 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	srand(time(0));
 	rand();
 	//Инициализация цветов
-	InitPalette(DrawTools.Palette);
-	//Инициализация шрифта
-	InitFont(DrawTools.Font);
+	InitPalette(DrawTools.Palette);	
 	// Махинации с консолью
 	SetConsoleTitle(TEXT("SNACKE!"));
 
@@ -384,16 +396,19 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	ConBufferStr += ItoaBuffer;
 	system(ConBufferStr.c_str());
 	// Центрируем консоль
-	RECT rectClient, rectWindow;
-	GetClientRect(DrawTools.Console.cHWND, &rectClient);
-	GetWindowRect(DrawTools.Console.cHWND, &rectWindow);
-	int posx, posy;
-	posx = GetSystemMetrics(SM_CXSCREEN) / 2 - (rectWindow.right - rectWindow.left) / 2;
-	posy = GetSystemMetrics(SM_CYSCREEN) / 2 - (rectWindow.bottom - rectWindow.top) / 2;
-	MoveWindow(DrawTools.Console.cHWND, posx, posy, rectWindow.right - rectWindow.left, rectWindow.bottom - rectWindow.top, TRUE);
-	//MoveWindow(DrawTools.Console.cHWND, posx, posy, 500, 500, TRUE);
+	RECT ClientRect, WindowRect;
+	GetClientRect(DrawTools.Console.cHWND, &ClientRect);
+	GetWindowRect(DrawTools.Console.cHWND, &WindowRect);
+	pos WindowPos;	
+	WindowPos.x = GetSystemMetrics(SM_CXSCREEN) / 2 - (WindowRect.right - WindowRect.left) / 2;
+	WindowPos.y = GetSystemMetrics(SM_CYSCREEN) / 2 - (WindowRect.bottom - WindowRect.top) / 2;
+	MoveWindow(DrawTools.Console.cHWND, WindowPos.x, WindowPos.y, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top, TRUE);	
 	SetWindowLong(DrawTools.Console.cHWND, GWL_STYLE, GetWindowLong(DrawTools.Console.cHWND, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);	
 
+	//Инициализация обычного шрифта
+	InitFont(DrawTools.NormalFont, DrawTools.TileSize, FONT_NORMAL_THICKNESS);
+	//Инициализация большого шрифта
+	InitFont(DrawTools.BigFont, (WindowRect.bottom - WindowRect.top) / 4, FONT_NORMAL_THICKNESS);
 	// Прячем курсор
 	CONSOLE_CURSOR_INFO Cursor;
 	Cursor.bVisible = false;
@@ -526,12 +541,13 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		snake Snake;
 		int SnakeSpawnSegments = 3;
 		pos SnakeSpawnPos = { SnakeSpawnSegments,Map.Height / 2 };
-		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments);
-		SpawnFood(DrawTools, Map);
-		//Timer init
-		int UpdateDelayMiliseconds = 100;
+		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments);		
 		DrawMap(DrawTools, Map);
 		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+		SpawnFood(DrawTools, Map);
+		DrawInfoBar(DrawTools, Map);
+		//Timer init
+		int UpdateDelayMiliseconds = 100;		
 		SnakeFirstStep(DrawTools, Map, Snake);
 		Sleep(UpdateDelayMiliseconds);
 		// Main loop
@@ -637,68 +653,14 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		}
 	}
 }
-void RenderText(drawtools& DrawTools, const char* Text, pos Pos, int FontSize, int Thickness, int BackClr, int TxtClr, bool Centered) {
-	HWND cHWND = GetConsoleWindow(); // дескриптор окна, используемый консолью
-	HDC cHDC = GetDC(GetConsoleWindow()); // данные типа HDC представляют собой 32-разрядное целое беззнаковое число.
-	LOGFONTA Font; // Создаем шрифт, вручную задаем ему параметры	
-	Font.lfHeight = FontSize; // Высота	
-	//Font.lfWidth = FontSize/2; // Ширина	
-	Font.lfEscapement = 0; // Наклон строки текста
-	Font.lfOrientation = 0; // Поворот букв 
-	Font.lfWeight = Thickness; // Толщина, 0 - базовое значение
-	Font.lfItalic = false; // Курсив
-	Font.lfUnderline = false; // Нижнее подчёркивание
-	Font.lfStrikeOut = false; // Зачеркнутость
-	Font.lfCharSet = RUSSIAN_CHARSET; // Набор символов
-	Font.lfOutPrecision = OUT_DEFAULT_PRECIS; // Точность вывода
-	Font.lfClipPrecision = CLIP_DEFAULT_PRECIS; // Точность отсечения
-	Font.lfQuality = ANTIALIASED_QUALITY; // Качество
-	Font.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // Не так важно, что это
-	Font.lfFaceName[LF_FACESIZE]; // Название шрифта
-	strcpy_s(Font.lfFaceName, "Impact"); // Копируем название
-	
-	SetTextColor(cHDC, DrawTools.Palette.Colors[TxtClr]); // цвет текста
-	SetBkMode(cHDC, TRANSPARENT); // прозрачный цвет фона
-	//SetBkColor(cNDC, DrawTools.Palette.Colors[BackClr]); // цвет фона
-
-
-	SelectObject(cHDC, CreateFontIndirectA(&Font)); // выбор объекта с настройками отображения
-	if (Centered)
-	{
-		Pos.y -= FontSize / 2;
-		SetTextAlign(cHDC, TA_CENTER);
-	}
-	TextOutA(cHDC, Pos.x, Pos.y, Text, strlen(Text)); // вывод текста на экран
-
-	ReleaseDC(cHWND, cHDC);
-}
-void DrawTextLines(drawtools& DrawTools, std::string* TextLines, int TextLinesCount, pos Pos, int FontSize, int Thickness, int BackClr, int TxtClr, bool Centered) {
-	if (Centered)
-	{
-		if (TextLinesCount%2)
-		{
-			Pos.y -= TextLinesCount * FontSize;
-		}
-		else
-		{
-
-			Pos.y -= FontSize + (TextLinesCount - 1) * FontSize;
-		}
-	}
-	for (int i = 0; i < TextLinesCount; i++)
-	{	
-		RenderText(DrawTools, TextLines[i].c_str(), Pos, FontSize, Thickness, BackClr, TxtClr, Centered);
-		Pos.y += FontSize * 2;
-	}
-}
 void MainMenu(drawtools& DrawTools, map& Map) {
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
 	int TileSize = DrawTools.TileSize;
 	// Рисуем фон
-	SelectObject(cHDC, Pens[GCLR_YELLOW]);
-	SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+	SelectObject(cHDC, Pens[GCLR_LIGHTBURLYWOOD]);
+	SelectObject(cHDC, Brushes[GCLR_LIGHTBURLYWOOD]);
 	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height + INFO_BAR_SIZE) * DrawTools.TileSize);
 	// Рисуем текста	
 	RECT ClientRect, WindowRect;
@@ -709,11 +671,11 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	pos WindowCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 8 ) + (WindowRect.bottom - WindowRect.top))/2 };
 	
 	//pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , 0 };
-	RenderText(DrawTools, "SNACKE!", MainTitlePos, (WindowRect.bottom - WindowRect.top) / 4, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+	RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.BigFont, GCLR_DARKGREEN, true);
 	int StringsCount = 3;
 	string Strings[] = { "Play", "Settings", "Exit"};
 	
-	DrawTextLines(DrawTools, Strings, StringsCount, WindowCenterPos, TileSize, 0, GCLR_BLACK, GCLR_GREEN, true);
+	DrawTextLines(DrawTools, Strings, StringsCount, WindowCenterPos, DrawTools.NormalFont, GCLR_GREEN, true);
 	//
 	int SelectedButtonNum = 0;
 	pos ActiveButtonPos = WindowCenterPos;
@@ -728,16 +690,16 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	}
 	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	
 	Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
-	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize,0, GCLR_BLACK, GCLR_DARKGREEN, true);
+	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, GCLR_DARKGREEN, true);
 	while (true)
 	{
 		if (WindowMaximized(DrawTools))
 		{
 			Sleep(100);
 			Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height+INFO_BAR_SIZE) * DrawTools.TileSize);
-			DrawTextLines(DrawTools, Strings, StringsCount, WindowCenterPos, TileSize, GCLR_BLACK, 0, GCLR_GREEN, true);
+			DrawTextLines(DrawTools, Strings, StringsCount, WindowCenterPos, DrawTools.NormalFont, GCLR_GREEN, true);
 			Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
-			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, GCLR_DARKGREEN, true);
 		}
 		if (_kbhit())
 		{
@@ -746,20 +708,20 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0)
 			{
 				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
-				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_GREEN, true);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, GCLR_GREEN, true);
 				SelectedButtonNum--;
 				ActiveButtonPos.y -= TileSize * 2;
 				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
-				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, GCLR_DARKGREEN, true);
 			}
 			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount)
 			{
 				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
-				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_GREEN, true);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, GCLR_GREEN, true);
 				SelectedButtonNum++;
 				ActiveButtonPos.y += TileSize * 2;
 				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize);
-				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, TileSize, 0, GCLR_BLACK, GCLR_DARKGREEN, true);
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, GCLR_DARKGREEN, true);
 			}
 			else if (Keycode == GMKEY_ENTER)
 			{

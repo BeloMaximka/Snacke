@@ -5,6 +5,11 @@ struct pos
 	int x;
 	int y;
 };
+struct dpos
+{
+	double x;
+	double y;
+};
 struct map
 {
 	int** Tiles;
@@ -18,6 +23,8 @@ struct snake
 	int Segments;
 	int Head;
 	int OldHead;
+	int FoodEaten;
+	int Score;
 };
 struct console
 {
@@ -35,7 +42,8 @@ struct drawtools
 {	
 	palette Palette;
 	console Console;
-	HFONT Font;
+	HFONT NormalFont;
+	HFONT BigFont;
 	int TileSize;
 	int WindowState;
 };
@@ -75,7 +83,10 @@ enum Colors
 {
 	GCLR_BLACK,
 	GCLR_WHITE,
-	GCLR_YELLOW,
+	GCLR_LIGHTBURLYWOOD,
+	GCLR_BURLYWOOD,
+	GCLR_DARKBURLYWOOD,
+	GCLR_DARKWOOD,
 	GCLR_RED,
 	GCLR_GREEN,
 	GCLR_DARKGREEN,

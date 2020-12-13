@@ -1,5 +1,37 @@
 #pragma once
 #include "includes.h"
+void DrawApple(drawtools& DrawTools, dpos Pos) {
+	HDC& cHDC = DrawTools.Console.cHDC;
+	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
+	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
+	int& TileSize = DrawTools.TileSize;	
+	// Выбираем коричневый цвет для обводки
+	SelectObject(cHDC, Pens[GCLR_BROWN]);
+	// Выбираем коричневый цвет для заполнения
+	SelectObject(cHDC, Brushes[GCLR_BROWN]);
+	// Рисуем палочку
+	Rectangle(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize + TileSize / 16, Pos.x * TileSize + TileSize / 2 + TileSize / 16, Pos.y * TileSize + TileSize);
+	// Выбираем красный цвет для обводки
+	SelectObject(cHDC, Pens[GCLR_RED]);
+	// Выбираем красный цвет для заполнения
+	SelectObject(cHDC, Brushes[GCLR_RED]);
+	// Рисуем левую дольку
+	Ellipse(cHDC, Pos.x * TileSize + TileSize / 16, Pos.y * TileSize + TileSize * 0.2, Pos.x * TileSize + TileSize / 1.6, Pos.y * TileSize + TileSize);
+	// Рисуем правую дольку
+	Ellipse(cHDC, Pos.x * TileSize + TileSize - TileSize / 16, Pos.y * TileSize + TileSize * 0.2, Pos.x * TileSize + TileSize - TileSize / 1.6, Pos.y * TileSize + TileSize);
+	// Выбираем зеленый цвет для обводки
+	SelectObject(cHDC, Pens[GCLR_GREEN]);
+	// Выбираем зеленый цвет для заполнения
+	SelectObject(cHDC, Brushes[GCLR_GREEN]);
+	// Рисуем листок
+	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize, Pos.x * TileSize + TileSize - TileSize / 16, Pos.y * TileSize + TileSize / 6);
+	// Выбираем красный цвет для обводки
+	SelectObject(cHDC, Pens[GCLR_LIGHTRED]);
+	// Выбираем красный цвет для заполнения
+	SelectObject(cHDC, Brushes[GCLR_LIGHTRED]);
+	// Рисуем блик
+	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2.5, Pos.y * TileSize + TileSize / 1.8, Pos.x * TileSize + TileSize / 2.5 - TileSize / 6, Pos.y * TileSize + TileSize / 2 - TileSize / 5);
+}
 void DrawTile(drawtools& DrawTools, pos Pos, int TileID) {
 	Pos.y += INFO_BAR_SIZE;
 	HDC& cHDC = DrawTools.Console.cHDC;
@@ -8,13 +40,17 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID) {
 	int& TileSize = DrawTools.TileSize;
 	if (TileID == TILE_WALL)
 	{
-		SelectObject(cHDC, Pens[GCLR_WHITE]);
-		SelectObject(cHDC, Brushes[GCLR_WHITE]);
+		SelectObject(cHDC, Pens[GCLR_DARKBURLYWOOD]);
+		SelectObject(cHDC, Brushes[GCLR_DARKBURLYWOOD]);
 		Rectangle(cHDC, Pos.x * TileSize, Pos.y * TileSize, Pos.x * TileSize + TileSize, Pos.y * TileSize + TileSize);
 	}
-	if (TileID == TILE_FOOD)
+	else if (TileID == TILE_FOOD)
 	{
-		DrawTile(DrawTools, Pos, TILE_EMPTY);
+		HDC& cHDC = DrawTools.Console.cHDC;
+		std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
+		std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
+		int& TileSize = DrawTools.TileSize;
+		DrawTile(DrawTools, { Pos.x, Pos.y- INFO_BAR_SIZE }, TILE_EMPTY);
 		// Выбираем коричневый цвет для обводки
 		SelectObject(cHDC, Pens[GCLR_BROWN]);
 		// Выбираем коричневый цвет для заполнения
@@ -44,8 +80,16 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID) {
 	}
 	else
 	{
-		SelectObject(cHDC, Pens[GCLR_YELLOW]);
-		SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+		if (Pos.x%2 == Pos.y%2)
+		{
+			SelectObject(cHDC, Pens[GCLR_LIGHTBURLYWOOD]);
+			SelectObject(cHDC, Brushes[GCLR_LIGHTBURLYWOOD]);
+		}
+		else
+		{
+			SelectObject(cHDC, Pens[GCLR_BURLYWOOD]);
+			SelectObject(cHDC, Brushes[GCLR_BURLYWOOD]);
+		}		
 		Rectangle(cHDC, Pos.x * TileSize, Pos.y * TileSize, Pos.x * TileSize + TileSize, Pos.y * TileSize + TileSize);
 	}
 }
@@ -298,4 +342,60 @@ void DrawMap(drawtools& DrawTools, map& Map) {
 		}
 	}
 
+}
+void RenderText(drawtools& DrawTools, const char* Text, pos Pos, HFONT Font, int TxtClr, bool Centered) {
+	HWND cHWND = GetConsoleWindow(); // дескриптор окна, используемый консолью
+	HDC cHDC = GetDC(GetConsoleWindow()); // данные типа HDC представляют собой 32-разрядное целое беззнаковое число.	
+	SetTextColor(cHDC, DrawTools.Palette.Colors[TxtClr]); // цвет текста
+	SetBkMode(cHDC, TRANSPARENT); // прозрачный цвет фона
+
+	SelectObject(cHDC, Font); // выбор объекта с настройками отображения
+	if (Centered)
+	{
+		LOGFONT TempFont;
+		GetObject(Font, sizeof(LOGFONT), &TempFont);
+		Pos.y -= TempFont.lfHeight / 2;
+		SetTextAlign(cHDC, TA_CENTER);
+	}
+	TextOutA(cHDC, Pos.x, Pos.y, Text, strlen(Text)); // вывод текста на экран
+
+	ReleaseDC(cHWND, cHDC);
+}
+void DrawTextLines(drawtools& DrawTools, std::string* TextLines, int TextLinesCount, pos Pos, HFONT Font, int TxtClr, bool Centered) {
+	LOGFONT TempFont;
+	GetObject(Font, sizeof(LOGFONT), &TempFont);
+	if (Centered)
+	{
+		if (TextLinesCount % 2)
+		{
+			Pos.y -= TextLinesCount * TempFont.lfHeight;
+		}
+		else
+		{
+
+			Pos.y -= TempFont.lfHeight + (TextLinesCount - 1) * TempFont.lfHeight;
+		}
+	}
+	for (int i = 0; i < TextLinesCount; i++)
+	{
+		RenderText(DrawTools, TextLines[i].c_str(), Pos, Font, TxtClr, Centered);
+		Pos.y += TempFont.lfHeight * 2;
+	}
+}
+void DrawInfoBar(drawtools& DrawTools, map& Map) {
+	HDC& cHDC = DrawTools.Console.cHDC;
+	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
+	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
+	SelectObject(cHDC, Pens[GCLR_DARKWOOD]);
+	SelectObject(cHDC, Brushes[GCLR_DARKWOOD]);
+	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, INFO_BAR_SIZE * DrawTools.TileSize);	
+	SelectObject(cHDC, Pens[GCLR_BURLYWOOD]);
+	SelectObject(cHDC, Brushes[GCLR_BURLYWOOD]);
+	Ellipse(cHDC, DrawTools.TileSize, 0.5* DrawTools.TileSize, 2 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
+	DrawApple(DrawTools, { 1, 0.5 });
+
+	char StrBuffer[6];
+	sprintf_s(StrBuffer, 6, " %03i", 12);
+	RenderText(DrawTools, StrBuffer, { 2 * DrawTools.TileSize, (int)(0.5 * DrawTools.TileSize) }, DrawTools.NormalFont, GCLR_BURLYWOOD, false);
+	
 }
