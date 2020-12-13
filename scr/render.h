@@ -5,26 +5,27 @@ void DrawApple(drawtools& DrawTools, dpos Pos) {
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
 	int& TileSize = DrawTools.TileSize;	
+	int SizeMod = TileSize / 16;
 	// Выбираем коричневый цвет для обводки
 	SelectObject(cHDC, Pens[GCLR_BROWN]);
 	// Выбираем коричневый цвет для заполнения
 	SelectObject(cHDC, Brushes[GCLR_BROWN]);
 	// Рисуем палочку
-	Rectangle(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize + TileSize / 16, Pos.x * TileSize + TileSize / 2 + TileSize / 16, Pos.y * TileSize + TileSize);
+	Rectangle(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize + TileSize / 16 + SizeMod*2, Pos.x * TileSize + TileSize / 2 + TileSize / 16, Pos.y * TileSize + TileSize - SizeMod);
 	// Выбираем красный цвет для обводки
 	SelectObject(cHDC, Pens[GCLR_RED]);
 	// Выбираем красный цвет для заполнения
 	SelectObject(cHDC, Brushes[GCLR_RED]);
 	// Рисуем левую дольку
-	Ellipse(cHDC, Pos.x * TileSize + TileSize / 16, Pos.y * TileSize + TileSize * 0.2, Pos.x * TileSize + TileSize / 1.6, Pos.y * TileSize + TileSize);
+	Ellipse(cHDC, Pos.x * TileSize + TileSize / 16 + SizeMod, Pos.y * TileSize + TileSize * 0.2 + SizeMod, Pos.x * TileSize + TileSize / 1.6 - SizeMod, Pos.y * TileSize + TileSize - SizeMod);
 	// Рисуем правую дольку
-	Ellipse(cHDC, Pos.x * TileSize + TileSize - TileSize / 16, Pos.y * TileSize + TileSize * 0.2, Pos.x * TileSize + TileSize - TileSize / 1.6, Pos.y * TileSize + TileSize);
+	Ellipse(cHDC, Pos.x * TileSize + TileSize - TileSize / 16 - SizeMod, Pos.y * TileSize + TileSize * 0.2 + SizeMod, Pos.x * TileSize + TileSize - TileSize / 1.6 + SizeMod, Pos.y * TileSize + TileSize - SizeMod);
 	// Выбираем зеленый цвет для обводки
 	SelectObject(cHDC, Pens[GCLR_GREEN]);
 	// Выбираем зеленый цвет для заполнения
 	SelectObject(cHDC, Brushes[GCLR_GREEN]);
 	// Рисуем листок
-	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize, Pos.x * TileSize + TileSize - TileSize / 16, Pos.y * TileSize + TileSize / 6);
+	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16 + SizeMod/2, Pos.y * TileSize  + SizeMod*2, Pos.x * TileSize + TileSize - TileSize / 16 - SizeMod*2, Pos.y * TileSize + TileSize / 6 + SizeMod);
 	// Выбираем красный цвет для обводки
 	SelectObject(cHDC, Pens[GCLR_LIGHTRED]);
 	// Выбираем красный цвет для заполнения
@@ -382,7 +383,15 @@ void DrawTextLines(drawtools& DrawTools, std::string* TextLines, int TextLinesCo
 		Pos.y += TempFont.lfHeight * 2;
 	}
 }
-void DrawInfoBar(drawtools& DrawTools, map& Map) {
+void DrawInfoFoodCount(drawtools& DrawTools, int FoodCount) {
+	char StrBuffer[6];
+	sprintf_s(StrBuffer, 6, " %03i", FoodCount);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_DARKWOOD]);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_DARKWOOD]);
+	Rectangle(DrawTools.Console.cHDC, 2 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 3.4 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
+	RenderText(DrawTools, StrBuffer, { 2 * DrawTools.TileSize, (int)(0.5 * DrawTools.TileSize) }, DrawTools.NormalFont, GCLR_BURLYWOOD, false);
+}
+void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount) {
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
@@ -393,9 +402,7 @@ void DrawInfoBar(drawtools& DrawTools, map& Map) {
 	SelectObject(cHDC, Brushes[GCLR_BURLYWOOD]);
 	Ellipse(cHDC, DrawTools.TileSize, 0.5* DrawTools.TileSize, 2 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
 	DrawApple(DrawTools, { 1, 0.5 });
-
-	char StrBuffer[6];
-	sprintf_s(StrBuffer, 6, " %03i", 12);
-	RenderText(DrawTools, StrBuffer, { 2 * DrawTools.TileSize, (int)(0.5 * DrawTools.TileSize) }, DrawTools.NormalFont, GCLR_BURLYWOOD, false);
+	DrawInfoFoodCount(DrawTools, FoodCount);
+	
 	
 }

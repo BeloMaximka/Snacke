@@ -44,6 +44,7 @@ struct drawtools
 	console Console;
 	HFONT NormalFont;
 	HFONT BigFont;
+	HFONT TitleFont;
 	int TileSize;
 	int WindowState;
 };
@@ -53,6 +54,12 @@ enum MainMenuButtons
 	BTN_PLAY,
 	BTN_SETTINGS,
 	BTN_EXIT
+};
+enum RetryMenuButtons
+{
+	BTN_RETRY,
+	BTN_EXIT_TO_MAIN_MENU,
+	BTN_EXIT_TO_DESKTOP
 };
 enum Keys
 {
