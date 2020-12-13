@@ -1,5 +1,8 @@
 #pragma once
-
+#define TILESIZE 32
+#define WINDOW_STATE_MAXIMIZED 1
+#define WINDOW_STATE_MINIMIZED 2
+#define INFO_BAR_SIZE 3
 #include <iostream>
 #include <Windows.h>
 #include <conio.h>

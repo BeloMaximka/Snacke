@@ -1,6 +1,7 @@
 #pragma once
 #include "includes.h"
 void DrawTile(drawtools& DrawTools, pos Pos, int TileID) {
+	Pos.y += INFO_BAR_SIZE;
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
@@ -48,13 +49,15 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID) {
 		Rectangle(cHDC, Pos.x * TileSize, Pos.y * TileSize, Pos.x * TileSize + TileSize, Pos.y * TileSize + TileSize);
 	}
 }
-void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmount, int SegmentNumber) {
+void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmount, int SegmentNumber) {	
+	Pos.y += INFO_BAR_SIZE;
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
-	int& TileSize = DrawTools.TileSize;
-	Pos.x = Pos.x * TileSize + TileSize / 2;
+	int& TileSize = DrawTools.TileSize;	
+	Pos.x = Pos.x * TileSize + TileSize / 2;	
 	Pos.y = Pos.y * TileSize + TileSize / 2;
+	
 	int Width;
 	Width = TileSize * (0.5 + ((double)SegmentNumber / SegmentsAmount) / 4);
 	SelectObject(cHDC, Pens[GCLR_GREEN]);
@@ -218,7 +221,7 @@ void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile) {
 
 	int SegmentNumber = 0;
 	int SegmentTile = TailTile;
-	pos DrawPos = Snake.TailPos;
+	pos DrawPos = Snake.TailPos;	
 	DrawTile(DrawTools, DrawPos, TILE_EMPTY);
 	while (true)
 	{

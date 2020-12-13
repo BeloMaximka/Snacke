@@ -1,9 +1,6 @@
 ﻿#include "includes.h"
 using namespace std;
-#define TILESIZE 32
-#define WINDOW_STATE_MAXIMIZED 1
-#define WINDOW_STATE_MINIMIZED 2
-#define INFO_BAR_SIZE 3
+
 bool WindowMaximized(drawtools& DrawTools) {
 	WINDOWPLACEMENT WinPlacement;
 	GetWindowPlacement(DrawTools.Console.cHWND, &WinPlacement);
@@ -383,7 +380,7 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	_itoa_s(2.0 * DrawTools.TileSize / CFI.dwFontSize.Y * MapWidth, ItoaBuffer, 10);
 	ConBufferStr += ItoaBuffer;
 	ConBufferStr += " lines=";
-	_itoa_s(1.0 * DrawTools.TileSize / CFI.dwFontSize.Y * MapWidth + 3, ItoaBuffer, 10);
+	_itoa_s(1.0 * DrawTools.TileSize / CFI.dwFontSize.Y * (MapWidth + INFO_BAR_SIZE), ItoaBuffer, 10);
 	ConBufferStr += ItoaBuffer;
 	system(ConBufferStr.c_str());
 	// Центрируем консоль
