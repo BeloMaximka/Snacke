@@ -420,6 +420,7 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	Cursor.bVisible = false;
 	Cursor.dwSize = 100;
 	SetConsoleCursorInfo(DrawTools.Console.cHANDLE, &Cursor);
+	Sleep(200); // Даем окну возможность развернуться
 }
 void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments) {
 	pos PlacePos = HeadPos;
@@ -492,7 +493,7 @@ void SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
 	{
 		if (WindowMaximized(DrawTools))
 		{
-			Sleep(100);
+			Sleep(200);
 			DrawMap(DrawTools, Map);
 			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 			DrawInfoBar(DrawTools, Map, Snake.FoodEaten);
@@ -568,12 +569,16 @@ bool RetryMenu(drawtools& DrawTools, map& Map) {
 	RECT ClientRect, WindowRect; // Переменные для определения координат центра окна
 	GetClientRect(DrawTools.Console.cHWND, &ClientRect); // Определяем ко-рды рабочей зоны
 	GetWindowRect(DrawTools.Console.cHWND, &WindowRect); // Определяем ко-рды окна	
-	pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 4 }; // Положение названия игры
-	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 16) + (WindowRect.bottom - WindowRect.top)) / 2 };	 // Положение центра линий текста
+	pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 4 }; // Положение названия игры	
 
 	RenderText(DrawTools, "GAME OVER", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Рисуем название игры
+	LOGFONT TempFont;
+	GetObject(DrawTools.NormalFont, sizeof(LOGFONT), &TempFont);
+	MainTitlePos.y += TempFont.lfHeight*2;
+	RenderText(DrawTools, "Your score:", MainTitlePos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем название игры
 	int StringsCount = 3; // Сколько будет опций выбора
 	string Strings[] = { "Retry", "Exit to main menu", "Exit to desktop" }; // Названия опций выбора	
+	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 16) + (WindowRect.bottom - WindowRect.top)) / 2 };	 // Положение центра линий текста
 	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора
 
 	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
@@ -593,7 +598,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map) {
 	{
 		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
 		{
-			Sleep(100); // Ждем, пока окно достаточно не развернется
+			Sleep(200); // Ждем, пока окно достаточно не развернется
 			// Далее, собсна, рисуем всё заново
 			Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height + INFO_BAR_SIZE) * DrawTools.TileSize); // Фон
 			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста
@@ -664,7 +669,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		{
 			if (WindowMaximized(DrawTools))
 			{
-				Sleep(100);
+				Sleep(200);
 				DrawMap(DrawTools, Map);
 				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 				DrawInfoBar(DrawTools, Map, Snake.FoodEaten);
@@ -808,7 +813,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	{
 		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
 		{
-			Sleep(100); // Ждем, пока окно достаточно не развернется
+			Sleep(200); // Ждем, пока окно достаточно не развернется
 			// Далее, собсна, рисуем всё заново
 			Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height+INFO_BAR_SIZE) * DrawTools.TileSize); // Фон
 			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста

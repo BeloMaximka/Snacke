@@ -1,5 +1,50 @@
 #pragma once
 #include "includes.h"
+void DrawStar(drawtools& DrawTools, dpos Pos, double SizeMod) {
+	Pos = { Pos.x * DrawTools.TileSize, Pos.y * DrawTools.TileSize };
+	int TileSize = DrawTools.TileSize;
+	dpos StarOutEndDir = { 0,-1 };
+	dpos StarInEndDir = { 0,1 };
+	POINT PolyPoints[10];
+	LONG PosX;
+	LONG PosY;
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_WHITE]);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_WHITE]);
+	double Angle =72*(M_PI / 180);
+	PosX = Pos.x + StarOutEndDir.x * TileSize * SizeMod;
+	PosY = Pos.y + StarOutEndDir.y * TileSize * SizeMod;
+	PolyPoints[0] = { PosX, PosY };
+	LineTo(DrawTools.Console.cHDC, PolyPoints[0].x, PolyPoints[0].y);
+	StarInEndDir.x = StarInEndDir.x * cos(Angle * -2) - StarInEndDir.y * sin(Angle * -2);
+	StarInEndDir.y = StarInEndDir.y * cos(Angle * -2) + StarInEndDir.x * sin(Angle * -2);
+	PosX = Pos.x + StarInEndDir.x * 0.5 * TileSize * SizeMod;
+	PosY = Pos.y + StarInEndDir.y * 0.5 * TileSize * SizeMod;
+	PolyPoints[1] = { PosX, PosY };
+	//LineTo(DrawTools.Console.cHDC, PolyPoints[1].x, PolyPoints[1].y);
+	StarOutEndDir.x = StarOutEndDir.x * cos(Angle) - StarOutEndDir.y * sin(Angle);
+	StarOutEndDir.y = StarOutEndDir.y * cos(Angle) + StarOutEndDir.x * sin(Angle);
+	for (int i = 2; i < 10; i++)
+	{
+		PosX = Pos.x + StarOutEndDir.x * TileSize * SizeMod;
+		PosY = Pos.y + StarOutEndDir.y * TileSize * SizeMod;
+		PolyPoints[i] = { PosX, PosY };
+		LineTo(DrawTools.Console.cHDC, PolyPoints[i].x, PolyPoints[i].y);
+		StarInEndDir.x = StarInEndDir.x * cos(Angle) - StarInEndDir.y * sin(Angle);
+		StarInEndDir.y = StarInEndDir.y * cos(Angle) + StarInEndDir.x * sin(Angle);
+		i++;
+		PosX = Pos.x + StarInEndDir.x * 0.5 * TileSize * SizeMod;
+		PosY = Pos.y + StarInEndDir.y * 0.5 * TileSize * SizeMod;
+		//PolyPoints[i] = { PosX, PosY};
+		LineTo(DrawTools.Console.cHDC, PolyPoints[i].x, PolyPoints[i].y);
+		StarOutEndDir.x = StarOutEndDir.x * cos(Angle) - StarOutEndDir.y * sin(Angle);
+		StarOutEndDir.y = StarOutEndDir.y * cos(Angle) + StarOutEndDir.x * sin(Angle);
+	}
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_WHITE]);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_WHITE]);
+	Polygon(DrawTools.Console.cHDC, PolyPoints, 10);
+	//x1 = x * cos(angle) - y * sin(angle);
+	//y1 = y * cos(angle) + x * sin(angle);
+}
 void DrawApple(drawtools& DrawTools, dpos Pos) {
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
@@ -403,6 +448,6 @@ void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount) {
 	Ellipse(cHDC, DrawTools.TileSize, 0.5* DrawTools.TileSize, 2 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
 	DrawApple(DrawTools, { 1, 0.5 });
 	DrawInfoFoodCount(DrawTools, FoodCount);
-	
+	DrawStar(DrawTools, { 1, 1.5 }, 1);
 	
 }
