@@ -55,7 +55,7 @@ void InitFont(HFONT& HFont, int FontSize, int Thickness) {
 	Font.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // Не так важно, что это
 	Font.lfFaceName[LF_FACESIZE]; // Название шрифта
 	strcpy_s(Font.lfFaceName, "Impact"); // Копируем название
-	HFont = CreateFontIndirectA(&Font);
+	HFont = CreateFontIndirectA(&Font);	
 }
 void InitPalette(palette& Palette) {
 	//GCLR_BLACK
@@ -569,17 +569,13 @@ void SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
 		Sleep(1);
 	}
 }
-bool RetryMenu(drawtools& DrawTools, map& Map) {
+bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	int TileSize = DrawTools.TileSize; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	int BaseColor = GCLR_DARKBURLYWOOD; // Добавляем дополнительную переменную, чтобы можно было в одной строчке кода изменить цвета для обычных строчек текста
-	int SelectedButtonColor = GCLR_DARKWOOD; // Добавляем дополнительную переменную, чтобы можно было в одной строчке кода изменить цвета для выбранныех строчек текста (и заголовка тоже, кстати)
-
-	SelectObject(cHDC, Pens[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для обводки
-	SelectObject(cHDC, Brushes[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для заливки
-	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height + INFO_BAR_SIZE) * DrawTools.TileSize); // Рисуем фон
+	int SelectedButtonColor = GCLR_DARKWOOD; // Добавляем дополнительную переменную, чтобы можно было в одной строчке кода изменить цвета для выбранныех строчек текста (и заголовка тоже, кстати)	
 
 	RECT ClientRect, WindowRect; // Переменные для определения координат центра окна
 	GetClientRect(DrawTools.Console.cHWND, &ClientRect); // Определяем ко-рды рабочей зоны
@@ -589,8 +585,12 @@ bool RetryMenu(drawtools& DrawTools, map& Map) {
 	RenderText(DrawTools, "GAME OVER", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Рисуем название игры
 	LOGFONT TempFont;
 	GetObject(DrawTools.NormalFont, sizeof(LOGFONT), &TempFont);
-	MainTitlePos.y += TempFont.lfHeight*2;
-	RenderText(DrawTools, "Your score:", MainTitlePos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем название игры
+	MainTitlePos.y += TempFont.lfHeight*2;	
+	std::string ScoreStr = "Your score: ";
+	char StrBuffer[SCORE_DIGITS + 1];
+	_itoa_s(Score, StrBuffer, SCORE_DIGITS + 1, 10);
+	ScoreStr += StrBuffer;
+	RenderText(DrawTools, ScoreStr.c_str(), MainTitlePos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем название игры
 	int StringsCount = 3; // Сколько будет опций выбора
 	string Strings[] = { "Retry", "Exit to main menu", "Exit to desktop" }; // Названия опций выбора	
 	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 16) + (WindowRect.bottom - WindowRect.top)) / 2 };	 // Положение центра линий текста
@@ -606,18 +606,15 @@ bool RetryMenu(drawtools& DrawTools, map& Map) {
 	{
 		ActiveButtonPos.y -= TileSize + (StringsCount - 1) * TileSize; // Смещаем позицию к последней
 	}
-	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции
-	Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем предыдущий текст
+	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции	
 	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем текст
 	while (true)
 	{
 		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
 		{
 			Sleep(200); // Ждем, пока окно достаточно не развернется
-			// Далее, собсна, рисуем всё заново
-			Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height + INFO_BAR_SIZE) * DrawTools.TileSize); // Фон
-			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста
-			Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем
+			// Далее, собсна, рисуем всё заново			
+			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
 			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 			RenderText(DrawTools, "GAME OVER", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Тайтл
 		}
@@ -626,21 +623,18 @@ bool RetryMenu(drawtools& DrawTools, map& Map) {
 			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
-			{
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
+			{				
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
-				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем обычный текст
+				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
 			}
 			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount) // Если стрелочка вниз  (и проверка на выход из границ)
 			{
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
+				//Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum++; // Меняем номер выбранной опции
-				ActiveButtonPos.y += TileSize * 2; // Смещаем  позицию выбранной опции на окне
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем обычный текст
+				ActiveButtonPos.y += TileSize * 2; // Смещаем  позицию выбранной опции на окне				
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
@@ -781,8 +775,8 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 			{
 				Map.Tiles[y][x] = TILE_EMPTY;
 			}
-		}
-		if (!RetryMenu(DrawTools, Map))
+		}		
+		if (!RetryMenu(DrawTools, Map, Snake.Score))
 		{
 			return;
 		}

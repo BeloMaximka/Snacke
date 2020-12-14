@@ -5,6 +5,7 @@
 #define INFO_BAR_SIZE 2
 #define FONT_NORMAL_THICKNESS 0
 #define FOOD_SCORE_REWARD 100
+#define SCORE_DIGITS 5
 #include <iostream>
 #include <Windows.h>
 #include <conio.h>

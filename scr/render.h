@@ -1,5 +1,20 @@
 #pragma once
 #include "includes.h"
+void DarkenArea(drawtools& DrawTools, pos TopLeft, pos RightBottom, double Percent) {
+	Percent = (100 - Percent) / 100;
+	COLORREF Pixel;
+	COLORREF NewPixel;
+	for (int y = TopLeft.y; y <= RightBottom.y; y++)
+	{
+		for (int x = TopLeft.x; x <= RightBottom.x; x++)
+		{
+			
+			Pixel = GetPixel(DrawTools.Console.cHDC, x, y);
+			NewPixel = RGB(GetRValue(Pixel) * Percent, GetGValue(Pixel) * Percent, GetBValue(Pixel) * Percent);
+			SetPixel(DrawTools.Console.cHDC, x, y, NewPixel);
+		}
+	}
+}
 void RotateVector(dpos& Point, double Angle) {
 	Angle *= (M_PI / 180);
 	dpos NewPoint;
@@ -455,6 +470,5 @@ void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount, int Score) {
 	SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 	Ellipse(cHDC, 4 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 5 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);	
 	DrawStar(DrawTools, { 4.5, 1 }, 0.4);
-	DrawInfoScore(DrawTools, Score);
-	
+	DrawInfoScore(DrawTools, Score);	
 }
