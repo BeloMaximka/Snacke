@@ -4,6 +4,7 @@
 #define WINDOW_STATE_MINIMIZED 2
 #define INFO_BAR_SIZE 2
 #define FONT_NORMAL_THICKNESS 0
+#define FOOD_SCORE_REWARD 100
 #include <iostream>
 #include <Windows.h>
 #include <conio.h>

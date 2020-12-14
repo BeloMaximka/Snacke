@@ -47,29 +47,29 @@ void DrawApple(drawtools& DrawTools, dpos Pos) {
 	int& TileSize = DrawTools.TileSize;	
 	int SizeMod = TileSize / 16;
 	// Выбираем коричневый цвет для обводки
-	SelectObject(cHDC, Pens[GCLR_BROWN]);
+	SelectObject(cHDC, Pens[GCLR_DARKRED]);
 	// Выбираем коричневый цвет для заполнения
-	SelectObject(cHDC, Brushes[GCLR_BROWN]);
+	SelectObject(cHDC, Brushes[GCLR_DARKRED]);
 	// Рисуем палочку
 	Rectangle(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize + TileSize / 16 + SizeMod*2, Pos.x * TileSize + TileSize / 2 + TileSize / 16, Pos.y * TileSize + TileSize - SizeMod);
 	// Выбираем красный цвет для обводки
-	SelectObject(cHDC, Pens[GCLR_RED]);
+	//SelectObject(cHDC, Pens[GCLR_RED]);
 	// Выбираем красный цвет для заполнения
-	SelectObject(cHDC, Brushes[GCLR_RED]);
+	//SelectObject(cHDC, Brushes[GCLR_RED]);
 	// Рисуем левую дольку
 	Ellipse(cHDC, Pos.x * TileSize + TileSize / 16 + SizeMod, Pos.y * TileSize + TileSize * 0.2 + SizeMod, Pos.x * TileSize + TileSize / 1.6 - SizeMod, Pos.y * TileSize + TileSize - SizeMod);
 	// Рисуем правую дольку
 	Ellipse(cHDC, Pos.x * TileSize + TileSize - TileSize / 16 - SizeMod, Pos.y * TileSize + TileSize * 0.2 + SizeMod, Pos.x * TileSize + TileSize - TileSize / 1.6 + SizeMod, Pos.y * TileSize + TileSize - SizeMod);
 	// Выбираем зеленый цвет для обводки
-	SelectObject(cHDC, Pens[GCLR_GREEN]);
+	//SelectObject(cHDC, Pens[GCLR_GREEN]);
 	// Выбираем зеленый цвет для заполнения
-	SelectObject(cHDC, Brushes[GCLR_GREEN]);
+	//SelectObject(cHDC, Brushes[GCLR_GREEN]);
 	// Рисуем листок
 	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16 + SizeMod/2, Pos.y * TileSize  + SizeMod*2, Pos.x * TileSize + TileSize - TileSize / 16 - SizeMod*2, Pos.y * TileSize + TileSize / 6 + SizeMod);
 	// Выбираем красный цвет для обводки
-	SelectObject(cHDC, Pens[GCLR_LIGHTRED]);
+	//SelectObject(cHDC, Pens[GCLR_LIGHTRED]);
 	// Выбираем красный цвет для заполнения
-	SelectObject(cHDC, Brushes[GCLR_LIGHTRED]);
+	//SelectObject(cHDC, Brushes[GCLR_LIGHTRED]);
 	// Рисуем блик
 	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2.5, Pos.y * TileSize + TileSize / 1.8, Pos.x * TileSize + TileSize / 2.5 - TileSize / 6, Pos.y * TileSize + TileSize / 2 - TileSize / 5);
 }
@@ -431,15 +431,23 @@ void DrawInfoFoodCount(drawtools& DrawTools, int FoodCount) {
 	Rectangle(DrawTools.Console.cHDC, 2 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 3.4 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
 	RenderText(DrawTools, StrBuffer, { 2 * DrawTools.TileSize, (int)(0.5 * DrawTools.TileSize) }, DrawTools.NormalFont, GCLR_BURLYWOOD, false);
 }
-void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount) {
+void DrawInfoScore(drawtools& DrawTools, int Score) {
+	char StrBuffer[8];
+	sprintf_s(StrBuffer, 8, " %05i", Score);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_DARKWOOD]);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_DARKWOOD]);
+	Rectangle(DrawTools.Console.cHDC, 5 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 8.4 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
+	RenderText(DrawTools, StrBuffer, { 5 * DrawTools.TileSize, (int)(0.5 * DrawTools.TileSize) }, DrawTools.NormalFont, GCLR_BURLYWOOD, false);
+}
+void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount, int Score) {
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
 	SelectObject(cHDC, Pens[GCLR_DARKWOOD]);
 	SelectObject(cHDC, Brushes[GCLR_DARKWOOD]);
 	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, INFO_BAR_SIZE * DrawTools.TileSize);	
-	SelectObject(cHDC, Pens[GCLR_BURLYWOOD]);
-	SelectObject(cHDC, Brushes[GCLR_BURLYWOOD]);
+	SelectObject(cHDC, Pens[GCLR_SCARLET]);
+	SelectObject(cHDC, Brushes[GCLR_SCARLET]);
 	Ellipse(cHDC, DrawTools.TileSize, 0.5* DrawTools.TileSize, 2 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
 	DrawApple(DrawTools, { 1, 0.5 });
 	DrawInfoFoodCount(DrawTools, FoodCount);
@@ -447,5 +455,6 @@ void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount) {
 	SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 	Ellipse(cHDC, 4 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 5 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);	
 	DrawStar(DrawTools, { 4.5, 1 }, 0.4);
+	DrawInfoScore(DrawTools, Score);
 	
 }

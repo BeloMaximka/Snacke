@@ -79,17 +79,20 @@ void InitPalette(palette& Palette) {
 	//Palette.Colors.push_back(RGB(112, 100, 74));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKBURLYWOOD]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKBURLYWOOD]));
-	//GCLR_DARKWOOD	
-	//Palette.Colors.push_back(RGB(112, 100, 74));
+	//GCLR_DARKWOOD		
 	Palette.Colors.push_back(RGB(125, 112, 82));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKWOOD]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKWOOD]));
+	//GCLR_SCARLET
+	Palette.Colors.push_back(RGB(212, 46, 4));
+	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_SCARLET]));
+	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_SCARLET]));
 	//GCLR_RED
 	Palette.Colors.push_back(RGB(194, 42, 4));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_RED]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_RED]));
 	//GCLR_DARKRED
-	Palette.Colors.push_back(RGB(117, 25, 2));
+	Palette.Colors.push_back(RGB(148, 32, 3));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKRED]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKRED]));
 	//GCLR_GREEN
@@ -285,8 +288,12 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 		Snake.Segments++;
 		// Увеличиваем счетчик съеденой еды
 		Snake.FoodEaten++;
-		// Обновляем счетчик на инфобаре
+		// Увеличиваем счет
+		Snake.Score += FOOD_SCORE_REWARD;
+		// Обновляем счетчик еды на инфобаре
 		DrawInfoFoodCount(DrawTools, Snake.FoodEaten);
+		// Обновляем счет на инфобаре
+		DrawInfoScore(DrawTools, Snake.Score);
 		// Создаём ещё одну еду
 		SpawnFood(DrawTools, Map);
 		// Останавливаем функцию здесь, чтобы не хвост не удалился
@@ -504,7 +511,7 @@ void SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
 			Sleep(200);
 			DrawMap(DrawTools, Map);
 			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-			DrawInfoBar(DrawTools, Map, Snake.FoodEaten);
+			DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 		}
 		if (_kbhit())
 		{
@@ -667,7 +674,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		DrawMap(DrawTools, Map);
 		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 		SpawnFood(DrawTools, Map);
-		DrawInfoBar(DrawTools, Map, Snake.FoodEaten);
+		DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 		//Timer init
 		int UpdateDelayMiliseconds = 100;		
 		SnakeFirstStep(DrawTools, Map, Snake);
@@ -680,7 +687,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 				Sleep(200);
 				DrawMap(DrawTools, Map);
 				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				DrawInfoBar(DrawTools, Map, Snake.FoodEaten);
+				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 			}
 			if (_kbhit())
 			{
