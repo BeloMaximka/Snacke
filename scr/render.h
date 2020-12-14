@@ -1,5 +1,12 @@
 #pragma once
 #include "includes.h"
+void RotateVector(dpos& Point, double Angle) {
+	Angle *= (M_PI / 180);
+	dpos NewPoint;
+	NewPoint.x = Point.x * cos(Angle) - Point.y * sin(Angle);
+	NewPoint.y = Point.x * sin(Angle) + Point.y * cos(Angle);
+	Point = NewPoint;
+}
 void DrawStar(drawtools& DrawTools, dpos Pos, double SizeMod) {
 	Pos = { Pos.x * DrawTools.TileSize, Pos.y * DrawTools.TileSize };
 	int TileSize = DrawTools.TileSize;
@@ -7,43 +14,31 @@ void DrawStar(drawtools& DrawTools, dpos Pos, double SizeMod) {
 	dpos StarInEndDir = { 0,1 };
 	POINT PolyPoints[10];
 	LONG PosX;
-	LONG PosY;
-	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_WHITE]);
-	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_WHITE]);
-	double Angle =72*(M_PI / 180);
+	LONG PosY;	
+	double Angle =72;
 	PosX = Pos.x + StarOutEndDir.x * TileSize * SizeMod;
 	PosY = Pos.y + StarOutEndDir.y * TileSize * SizeMod;
-	PolyPoints[0] = { PosX, PosY };
-	LineTo(DrawTools.Console.cHDC, PolyPoints[0].x, PolyPoints[0].y);
-	StarInEndDir.x = StarInEndDir.x * cos(Angle * -2) - StarInEndDir.y * sin(Angle * -2);
-	StarInEndDir.y = StarInEndDir.y * cos(Angle * -2) + StarInEndDir.x * sin(Angle * -2);
+	PolyPoints[0] = { PosX, PosY };	
+	RotateVector(StarInEndDir, -2 * Angle);	
 	PosX = Pos.x + StarInEndDir.x * 0.5 * TileSize * SizeMod;
 	PosY = Pos.y + StarInEndDir.y * 0.5 * TileSize * SizeMod;
-	PolyPoints[1] = { PosX, PosY };
-	//LineTo(DrawTools.Console.cHDC, PolyPoints[1].x, PolyPoints[1].y);
-	StarOutEndDir.x = StarOutEndDir.x * cos(Angle) - StarOutEndDir.y * sin(Angle);
-	StarOutEndDir.y = StarOutEndDir.y * cos(Angle) + StarOutEndDir.x * sin(Angle);
+	PolyPoints[1] = { PosX, PosY };	
+	RotateVector(StarOutEndDir, Angle);	
 	for (int i = 2; i < 10; i++)
 	{
 		PosX = Pos.x + StarOutEndDir.x * TileSize * SizeMod;
 		PosY = Pos.y + StarOutEndDir.y * TileSize * SizeMod;
-		PolyPoints[i] = { PosX, PosY };
-		LineTo(DrawTools.Console.cHDC, PolyPoints[i].x, PolyPoints[i].y);
-		StarInEndDir.x = StarInEndDir.x * cos(Angle) - StarInEndDir.y * sin(Angle);
-		StarInEndDir.y = StarInEndDir.y * cos(Angle) + StarInEndDir.x * sin(Angle);
+		PolyPoints[i] = { PosX, PosY };		
+		RotateVector(StarInEndDir, Angle);		
 		i++;
 		PosX = Pos.x + StarInEndDir.x * 0.5 * TileSize * SizeMod;
 		PosY = Pos.y + StarInEndDir.y * 0.5 * TileSize * SizeMod;
-		//PolyPoints[i] = { PosX, PosY};
-		LineTo(DrawTools.Console.cHDC, PolyPoints[i].x, PolyPoints[i].y);
-		StarOutEndDir.x = StarOutEndDir.x * cos(Angle) - StarOutEndDir.y * sin(Angle);
-		StarOutEndDir.y = StarOutEndDir.y * cos(Angle) + StarOutEndDir.x * sin(Angle);
+		PolyPoints[i] = { PosX, PosY};		
+		RotateVector(StarOutEndDir, Angle);		
 	}
-	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_WHITE]);
-	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_WHITE]);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_DARKYELLOW]);
+	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_DARKYELLOW]);
 	Polygon(DrawTools.Console.cHDC, PolyPoints, 10);
-	//x1 = x * cos(angle) - y * sin(angle);
-	//y1 = y * cos(angle) + x * sin(angle);
 }
 void DrawApple(drawtools& DrawTools, dpos Pos) {
 	HDC& cHDC = DrawTools.Console.cHDC;
@@ -170,8 +165,8 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
 			Polygon(cHDC, PolyPoints, 4);
 			// глазки
-			SelectObject(cHDC, Pens[GCLR_DARKYELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_DARKYELLOW]);
+			SelectObject(cHDC, Pens[GCLR_YELLOW]);
+			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 			Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
 			Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
 		}
@@ -208,8 +203,8 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
 			Polygon(cHDC, PolyPoints, 4);
 			// глазки
-			SelectObject(cHDC, Pens[GCLR_DARKYELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_DARKYELLOW]);
+			SelectObject(cHDC, Pens[GCLR_YELLOW]);
+			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 			Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
 			Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
 		}
@@ -246,8 +241,8 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
 			Polygon(cHDC, PolyPoints, 4);
 			// глазки
-			SelectObject(cHDC, Pens[GCLR_DARKYELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_DARKYELLOW]);
+			SelectObject(cHDC, Pens[GCLR_YELLOW]);
+			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 			Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
 			Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
 		}
@@ -285,8 +280,8 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
 			Polygon(cHDC, PolyPoints, 4);
 			// глазки
-			SelectObject(cHDC, Pens[GCLR_DARKYELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_DARKYELLOW]);
+			SelectObject(cHDC, Pens[GCLR_YELLOW]);
+			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 			Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
 			Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
 		}
@@ -448,6 +443,9 @@ void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount) {
 	Ellipse(cHDC, DrawTools.TileSize, 0.5* DrawTools.TileSize, 2 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
 	DrawApple(DrawTools, { 1, 0.5 });
 	DrawInfoFoodCount(DrawTools, FoodCount);
-	DrawStar(DrawTools, { 1, 1.5 }, 1);
+	SelectObject(cHDC, Pens[GCLR_YELLOW]);
+	SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+	Ellipse(cHDC, 4 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 5 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);	
+	DrawStar(DrawTools, { 4.5, 1 }, 0.4);
 	
 }

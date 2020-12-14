@@ -88,6 +88,10 @@ void InitPalette(palette& Palette) {
 	Palette.Colors.push_back(RGB(194, 42, 4));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_RED]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_RED]));
+	//GCLR_DARKRED
+	Palette.Colors.push_back(RGB(117, 25, 2));
+	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKRED]));
+	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKRED]));
 	//GCLR_GREEN
 	Palette.Colors.push_back(RGB(76, 115, 21));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_GREEN]));
@@ -96,8 +100,12 @@ void InitPalette(palette& Palette) {
 	Palette.Colors.push_back(RGB(42, 64, 11));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKGREEN]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKGREEN]));
-	//GCLR_DARKYELLOW
+	//GCLR_YELLOW
 	Palette.Colors.push_back(RGB(211, 205, 0));
+	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_YELLOW]));
+	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_YELLOW]));
+	//GCLR_DARKYELLOW
+	Palette.Colors.push_back(RGB(161, 155, 0));
 	Palette.Pens.push_back(CreatePen(PS_SOLID, 1, Palette.Colors[GCLR_DARKYELLOW]));
 	Palette.Brushes.push_back(CreateSolidBrush(Palette.Colors[GCLR_DARKYELLOW]));
 	//GCLR_BROWN
