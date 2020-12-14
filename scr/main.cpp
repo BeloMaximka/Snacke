@@ -608,6 +608,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
 	}
 	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции	
 	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем текст
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 	while (true)
 	{
 		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
@@ -674,6 +675,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		SnakeFirstStep(DrawTools, Map, Snake);
 		Sleep(UpdateDelayMiliseconds);
 		// Main loop
+		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 		while (true)
 		{
 			if (WindowMaximized(DrawTools))
@@ -775,7 +777,8 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 			{
 				Map.Tiles[y][x] = TILE_EMPTY;
 			}
-		}		
+		}
+		DrawMap(DrawTools, Map);
 		if (!RetryMenu(DrawTools, Map, Snake.Score))
 		{
 			return;
@@ -818,6 +821,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции
 	Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем предыдущий текст
 	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем текст
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 	while (true)
 	{
 		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
