@@ -472,3 +472,12 @@ void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount, int Score) {
 	DrawStar(DrawTools, { 4.5, 1 }, 0.4);
 	DrawInfoScore(DrawTools, Score);	
 }
+void DrawMainMenuBackGround(drawtools& DrawTools, map& Map) {
+	for (int y = 0; y < Map.Height + INFO_BAR_SIZE; y++) // Рисуем фон
+	{
+		for (int x = 0; x < Map.Width; x++) // Отрисовываем шахматный фон по клеточкам
+		{
+			DrawTile(DrawTools, { x,y - INFO_BAR_SIZE }, TILE_EMPTY); // Вызываем функцию отрисовки ячейки
+		}
+	}
+}

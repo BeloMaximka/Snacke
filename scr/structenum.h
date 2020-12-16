@@ -42,6 +42,7 @@ struct drawtools
 {	
 	palette Palette;
 	console Console;
+	HFONT SmallFont;
 	HFONT NormalFont;
 	HFONT BigFont;
 	HFONT TitleFont;

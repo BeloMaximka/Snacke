@@ -424,6 +424,8 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	MoveWindow(DrawTools.Console.cHWND, WindowPos.x, WindowPos.y, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top, TRUE);
 	SetWindowLong(DrawTools.Console.cHWND, GWL_STYLE, GetWindowLong(DrawTools.Console.cHWND, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
 
+	//Инициализация маленького шрифта
+	InitFont(DrawTools.SmallFont, DrawTools.TileSize/1.3, FONT_NORMAL_THICKNESS);
 	//Инициализация обычного шрифта
 	InitFont(DrawTools.NormalFont, DrawTools.TileSize, FONT_NORMAL_THICKNESS);
 	//Инициализация большого шрифта
@@ -795,13 +797,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 
 	SelectObject(cHDC, Pens[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для обводки
 	SelectObject(cHDC, Brushes[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для заливки
-	for (int y = 0; y < Map.Height + INFO_BAR_SIZE; y++) // Рисуем фон
-	{
-		for (int x = 0; x < Map.Width; x++) // Отрисовываем шахматный фон по клеточкам
-		{
-			DrawTile(DrawTools, { x,y - INFO_BAR_SIZE }, TILE_EMPTY); // Вызываем функцию отрисовки ячейки
-		}
-	}
+	DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
 
 	RECT ClientRect, WindowRect; // Переменные для определения координат центра окна
 	GetClientRect(DrawTools.Console.cHWND, &ClientRect); // Определяем ко-рды рабочей зоны
@@ -812,8 +808,10 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Рисуем название игры
 	int StringsCount = 3; // Сколько будет опций выбора
 	string Strings[] = { "Play", "Settings", "Exit" }; // Названия опций выбора	
-	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора
-
+	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора	
+	RenderText(DrawTools, "Controls: Arrow keys, Enter", { MainTitlePos.x,TileSize/2}, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем управление сверху
+	RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize/2}, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
+	
 	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
 	pos ActiveButtonPos = TextLinesCenterPos; // Позиция выбранной опции. Начинаем с центра, будем смещать
 	if (StringsCount % 2) // В зависимости от четности будут разные формулы смещения
@@ -833,13 +831,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 		{
 			Sleep(200); // Ждем, пока окно достаточно не развернется
 			// Далее, собсна, рисуем всё заново
-			for (int y = 0; y < Map.Height + INFO_BAR_SIZE; y++) // Рисуем фон
-			{
-				for (int x = 0; x < Map.Width; x++) // Отрисовываем шахматный фон по клеточкам
-				{
-					DrawTile(DrawTools, { x,y - INFO_BAR_SIZE }, TILE_EMPTY); // Вызываем функцию отрисовки ячейки
-				}
-			}
+			DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
 			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
 			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 			RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
@@ -866,8 +858,9 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 			{
 				if (SelectedButtonNum == BTN_PLAY) // Если выбрали кнопку "Игать"
 				{
-					SnakeMainGame(DrawTools, Map); // Запускаем змейку
+					SnakeMainGame(DrawTools, Map); // Запускаем змейку					
 					// Вышли из змейки, рисуем меню заново					
+					DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
 					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста					
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
