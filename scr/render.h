@@ -88,7 +88,7 @@ void DrawApple(drawtools& DrawTools, dpos Pos) {
 	// Рисуем блик
 	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2.5, Pos.y * TileSize + TileSize / 1.8, Pos.x * TileSize + TileSize / 2.5 - TileSize / 6, Pos.y * TileSize + TileSize / 2 - TileSize / 5);
 }
-void DrawTile(drawtools& DrawTools, pos Pos, int TileID) {
+void DrawTile(drawtools& DrawTools, pos Pos, int TileID, bool NoApples = false) {
 	Pos.y += INFO_BAR_SIZE;
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
@@ -100,7 +100,7 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID) {
 		SelectObject(cHDC, Brushes[GCLR_DARKBURLYWOOD]);
 		Rectangle(cHDC, Pos.x * TileSize, Pos.y * TileSize, Pos.x * TileSize + TileSize, Pos.y * TileSize + TileSize);
 	}
-	else if (TileID == TILE_FOOD)
+	else if (TileID == TILE_FOOD && !NoApples)
 	{
 		HDC& cHDC = DrawTools.Console.cHDC;
 		std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
@@ -389,12 +389,12 @@ void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile) {
 		SegmentTile = Map.Tiles[DrawPos.y][DrawPos.x];
 	}
 }
-void DrawMap(drawtools& DrawTools, map& Map) {
+void DrawMap(drawtools& DrawTools, map& Map, bool NoApples = false) {
 	for (int y = 0; y < Map.Height; y++)
 	{
 		for (int x = 0; x < Map.Width; x++)
 		{
-			DrawTile(DrawTools, { x, y }, Map.Tiles[y][x]);
+			DrawTile(DrawTools, { x, y }, Map.Tiles[y][x], NoApples);
 		}
 	}
 

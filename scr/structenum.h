@@ -50,17 +50,15 @@ struct drawtools
 	int WindowState;
 };
 
-enum MainMenuButtons
+enum MenuButtons
 {
-	BTN_PLAY,
-	BTN_SETTINGS,
-	BTN_EXIT
-};
-enum RetryMenuButtons
-{
-	BTN_RETRY,
-	BTN_EXIT_TO_MAIN_MENU,
-	BTN_EXIT_TO_DESKTOP
+	BTN_CONTINUE =0,
+	BTN_RETRY = 0,
+	BTN_PLAY = 0,
+	BTN_SETTINGS = 1,
+	BTN_EXIT = 2,
+	BTN_EXIT_TO_MAIN_MENU = 1,
+	BTN_EXIT_TO_DESKTOP = 2
 };
 enum Keys
 {

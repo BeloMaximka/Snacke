@@ -15,6 +15,22 @@ bool WindowMaximized(drawtools& DrawTools) {
 		return false;
 	}
 }
+void ClearMap(map& Map, bool Walls = false) {
+	for (int y = 0; y < Map.Height; y++)
+	{		
+		for (int x = 0; x < Map.Width; x++)
+		{
+			if (Walls && (x == 0 || y == 0 || x == Map.Width - 1 || y == Map.Height - 1))
+			{
+				Map.Tiles[y][x] = TILE_WALL;
+			}
+			else
+			{
+				Map.Tiles[y][x] = TILE_EMPTY;
+			}			
+		}
+	}
+}
 void MapInit(map& Map, int MapHeight, int MapWidth) {
 	Map.Height = MapHeight;
 	Map.Width = MapWidth;
@@ -22,19 +38,6 @@ void MapInit(map& Map, int MapHeight, int MapWidth) {
 	for (int y = 0; y < Map.Height; y++)
 	{
 		Map.Tiles[y] = new int[Map.Width];
-		for (int x = 0; x < Map.Width; x++)
-		{
-			if (x == 0 || y == 0 || x == Map.Width - 1 || y == Map.Height - 1)
-			{
-				Map.Tiles[y][x] = TILE_WALL;
-			}
-			else
-			{
-				Map.Tiles[y][x] = TILE_EMPTY;
-			}
-			// это пременно
-			//Map.Tiles[y][x] = TILE_EMPTY;
-		}
 	}
 }
 // Настройка логического шрифта
@@ -503,7 +506,91 @@ void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments) 
 	Snake.FoodEaten = 0;
 	Snake.Score = 0;
 }
-void SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
+bool PauseMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
+	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	int TileSize = DrawTools.TileSize; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	int BaseColor = GCLR_DARKBURLYWOOD; // Добавляем дополнительную переменную, чтобы можно было в одной строчке кода изменить цвета для обычных строчек текста
+	int SelectedButtonColor = GCLR_DARKWOOD; // Добавляем дополнительную переменную, чтобы можно было в одной строчке кода изменить цвета для выбранныех строчек текста (и заголовка тоже, кстати)	
+
+	RECT ClientRect, WindowRect; // Переменные для определения координат центра окна
+	GetClientRect(DrawTools.Console.cHWND, &ClientRect); // Определяем ко-рды рабочей зоны
+	GetWindowRect(DrawTools.Console.cHWND, &WindowRect); // Определяем ко-рды окна	
+	pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 4 }; // Положение названия игры	
+
+	DrawMap(DrawTools, Map, true); // Отрисовываем карту, инфобар перерисовывать не надо
+	RenderText(DrawTools, "GAME PAUSED", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Рисуем паузу	
+	int StringsCount = 3; // Сколько будет опций выбора
+	string Strings[] = { "Continue", "Exit to main menu", "Exit to desktop" }; // Названия опций выбора	
+	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 16) + (WindowRect.bottom - WindowRect.top)) / 2 };	 // Положение центра линий текста
+	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора
+
+	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
+	pos ActiveButtonPos = TextLinesCenterPos; // Позиция выбранной опции. Начинаем с центра, будем смещать
+	if (StringsCount % 2) // В зависимости от четности будут разные формулы смещения
+	{
+		ActiveButtonPos.y -= StringsCount * TileSize; // Смещаем позицию к последней
+	}
+	else // Если четная
+	{
+		ActiveButtonPos.y -= TileSize + (StringsCount - 1) * TileSize; // Смещаем позицию к последней
+	}
+	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции	
+	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем текст
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+	while (true)
+	{
+		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
+		{
+			Sleep(200); // Ждем, пока окно достаточно не развернется
+			// Далее, собсна, рисуем всё заново			
+			DrawMap(DrawTools, Map, true); // Карта
+			DrawInfoBar(DrawTools, Map, FoodEaten, Score); // Инфобар
+			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
+			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
+			RenderText(DrawTools, "GAME PAUSED", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Тайтл
+		}
+		if (_kbhit()) // Если нажата какая-нибудь кнопка
+		{
+			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
+			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
+			{
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
+				SelectedButtonNum--; // Меняем номер выбранной опции
+				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
+			}
+			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount) // Если стрелочка вниз  (и проверка на выход из границ)
+			{
+				//Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
+				SelectedButtonNum++; // Меняем номер выбранной опции
+				ActiveButtonPos.y += TileSize * 2; // Смещаем  позицию выбранной опции на окне				
+				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
+			}
+			else if (Keycode == GMKEY_ENTER) // Если энтер
+			{
+				if (SelectedButtonNum == BTN_CONTINUE) // Если выбрали кнопку "Продолжить"
+				{
+					return false;
+				}
+				else if (SelectedButtonNum == BTN_EXIT_TO_MAIN_MENU) // Если "Выйти"
+				{
+					return true;
+				}
+				else if (SelectedButtonNum == BTN_EXIT_TO_DESKTOP) // Если "Выйти на рабочий стол"
+				{
+					exit(0); // Закрываем приложение
+				}
+			}
+		}
+		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
+	}
+	return false;
+}
+bool SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
 	// Пазуа до первого нажатия
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 	while (true)
@@ -519,7 +606,17 @@ void SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
 		{
 			int Keycode = _getch();
 			if (Keycode == 224) Keycode = _getch();
-			if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
+			if (Keycode == GMKEY_ENTER)
+			{
+				if (PauseMenu(DrawTools, Map, Snake.FoodEaten, Snake.Score))
+				{
+					return false;
+				}
+				DrawMap(DrawTools, Map);
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);				
+			}
+			else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
 			{
 				Snake.Head = TILE_SNAKE_UP;
 				Snake.OldHead = Snake.Head;
@@ -570,8 +667,10 @@ void SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
 		}
 		Sleep(1);
 	}
+	return true;
 }
-bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
+
+bool RetryMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -584,7 +683,8 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
 	GetWindowRect(DrawTools.Console.cHWND, &WindowRect); // Определяем ко-рды окна	
 	pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 4 }; // Положение названия игры	
 
-	RenderText(DrawTools, "GAME OVER", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Рисуем название игры
+	DrawMap(DrawTools, Map, true); // Отрисовываем карту, инфобар перерисовывать не надо
+	RenderText(DrawTools, "GAME OVER", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Рисуем game over
 	LOGFONT TempFont;
 	GetObject(DrawTools.NormalFont, sizeof(LOGFONT), &TempFont);
 	MainTitlePos.y += TempFont.lfHeight * 2;
@@ -617,6 +717,8 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
 		{
 			Sleep(200); // Ждем, пока окно достаточно не развернется
 			// Далее, собсна, рисуем всё заново			
+			DrawMap(DrawTools, Map, true); // Карта
+			DrawInfoBar(DrawTools, Map, FoodEaten, Score); // Инфобар
 			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
 			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 			RenderText(DrawTools, "GAME OVER", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Тайтл
@@ -663,6 +765,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
 void SnakeMainGame(drawtools& DrawTools, map& Map) {
 	while (true)
 	{
+		ClearMap(Map); // Очищаем карту
 		// Snake init		
 		snake Snake;
 		int SnakeSpawnSegments = 3;
@@ -674,10 +777,13 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 		//Timer init
 		int UpdateDelayMiliseconds = 100;
-		SnakeFirstStep(DrawTools, Map, Snake);
-		Sleep(UpdateDelayMiliseconds);
-		// Main loop
 		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+		if (!SnakeFirstStep(DrawTools, Map, Snake))
+		{
+			return;
+		}
+		Sleep(UpdateDelayMiliseconds);
+		// Main loop		
 		while (true)
 		{
 			if (WindowMaximized(DrawTools))
@@ -694,7 +800,23 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 					int Keycode = _getch();
 					if (Keycode == 224) Keycode = _getch();
 					//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-					if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
+					if (Keycode == GMKEY_ENTER)
+					{
+						if (PauseMenu(DrawTools, Map, Snake.FoodEaten, Snake.Score))
+						{
+							return;
+						}
+						DrawMap(DrawTools, Map);
+						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
+						DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
+						//Sleep(1000);
+						if (!SnakeFirstStep(DrawTools, Map, Snake))
+						{
+							return;
+						}
+						Sleep(UpdateDelayMiliseconds);						
+					}
+					else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
 					{
 						Snake.Head = TILE_SNAKE_UP;
 					}
@@ -709,7 +831,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
 					{
 						Snake.Head = TILE_SNAKE_RIGHT;
-					}
+					}			
 					if (Snake.Head != Snake.OldHead)
 					{
 						Snake.OldHead = Snake.Head;
@@ -743,7 +865,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
 					{
 						Snake.Head = TILE_SNAKE_RIGHT;
-					}
+					}					
 					if (Snake.Head != Snake.OldHead)
 					{
 						Snake.OldHead = Snake.Head;
@@ -771,17 +893,8 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		}
 		Beep(500, 400);
 		Beep(300, 200);
-		Beep(200, 500);
-		for (int y = 0; y < Map.Height; y++)
-		{
-			Map.Tiles[y] = new int[Map.Width];
-			for (int x = 0; x < Map.Width; x++)
-			{
-				Map.Tiles[y][x] = TILE_EMPTY;
-			}
-		}
-		DrawMap(DrawTools, Map);
-		if (!RetryMenu(DrawTools, Map, Snake.Score))
+		Beep(200, 500);	
+		if (!RetryMenu(DrawTools, Map, Snake.FoodEaten, Snake.Score))
 		{
 			return;
 		}
