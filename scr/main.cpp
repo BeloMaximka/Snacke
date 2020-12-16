@@ -55,7 +55,7 @@ void InitFont(HFONT& HFont, int FontSize, int Thickness) {
 	Font.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // Не так важно, что это
 	Font.lfFaceName[LF_FACESIZE]; // Название шрифта
 	strcpy_s(Font.lfFaceName, "Impact"); // Копируем название
-	HFont = CreateFontIndirectA(&Font);	
+	HFont = CreateFontIndirectA(&Font);
 }
 void InitPalette(palette& Palette) {
 	//GCLR_BLACK
@@ -124,7 +124,7 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 	pos FoodPos;
 	for (int i = 0; i < Map.Height * Map.Width; i++)
 	{
-		FoodPos.y = rand() % Map.Height;		
+		FoodPos.y = rand() % Map.Height;
 		FoodPos.x = rand() % Map.Width;
 		if (Map.Tiles[FoodPos.y][FoodPos.x] == TILE_EMPTY)
 		{
@@ -210,7 +210,7 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 	// Поворачиваем сегмент перед новой головой
 	Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
 	// Позиция новой головы
-	pos NewHeadPos = Snake.HeadPos;	
+	pos NewHeadPos = Snake.HeadPos;
 	// Определяем позицию новой головы
 	// Если голова смотрит вверх
 	if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_UP)
@@ -237,7 +237,7 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 			NewHeadPos.y = 0;
 		}
 		else
-		{			
+		{
 			// Смещаем позицию новой головы вниз
 			NewHeadPos.y++;
 		}
@@ -255,7 +255,7 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 		{
 			// Смещаем позицию новой головы влево
 			NewHeadPos.x--;
-		}		
+		}
 	}
 	// Если голова смотрит влево
 	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_RIGHT)
@@ -273,10 +273,10 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 	}
 	// Если на пути змейки препятствие (т.е не пусто и не еда)
 	if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_EMPTY && Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_FOOD)
-	{		
+	{
 		// Движение невозможно - возращаем false
 		return false;
-	}	
+	}
 	// Если на пути еда
 	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_FOOD)
 	{
@@ -385,7 +385,7 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	srand(time(0));
 	rand();
 	//Инициализация цветов
-	InitPalette(DrawTools.Palette);	
+	InitPalette(DrawTools.Palette);
 	// Махинации с консолью
 	SetConsoleTitle(TEXT("SNACKE!"));
 
@@ -418,11 +418,11 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	RECT ClientRect, WindowRect;
 	GetClientRect(DrawTools.Console.cHWND, &ClientRect);
 	GetWindowRect(DrawTools.Console.cHWND, &WindowRect);
-	pos WindowPos;	
+	pos WindowPos;
 	WindowPos.x = GetSystemMetrics(SM_CXSCREEN) / 2 - (WindowRect.right - WindowRect.left) / 2;
 	WindowPos.y = GetSystemMetrics(SM_CYSCREEN) / 2 - (WindowRect.bottom - WindowRect.top) / 2;
-	MoveWindow(DrawTools.Console.cHWND, WindowPos.x, WindowPos.y, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top, TRUE);	
-	SetWindowLong(DrawTools.Console.cHWND, GWL_STYLE, GetWindowLong(DrawTools.Console.cHWND, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);	
+	MoveWindow(DrawTools.Console.cHWND, WindowPos.x, WindowPos.y, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top, TRUE);
+	SetWindowLong(DrawTools.Console.cHWND, GWL_STYLE, GetWindowLong(DrawTools.Console.cHWND, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
 
 	//Инициализация обычного шрифта
 	InitFont(DrawTools.NormalFont, DrawTools.TileSize, FONT_NORMAL_THICKNESS);
@@ -464,7 +464,7 @@ void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments) 
 	{
 		Segments = Map.Width - 1;
 	}
-	for (int i = 0; i < Segments-1; i++)
+	for (int i = 0; i < Segments - 1; i++)
 	{
 		Map.Tiles[PlacePos.y][PlacePos.x] = DirTile;
 		if (PlacePos.x + PlaceDir.x < 0)
@@ -585,7 +585,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
 	RenderText(DrawTools, "GAME OVER", MainTitlePos, DrawTools.BigFont, SelectedButtonColor, true); // Рисуем название игры
 	LOGFONT TempFont;
 	GetObject(DrawTools.NormalFont, sizeof(LOGFONT), &TempFont);
-	MainTitlePos.y += TempFont.lfHeight*2;	
+	MainTitlePos.y += TempFont.lfHeight * 2;
 	std::string ScoreStr = "Your score: ";
 	char StrBuffer[SCORE_DIGITS + 1];
 	_itoa_s(Score, StrBuffer, SCORE_DIGITS + 1, 10);
@@ -624,7 +624,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int Score) {
 			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
-			{				
+			{
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
 				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
@@ -665,13 +665,13 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		snake Snake;
 		int SnakeSpawnSegments = 3;
 		pos SnakeSpawnPos = { SnakeSpawnSegments,Map.Height / 2 };
-		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments);		
+		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments);
 		DrawMap(DrawTools, Map);
 		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 		SpawnFood(DrawTools, Map);
 		DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 		//Timer init
-		int UpdateDelayMiliseconds = 100;		
+		int UpdateDelayMiliseconds = 100;
 		SnakeFirstStep(DrawTools, Map, Snake);
 		Sleep(UpdateDelayMiliseconds);
 		// Main loop
@@ -795,19 +795,25 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 
 	SelectObject(cHDC, Pens[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для обводки
 	SelectObject(cHDC, Brushes[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для заливки
-	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height + INFO_BAR_SIZE) * DrawTools.TileSize); // Рисуем фон
-	
+	for (int y = 0; y < Map.Height + INFO_BAR_SIZE; y++) // Рисуем фон
+	{
+		for (int x = 0; x < Map.Width; x++) // Отрисовываем шахматный фон по клеточкам
+		{
+			DrawTile(DrawTools, { x,y - INFO_BAR_SIZE }, TILE_EMPTY); // Вызываем функцию отрисовки ячейки
+		}
+	}
+
 	RECT ClientRect, WindowRect; // Переменные для определения координат центра окна
 	GetClientRect(DrawTools.Console.cHWND, &ClientRect); // Определяем ко-рды рабочей зоны
 	GetWindowRect(DrawTools.Console.cHWND, &WindowRect); // Определяем ко-рды окна	
 	pos MainTitlePos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 4 }; // Положение названия игры
-	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 8 ) + (WindowRect.bottom - WindowRect.top))/2 };	 // Положение центра линий текста
-	
+	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 8) + (WindowRect.bottom - WindowRect.top)) / 2 };	 // Положение центра линий текста
+
 	RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Рисуем название игры
 	int StringsCount = 3; // Сколько будет опций выбора
-	string Strings[] = { "Play", "Settings", "Exit"}; // Названия опций выбора	
+	string Strings[] = { "Play", "Settings", "Exit" }; // Названия опций выбора	
 	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора
-	
+
 	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
 	pos ActiveButtonPos = TextLinesCenterPos; // Позиция выбранной опции. Начинаем с центра, будем смещать
 	if (StringsCount % 2) // В зависимости от четности будут разные формулы смещения
@@ -818,8 +824,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	{
 		ActiveButtonPos.y -= TileSize + (StringsCount - 1) * TileSize; // Смещаем позицию к последней
 	}
-	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции
-	Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем предыдущий текст
+	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции	
 	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем текст
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 	while (true)
@@ -828,9 +833,14 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 		{
 			Sleep(200); // Ждем, пока окно достаточно не развернется
 			// Далее, собсна, рисуем всё заново
-			Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height+INFO_BAR_SIZE) * DrawTools.TileSize); // Фон
-			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста
-			Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем
+			for (int y = 0; y < Map.Height + INFO_BAR_SIZE; y++) // Рисуем фон
+			{
+				for (int x = 0; x < Map.Width; x++) // Отрисовываем шахматный фон по клеточкам
+				{
+					DrawTile(DrawTools, { x,y - INFO_BAR_SIZE }, TILE_EMPTY); // Вызываем функцию отрисовки ячейки
+				}
+			}
+			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
 			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 			RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
 		}
@@ -839,21 +849,17 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
-			{				
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
+			{
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
-				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем обычный текст
+				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
 			}
 			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount) // Если стрелочка вниз  (и проверка на выход из границ)
 			{
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum++; // Меняем номер выбранной опции
 				ActiveButtonPos.y += TileSize * 2; // Смещаем  позицию выбранной опции на окне
-				Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем обычный текст
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
@@ -861,10 +867,8 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 				if (SelectedButtonNum == BTN_PLAY) // Если выбрали кнопку "Игать"
 				{
 					SnakeMainGame(DrawTools, Map); // Запускаем змейку
-					// Вышли из змейки, рисуем меню заново
-					Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, (Map.Height + INFO_BAR_SIZE) * DrawTools.TileSize); // Фон
-					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста
-					Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем
+					// Вышли из змейки, рисуем меню заново					
+					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста					
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
 				}
@@ -873,18 +877,18 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 					exit(0); // Закрываем приложение
 				}
 			}
-		}	
+		}
 		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
 }
 int main()
-{	
+{
 	// Map init
 	map Map;
 	MapInit(Map, 15, 15);
 	//
 	drawtools DrawTools;
-	GameInit(DrawTools, Map.Height, Map.Width);	
+	GameInit(DrawTools, Map.Height, Map.Width);
 	//
 	MainMenu(DrawTools, Map);
 	system("pause");
