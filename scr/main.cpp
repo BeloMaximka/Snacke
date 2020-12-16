@@ -572,15 +572,15 @@ bool PauseMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
 			{
-				if (SelectedButtonNum == BTN_CONTINUE) // Если выбрали кнопку "Продолжить"
+				if (Strings[SelectedButtonNum] == "Continue") // Если выбрали кнопку "Продолжить"
 				{
 					return false;
 				}
-				else if (SelectedButtonNum == BTN_EXIT_TO_MAIN_MENU) // Если "Выйти"
+				else if (Strings[SelectedButtonNum] == "Exit to main menu") // Если "Выйти"
 				{
 					return true;
 				}
-				else if (SelectedButtonNum == BTN_EXIT_TO_DESKTOP) // Если "Выйти на рабочий стол"
+				else if (Strings[SelectedButtonNum] == "Exit to desktop") // Если "Выйти на рабочий стол"
 				{
 					exit(0); // Закрываем приложение
 				}
@@ -744,15 +744,15 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
 			{
-				if (SelectedButtonNum == BTN_RETRY) // Если выбрали кнопку "Игать"
+				if (Strings[SelectedButtonNum] == "Retry") // Если выбрали кнопку ратрая
 				{
 					return true;
 				}
-				else if (SelectedButtonNum == BTN_EXIT_TO_MAIN_MENU) // Если "Выйти"
+				else if (Strings[SelectedButtonNum] == "Exit to main menu") // Если "Выйти"
 				{
 					return false;
 				}
-				else if (SelectedButtonNum == BTN_EXIT_TO_DESKTOP) // Если "Выйти на рабочий стол"
+				else if (Strings[SelectedButtonNum] == "Exit to desktop") // Если "Выйти на рабочий стол"
 				{
 					exit(0); // Закрываем приложение
 				}
@@ -969,7 +969,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
 			{
-				if (SelectedButtonNum == BTN_PLAY) // Если выбрали кнопку "Игать"
+				if (Strings[SelectedButtonNum] == "Play") // Если выбрали кнопку "Игать"
 				{
 					SnakeMainGame(DrawTools, Map); // Запускаем змейку					
 					// Вышли из змейки, рисуем меню заново					
@@ -978,7 +978,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
 				}
-				else if (SelectedButtonNum == BTN_EXIT) // Если "Выйти"
+				else if (Strings[SelectedButtonNum] == "Exit") // Если "Выйти"
 				{
 					exit(0); // Закрываем приложение
 				}
