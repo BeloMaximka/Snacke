@@ -50,6 +50,7 @@ struct drawtools
 	int WindowState;
 };
 
+// удоли
 enum MenuButtons
 {
 	BTN_CONTINUE =0,

@@ -17,7 +17,7 @@ bool WindowMaximized(drawtools& DrawTools) {
 }
 void ClearMap(map& Map, bool Walls = false) {
 	for (int y = 0; y < Map.Height; y++)
-	{		
+	{
 		for (int x = 0; x < Map.Width; x++)
 		{
 			if (Walls && (x == 0 || y == 0 || x == Map.Width - 1 || y == Map.Height - 1))
@@ -27,7 +27,7 @@ void ClearMap(map& Map, bool Walls = false) {
 			else
 			{
 				Map.Tiles[y][x] = TILE_EMPTY;
-			}			
+			}
 		}
 	}
 }
@@ -274,8 +274,67 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 			NewHeadPos.x++;
 		}
 	}
+	// Если на пути хвост
+	if (NewHeadPos.y == Snake.TailPos.y && NewHeadPos.x == Snake.TailPos.x)
+	{
+		//--------------РАБОТА С ХВОСТОМ--------------
+	// Закрашиваем удаляемый хвост пустой клеткой
+		DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY);
+		// Определяем новый конец
+		if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP)
+		{
+			// Если 
+			if (Snake.TailPos.y - 1 < 0)
+			{
+				Snake.TailPos.y = Map.Height - 1;
+			}
+			else
+			{
+				Snake.TailPos.y--;
+			}
+
+		}
+		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN)
+		{
+			if (Snake.TailPos.y + 1 >= Map.Height)
+			{
+				Snake.TailPos.y = 0;
+			}
+			else
+			{
+				Snake.TailPos.y++;
+			}
+		}
+		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT)
+		{
+			if (Snake.TailPos.x - 1 < 0)
+			{
+				Snake.TailPos.x = Map.Width - 1;
+			}
+			else
+			{
+				Snake.TailPos.x--;
+			}
+		}
+		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT)
+		{
+			if (Snake.TailPos.x + 1 >= Map.Width)
+			{
+				Snake.TailPos.x = 0;
+			}
+			else
+			{
+				Snake.TailPos.x++;
+			}
+		}
+		// Обновляем позицию головы змейки
+		Snake.HeadPos = NewHeadPos;
+		// Добавляем сегмент головы
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
+		return true;
+	}
 	// Если на пути змейки препятствие (т.е не пусто и не еда)
-	if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_EMPTY && Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_FOOD)
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_EMPTY && Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_FOOD)
 	{
 		// Движение невозможно - возращаем false
 		return false;
@@ -368,7 +427,6 @@ bool MoveSnake(drawtools& DrawTools, map& Map, snake& Snake) {
 			Snake.TailPos.x++;
 		}
 	}
-
 	return true;
 }
 void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
@@ -428,7 +486,7 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	SetWindowLong(DrawTools.Console.cHWND, GWL_STYLE, GetWindowLong(DrawTools.Console.cHWND, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
 
 	//Инициализация маленького шрифта
-	InitFont(DrawTools.SmallFont, DrawTools.TileSize/1.3, FONT_NORMAL_THICKNESS);
+	InitFont(DrawTools.SmallFont, DrawTools.TileSize / 1.3, FONT_NORMAL_THICKNESS);
 	//Инициализация обычного шрифта
 	InitFont(DrawTools.NormalFont, DrawTools.TileSize, FONT_NORMAL_THICKNESS);
 	//Инициализация большого шрифта
@@ -614,7 +672,7 @@ bool SnakeFirstStep(drawtools& DrawTools, map& Map, snake& Snake) {
 				}
 				DrawMap(DrawTools, Map);
 				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);				
+				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 			}
 			else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
 			{
@@ -814,7 +872,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 						{
 							return;
 						}
-						Sleep(UpdateDelayMiliseconds);						
+						Sleep(UpdateDelayMiliseconds);
 					}
 					else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
 					{
@@ -831,7 +889,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
 					{
 						Snake.Head = TILE_SNAKE_RIGHT;
-					}			
+					}
 					if (Snake.Head != Snake.OldHead)
 					{
 						Snake.OldHead = Snake.Head;
@@ -865,7 +923,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
 					{
 						Snake.Head = TILE_SNAKE_RIGHT;
-					}					
+					}
 					if (Snake.Head != Snake.OldHead)
 					{
 						Snake.OldHead = Snake.Head;
@@ -893,7 +951,7 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		}
 		Beep(500, 400);
 		Beep(300, 200);
-		Beep(200, 500);	
+		Beep(200, 500);
 		if (!RetryMenu(DrawTools, Map, Snake.FoodEaten, Snake.Score))
 		{
 			return;
@@ -922,9 +980,9 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	int StringsCount = 3; // Сколько будет опций выбора
 	string Strings[] = { "Play", "Settings", "Exit" }; // Названия опций выбора	
 	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора	
-	RenderText(DrawTools, "Controls: Arrow keys, Enter", { MainTitlePos.x,TileSize/2}, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем управление сверху
-	RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize/2}, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
-	
+	RenderText(DrawTools, "Controls: Arrow keys, Enter", { MainTitlePos.x,TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем управление сверху
+	RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
+
 	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
 	pos ActiveButtonPos = TextLinesCenterPos; // Позиция выбранной опции. Начинаем с центра, будем смещать
 	if (StringsCount % 2) // В зависимости от четности будут разные формулы смещения
