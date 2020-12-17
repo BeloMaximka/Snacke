@@ -958,6 +958,20 @@ void SnakeMainGame(drawtools& DrawTools, map& Map) {
 		}
 	}
 }
+
+DWORD WINAPI PlaySounds(void* SoundName) {
+	PlaySoundA((char*)SoundName, NULL, SND_FILENAME | SND_NODEFAULT | SND_ASYNC);
+	return 0;
+}
+void DoSound(const char* SoundName, double VolumePercent) {
+	DWORD LeftChannel = 0xFFFF & (int)((65535 * VolumePercent) / 100); // Какие-то непонятные преобразования
+	DWORD RightChannel = 0xFFFF0000 & (int)((65535 * VolumePercent) / 100) * 65535; // Что это?
+	waveOutSetVolume(NULL, LeftChannel + RightChannel);	 // Тут мы звук ставим, это понятно
+	//thread LoseSound(PlaySounds, SoundName); // Отдельный поток?
+	//LoseSound.detach();	// Без этого оно не работает
+	CreateThread(0, 0, PlaySounds, (void*)SoundName, 0, 0);
+}
+
 void MainMenu(drawtools& DrawTools, map& Map) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -995,7 +1009,7 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 	}
 	ActiveButtonPos.y += SelectedButtonNum * TileSize * 2;	 // Смещаем к фактической позиции	
 	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем текст
-	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));	
 	while (true)
 	{
 		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
@@ -1009,10 +1023,14 @@ void MainMenu(drawtools& DrawTools, map& Map) {
 		}
 		if (_kbhit()) // Если нажата какая-нибудь кнопка
 		{
+			
+			DoSound("\music.wav", 100);
+			DoSound("\jojo.wav", 100);
 			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
 			{
+				
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
 				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
