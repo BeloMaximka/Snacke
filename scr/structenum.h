@@ -1,5 +1,7 @@
 #pragma once
 #include "includes.h"
+
+typedef std::vector<HSTREAM> sounds;
 struct pos
 {
 	int x;
@@ -50,16 +52,13 @@ struct drawtools
 	int WindowState;
 };
 
-// удоли
-enum MenuButtons
+enum Sounds
 {
-	BTN_CONTINUE =0,
-	BTN_RETRY = 0,
-	BTN_PLAY = 0,
-	BTN_SETTINGS = 1,
-	BTN_EXIT = 2,
-	BTN_EXIT_TO_MAIN_MENU = 1,
-	BTN_EXIT_TO_DESKTOP = 2
+	GSND_CHEW1,
+	GSND_CHEW2,
+	GSND_CHEW3,
+	GSND_CHEW4,
+	GSND_MENU_MOVEMENT
 };
 enum Keys
 {
