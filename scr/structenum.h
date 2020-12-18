@@ -59,7 +59,14 @@ struct audiotools
 	double GameVolumePercent;
 	double MusicVolumePercent;
 };
-
+struct saveddata
+{
+	double GameVolumePercent;
+	double MusicVolumePercent;
+	int SnakeDelay;
+	bool Walls;	
+	bool FirstStart;
+};
 enum Sounds
 {
 	GSND_MUSIC,
@@ -68,7 +75,8 @@ enum Sounds
 	GSND_CHEW3,
 	GSND_CHEW4,
 	GSND_MENU_MOVEMENT,
-	GSND_MENU_ENTER
+	GSND_MENU_ENTER,
+	GSND_PUNCH
 };
 enum Keys
 {

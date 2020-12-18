@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="scr\cpptimer.h" />
+    <ClInclude Include="scr\files.h" />
     <ClInclude Include="scr\includes.h" />
     <ClInclude Include="scr\menus.h" />
     <ClInclude Include="scr\render.h" />

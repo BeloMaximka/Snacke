@@ -196,7 +196,7 @@ bool PauseMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int FoodEaten,
 	}
 	return false;
 }
-void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeDelay) {
+void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeDelay, saveddata& Data) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -372,6 +372,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				}
 				else if (Strings[SelectedButtonNum] == "Back") // Если "Выйти"
 				{
+					SaveFileData(Data, Audio, Map, SnakeDelay); // записываем данные настроек в файл
 					return; // Возвращаемся обратно
 				}
 			}
@@ -379,9 +380,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
 }
-void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
-	int SnakeDelay = 100; // Скорость змейки
-
+void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data, int SnakeDelay) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -468,7 +467,7 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 				}
 				else if (Strings[SelectedButtonNum] == "Settings") // Если "Выйти"
 				{
-					SettingsMenu(DrawTools, Audio, Map, SnakeDelay);
+					SettingsMenu(DrawTools, Audio, Map, SnakeDelay, Data);
 					DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
 					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем

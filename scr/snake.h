@@ -493,7 +493,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 	while (true)
 	{
 		ClearMap(Map); // Очищаем карту
-		// Snake init		
+		// Snake init
 		snake Snake;
 		int SnakeSpawnSegments = 3;
 		pos SnakeSpawnPos = { SnakeSpawnSegments,Map.Height / 2 };
@@ -564,7 +564,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 						{
 							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 							break;
-						}
+						}						
 						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 						Sleep(Snake.Delay);
 					}
@@ -619,7 +619,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 						{
 							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 							break;
-						}
+						}						
 						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 						Sleep(Snake.Delay);
 					}
@@ -637,9 +637,8 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 				Sleep(Snake.Delay);
 			}
 		}
-		Beep(500, 400);
-		Beep(300, 200);
-		Beep(200, 500);
+		PlaySoundB(Audio, GSND_PUNCH, Audio.GameVolumePercent);
+		Sleep(1500);
 		if (!RetryMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 		{
 			return;

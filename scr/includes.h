@@ -7,6 +7,7 @@
 #define FONT_NORMAL_THICKNESS 0
 #define FOOD_SCORE_REWARD 100
 #define SCORE_DIGITS 5
+#define SNAKE_DEFAULT_DELAY 300
 #include <iostream>
 #include <Windows.h>
 #include <conio.h>
@@ -18,6 +19,7 @@
 #include "bass.h"
 
 #include "structenum.h"
+#include "files.h"
 #include "render.h"
 #include "cpptimer.h"
 #include "sound.h"

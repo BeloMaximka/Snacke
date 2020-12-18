@@ -1,8 +1,6 @@
 #pragma once
 #include "includes.h"
 void SoundsInit(audiotools& Audio) {
-	Audio.GameVolumePercent = 100;
-	Audio.MusicVolumePercent = 100;
 	// GSND_MUSIC
 	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/music.mp3", 0, 0, 0));
 	// GSND_CHEW1
@@ -17,6 +15,8 @@ void SoundsInit(audiotools& Audio) {
 	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/menmov.mp3", 0, 0, 0));
 	// GSND_MENU_ENTER
 	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/menmov.mp3", 0, 0, 0));
+	//GSND_PUNCH
+	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/punch.mp3", 0, 0, 0));
 }
 void PlaySoundB(audiotools& Audio, int SoundID, double VolumePercent, bool Loop = false) {
 	VolumePercent /= 100;
