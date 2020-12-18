@@ -208,7 +208,7 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 	}
 	return false;
 }
-bool MoveSnake(drawtools& DrawTools, sounds& Sounds, map& Map, snake& Snake) {
+bool MoveSnake(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Snake) {
 	//--------------РАБОТА С ГОЛОВОЙ--------------
 	// Поворачиваем сегмент перед новой головой
 	Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
@@ -343,7 +343,7 @@ bool MoveSnake(drawtools& DrawTools, sounds& Sounds, map& Map, snake& Snake) {
 	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_FOOD)
 	{
 		// Проигрываем звук поедания яблока
-		PlaySoundB(Sounds, GSND_CHEW1 + rand() % 4, 100);
+		PlaySoundB(Audio, GSND_CHEW1 + rand() % 4, Audio.GameVolumePercent*2);
 		// Обновляем позицию головы змейки
 		Snake.HeadPos = NewHeadPos;
 		// Добавляем сегмент головы
@@ -501,8 +501,7 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	Cursor.dwSize = 100;
 	SetConsoleCursorInfo(DrawTools.Console.cHANDLE, &Cursor);
 
-	BASS_Init(-1, 44100, 0, 0, nullptr); // Инициализируем BASS
-	int Test = BASS_ErrorGetCode();
+	BASS_Init(-1, 44100, 0, 0, nullptr); // Инициализируем BASS	
 	Sleep(200); // Даем окну возможность развернуться
 }
 void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments) {
@@ -653,7 +652,7 @@ bool PauseMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 	}
 	return false;
 }
-bool SnakeFirstStep(drawtools& DrawTools, sounds& Sounds, map& Map, snake& Snake) {
+bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Snake) {
 	// Пазуа до первого нажатия
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 	while (true)
@@ -683,7 +682,7 @@ bool SnakeFirstStep(drawtools& DrawTools, sounds& Sounds, map& Map, snake& Snake
 			{
 				Snake.Head = TILE_SNAKE_UP;
 				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools,  Sounds, Map, Snake))
+				if (!MoveSnake(DrawTools, Audio, Map, Snake))
 				{
 					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 					//dead
@@ -695,7 +694,7 @@ bool SnakeFirstStep(drawtools& DrawTools, sounds& Sounds, map& Map, snake& Snake
 			{
 				Snake.Head = TILE_SNAKE_DOWN;
 				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools,  Sounds, Map, Snake))
+				if (!MoveSnake(DrawTools, Audio, Map, Snake))
 				{
 					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 					//dead
@@ -707,7 +706,7 @@ bool SnakeFirstStep(drawtools& DrawTools, sounds& Sounds, map& Map, snake& Snake
 			{
 				Snake.Head = TILE_SNAKE_LEFT;
 				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools,  Sounds, Map, Snake))
+				if (!MoveSnake(DrawTools, Audio, Map, Snake))
 				{
 					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 					//dead
@@ -719,7 +718,7 @@ bool SnakeFirstStep(drawtools& DrawTools, sounds& Sounds, map& Map, snake& Snake
 			{
 				Snake.Head = TILE_SNAKE_RIGHT;
 				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools,  Sounds, Map, Snake))
+				if (!MoveSnake(DrawTools, Audio, Map, Snake))
 				{
 					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 					//dead
@@ -825,7 +824,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 	}
 	return false;
 }
-void SnakeMainGame(drawtools& DrawTools, sounds& Sounds, map& Map) {
+void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map) {
 	while (true)
 	{
 		ClearMap(Map); // Очищаем карту
@@ -841,7 +840,7 @@ void SnakeMainGame(drawtools& DrawTools, sounds& Sounds, map& Map) {
 		//Timer init
 		int UpdateDelayMiliseconds = 100;
 		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-		if (!SnakeFirstStep(DrawTools, Sounds, Map, Snake))
+		if (!SnakeFirstStep(DrawTools, Audio, Map, Snake))
 		{
 			return;
 		}
@@ -873,7 +872,7 @@ void SnakeMainGame(drawtools& DrawTools, sounds& Sounds, map& Map) {
 						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 						DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 						//Sleep(1000);
-						if (!SnakeFirstStep(DrawTools, Sounds, Map, Snake))
+						if (!SnakeFirstStep(DrawTools, Audio, Map, Snake))
 						{
 							return;
 						}
@@ -898,7 +897,7 @@ void SnakeMainGame(drawtools& DrawTools, sounds& Sounds, map& Map) {
 					if (Snake.Head != Snake.OldHead)
 					{
 						Snake.OldHead = Snake.Head;
-						if (!MoveSnake(DrawTools, Sounds, Map, Snake))
+						if (!MoveSnake(DrawTools, Audio, Map, Snake))
 						{
 							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 							break;
@@ -932,7 +931,7 @@ void SnakeMainGame(drawtools& DrawTools, sounds& Sounds, map& Map) {
 					if (Snake.Head != Snake.OldHead)
 					{
 						Snake.OldHead = Snake.Head;
-						if (!MoveSnake(DrawTools, Sounds, Map, Snake))
+						if (!MoveSnake(DrawTools, Audio, Map, Snake))
 						{
 							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 							break;
@@ -945,7 +944,7 @@ void SnakeMainGame(drawtools& DrawTools, sounds& Sounds, map& Map) {
 			else
 			{
 				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools, Sounds, Map, Snake))
+				if (!MoveSnake(DrawTools, Audio, Map, Snake))
 				{
 					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 					break;
@@ -963,7 +962,7 @@ void SnakeMainGame(drawtools& DrawTools, sounds& Sounds, map& Map) {
 		}
 	}
 }
-void MainMenu(drawtools& DrawTools, sounds& Sounds, map& Map) {
+void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -1013,12 +1012,12 @@ void MainMenu(drawtools& DrawTools, sounds& Sounds, map& Map) {
 			RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
 		}
 		if (_kbhit()) // Если нажата какая-нибудь кнопка
-		{			
+		{
 			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
 			{
-				
+
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
 				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
@@ -1035,7 +1034,7 @@ void MainMenu(drawtools& DrawTools, sounds& Sounds, map& Map) {
 			{
 				if (Strings[SelectedButtonNum] == "Play") // Если выбрали кнопку "Игать"
 				{
-					SnakeMainGame(DrawTools, Sounds, Map); // Запускаем змейку					
+					SnakeMainGame(DrawTools, Audio, Map); // Запускаем змейку					
 					// Вышли из змейки, рисуем меню заново					
 					DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
 					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста					
@@ -1052,7 +1051,7 @@ void MainMenu(drawtools& DrawTools, sounds& Sounds, map& Map) {
 	}
 }
 int main()
-{	
+{
 	// Map init
 	map Map;
 	MapInit(Map, 15, 15);
@@ -1061,9 +1060,11 @@ int main()
 	GameInit(DrawTools, Map.Height, Map.Width);
 	
 	// Sound init
-	sounds Sounds;
-	SoundsInit(Sounds);
-	MainMenu(DrawTools, Sounds, Map);
+	audiotools Audio;
+	SoundsInit(Audio);
+	// Set background musci
+	PlaySoundB(Audio, GSND_MUSIC, Audio.MusicVolumePercent/2, true);
+	MainMenu(DrawTools, Audio, Map);
 	system("pause");
-	SnakeMainGame(DrawTools, Sounds, Map);
+	SnakeMainGame(DrawTools, Audio, Map);
 }

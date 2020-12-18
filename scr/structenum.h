@@ -51,9 +51,16 @@ struct drawtools
 	int TileSize;
 	int WindowState;
 };
+struct audiotools
+{
+	sounds Sounds;
+	double GameVolumePercent;
+	double MusicVolumePercent;
+};
 
 enum Sounds
 {
+	GSND_MUSIC,
 	GSND_CHEW1,
 	GSND_CHEW2,
 	GSND_CHEW3,
