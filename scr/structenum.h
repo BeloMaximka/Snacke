@@ -17,6 +17,7 @@ struct map
 	int** Tiles;
 	int Height;
 	int Width;
+	bool Walls;
 };
 struct snake
 {
@@ -27,6 +28,7 @@ struct snake
 	int OldHead;
 	int FoodEaten;
 	int Score;
+	int Delay;
 };
 struct console
 {

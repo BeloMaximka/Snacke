@@ -1,18 +1,17 @@
 #pragma once
 #include "includes.h"
-void DarkenArea(drawtools& DrawTools, pos TopLeft, pos RightBottom, double Percent) {
-	Percent = (100 - Percent) / 100;
-	COLORREF Pixel;
-	COLORREF NewPixel;
-	for (int y = TopLeft.y; y <= RightBottom.y; y++)
+bool WindowMaximized(drawtools& DrawTools) {
+	WINDOWPLACEMENT WinPlacement;
+	GetWindowPlacement(DrawTools.Console.cHWND, &WinPlacement);
+	if (DrawTools.WindowState == WINDOW_STATE_MINIMIZED && WinPlacement.showCmd == WINDOW_STATE_MAXIMIZED)
 	{
-		for (int x = TopLeft.x; x <= RightBottom.x; x++)
-		{
-			
-			Pixel = GetPixel(DrawTools.Console.cHDC, x, y);
-			NewPixel = RGB(GetRValue(Pixel) * Percent, GetGValue(Pixel) * Percent, GetBValue(Pixel) * Percent);
-			SetPixel(DrawTools.Console.cHDC, x, y, NewPixel);
-		}
+		DrawTools.WindowState = WINDOW_STATE_MAXIMIZED;
+		return true;
+	}
+	else
+	{
+		DrawTools.WindowState = WinPlacement.showCmd;
+		return false;
 	}
 }
 void RotateVector(dpos& Point, double Angle) {

@@ -30,6 +30,12 @@
     <ClInclude Include="scr\sound.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="scr\menus.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="scr\snake.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="scr\main.cpp">
