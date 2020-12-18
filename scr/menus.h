@@ -311,7 +311,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				else if (Strings[SelectedButtonNum].find("Music volume: ", 0) != std::string::npos && Audio.MusicVolumePercent - VOLUME_CHANGE_STEP >= 0) // Если в строчке найдено ключевое слово
 				{
 					Audio.MusicVolumePercent -= VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
-					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent/200); // Обновляем громкость музыки
+					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent/100); // Обновляем громкость музыки
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
 					sprintf_s(Buffer, "Music volume: %i", (int)Audio.MusicVolumePercent); // Переводим число в строку
 					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
@@ -350,7 +350,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				else if (Strings[SelectedButtonNum].find("Music volume: ", 0) != std::string::npos && Audio.MusicVolumePercent + VOLUME_CHANGE_STEP <= 100) // Если в строчке найдено ключевое слово
 				{
 					Audio.MusicVolumePercent += VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
-					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent/200); // Обновляем громкость музыки
+					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent/100); // Обновляем громкость музыки
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции					
 					sprintf_s(Buffer, "Music volume: %i", (int)Audio.MusicVolumePercent); // Переводим число в строку
 					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					

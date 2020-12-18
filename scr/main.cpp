@@ -137,7 +137,7 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 	_itoa_s(2.0 * DrawTools.TileSize / CFI.dwFontSize.Y * MapWidth, ItoaBuffer, 10);
 	ConBufferStr += ItoaBuffer;
 	ConBufferStr += " lines=";
-	_itoa_s(1.0 * DrawTools.TileSize / CFI.dwFontSize.Y * (MapWidth + INFO_BAR_SIZE), ItoaBuffer, 10);
+	_itoa_s(1.0 * DrawTools.TileSize / CFI.dwFontSize.Y * (MapHeight + INFO_BAR_SIZE), ItoaBuffer, 10);
 	ConBufferStr += ItoaBuffer;
 	system(ConBufferStr.c_str());
 	// Центрируем консоль
@@ -172,7 +172,7 @@ int main()
 {
 	// Map init
 	map Map;
-	MapInit(Map, 15, 15);
+	MapInit(Map, 15, 18);
 	//
 	drawtools DrawTools;
 	GameInit(DrawTools, Map.Height, Map.Width);
@@ -181,7 +181,7 @@ int main()
 	audiotools Audio;
 	SoundsInit(Audio);
 	// Set background musci
-	PlaySoundB(Audio, GSND_MUSIC, Audio.MusicVolumePercent/2, true);
+	PlaySoundB(Audio, GSND_MUSIC, Audio.MusicVolumePercent, true);
 	MainMenu(DrawTools, Audio, Map);
 	system("pause");
 	
