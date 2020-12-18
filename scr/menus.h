@@ -4,6 +4,7 @@
 #define SNAKE_DELAY_CHANGE_STEP 50
 #define SNAKE_DELAY_MIN 100
 #define SNAKE_DELAY_MAX 500
+#define VOLUME_CHANGE_STEP 5
 
 void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeDelay);
 void MenuClearLineTile(drawtools& DrawTools, map& Map, int PosY) {
@@ -219,7 +220,11 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 	const int BufferSize = 32;
 	char Buffer[BufferSize]; // Буфер для различных именяющихся строчек
 	sprintf_s(Buffer, "Snake delay: %i", SnakeDelay); // Переводим число строку
-	Strings[1] = Buffer; // Обновляем надпись					
+	Strings[1] = Buffer; // Обновляем надпись
+	sprintf_s(Buffer, "Game volume: %i", (int)Audio.GameVolumePercent); // Переводим число в строку
+	Strings[2] = Buffer; // Обновляем надпись	
+	sprintf_s(Buffer, "Music volume: %i", (int)Audio.MusicVolumePercent); // Переводим число в строку
+	Strings[3] = Buffer; // Обновляем надпись	
 	if (Map.Walls)
 	{
 		Strings[0] += "WALLS";
@@ -231,7 +236,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 	
 	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора		
 
-	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
+	int SelectedButtonNum = 4; // Выбранная опция выбора по умолчанию
 	pos ActiveButtonPos = TextLinesCenterPos; // Позиция выбранной опции. Начинаем с центра, будем смещать
 	if (StringsCount % 2) // В зависимости от четности будут разные формулы смещения
 	{
@@ -294,6 +299,25 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
 				}
+				else if (Strings[SelectedButtonNum].find("Game volume: ", 0) != std::string::npos && Audio.GameVolumePercent - VOLUME_CHANGE_STEP >= 0) // Если в строчке найдено ключевое слово
+				{
+					Audio.GameVolumePercent -= VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
+					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
+					sprintf_s(Buffer, "Game volume: %i", (int)Audio.GameVolumePercent); // Переводим число в строку
+					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
+					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
+					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
+				}
+				else if (Strings[SelectedButtonNum].find("Music volume: ", 0) != std::string::npos && Audio.MusicVolumePercent - VOLUME_CHANGE_STEP >= 0) // Если в строчке найдено ключевое слово
+				{
+					Audio.MusicVolumePercent -= VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
+					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent/200); // Обновляем громкость музыки
+					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
+					sprintf_s(Buffer, "Music volume: %i", (int)Audio.MusicVolumePercent); // Переводим число в строку
+					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
+					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
+					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
+				}
 			}
 			else if (Keycode == GMKEY_RIGHT) // Если стрелочка влево
 			{
@@ -309,7 +333,26 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				{
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
 					SnakeDelay += SNAKE_DELAY_CHANGE_STEP; // Увеличиваем задержку движения змейки
-					sprintf_s(Buffer, "Snake delay: %i", SnakeDelay); // Переводим число строку
+					sprintf_s(Buffer, "Snake delay: %i", SnakeDelay); // Переводим число в строку
+					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
+					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
+					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
+				}
+				else if (Strings[SelectedButtonNum].find("Game volume: ", 0) != std::string::npos && Audio.GameVolumePercent + VOLUME_CHANGE_STEP <= 100) // Если в строчке найдено ключевое слово
+				{					
+					Audio.GameVolumePercent += VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
+					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
+					sprintf_s(Buffer, "Game volume: %i", (int)Audio.GameVolumePercent); // Переводим число в строку
+					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
+					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
+					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
+				}
+				else if (Strings[SelectedButtonNum].find("Music volume: ", 0) != std::string::npos && Audio.MusicVolumePercent + VOLUME_CHANGE_STEP <= 100) // Если в строчке найдено ключевое слово
+				{
+					Audio.MusicVolumePercent += VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
+					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent/200); // Обновляем громкость музыки
+					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции					
+					sprintf_s(Buffer, "Music volume: %i", (int)Audio.MusicVolumePercent); // Переводим число в строку
 					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
 					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
