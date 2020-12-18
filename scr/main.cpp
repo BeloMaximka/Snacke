@@ -568,7 +568,7 @@ void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments) 
 	Snake.FoodEaten = 0;
 	Snake.Score = 0;
 }
-bool PauseMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
+bool PauseMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int FoodEaten, int Score) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -619,6 +619,7 @@ bool PauseMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
 			{
+				PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
 				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
@@ -626,6 +627,7 @@ bool PauseMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			}
 			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount) // Если стрелочка вниз  (и проверка на выход из границ)
 			{
+				PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню
 				//Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum++; // Меняем номер выбранной опции
@@ -634,6 +636,7 @@ bool PauseMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
 			{
+				PlaySoundB(Audio, GSND_MENU_ENTER, Audio.GameVolumePercent); // Проигрываем звук нажатия на опцию меню
 				if (Strings[SelectedButtonNum] == "Continue") // Если выбрали кнопку "Продолжить"
 				{
 					return false;
@@ -670,7 +673,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Sn
 			if (Keycode == 224) Keycode = _getch();
 			if (Keycode == GMKEY_ENTER)
 			{
-				if (PauseMenu(DrawTools, Map, Snake.FoodEaten, Snake.Score))
+				if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 				{
 					return false;
 				}
@@ -732,7 +735,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Sn
 	return true;
 }
 
-bool RetryMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
+bool RetryMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int FoodEaten, int Score) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -791,6 +794,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
 			{
+				PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
 				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
@@ -798,6 +802,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			}
 			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount) // Если стрелочка вниз  (и проверка на выход из границ)
 			{
+				PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню
 				//Rectangle(cHDC, 0, ActiveButtonPos.y, ActiveButtonPos.x + Map.Width / 2 * TileSize, ActiveButtonPos.y + TileSize); // Затираем текст выбранной позиции
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum++; // Меняем номер выбранной опции
@@ -806,6 +811,7 @@ bool RetryMenu(drawtools& DrawTools, map& Map, int FoodEaten, int Score) {
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
 			{
+				PlaySoundB(Audio, GSND_MENU_ENTER, Audio.GameVolumePercent); // Проигрываем звук нажатия на опцию меню
 				if (Strings[SelectedButtonNum] == "Retry") // Если выбрали кнопку ратрая
 				{
 					return true;
@@ -864,7 +870,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map) {
 					//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 					if (Keycode == GMKEY_ENTER)
 					{
-						if (PauseMenu(DrawTools, Map, Snake.FoodEaten, Snake.Score))
+						if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 						{
 							return;
 						}
@@ -956,7 +962,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map) {
 		Beep(500, 400);
 		Beep(300, 200);
 		Beep(200, 500);
-		if (!RetryMenu(DrawTools, Map, Snake.FoodEaten, Snake.Score))
+		if (!RetryMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 		{
 			return;
 		}
@@ -1017,7 +1023,7 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
 			{
-
+				PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum--; // Меняем номер выбранной опции
 				ActiveButtonPos.y -= TileSize * 2; // Смещаем  позицию выбранной опции на окне				
@@ -1025,6 +1031,7 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 			}
 			else if (Keycode == GMKEY_DOWN && SelectedButtonNum + 1 < StringsCount) // Если стрелочка вниз  (и проверка на выход из границ)
 			{
+				PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню
 				RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, BaseColor, true); // Рисуем обычным цветом
 				SelectedButtonNum++; // Меняем номер выбранной опции
 				ActiveButtonPos.y += TileSize * 2; // Смещаем  позицию выбранной опции на окне
@@ -1032,6 +1039,7 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 			}
 			else if (Keycode == GMKEY_ENTER) // Если энтер
 			{
+				PlaySoundB(Audio, GSND_MENU_ENTER, Audio.GameVolumePercent); // Проигрываем звук нажатия на опцию меню
 				if (Strings[SelectedButtonNum] == "Play") // Если выбрали кнопку "Игать"
 				{
 					SnakeMainGame(DrawTools, Audio, Map); // Запускаем змейку					

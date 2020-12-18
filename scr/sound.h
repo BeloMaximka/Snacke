@@ -14,7 +14,9 @@ void SoundsInit(audiotools& Audio) {
 	// GSND_CHEW4
 	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/chew4.mp3", 0, 0, 0));
 	// GSND_MENU_MOVEMENT
-	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/chew2.mp3", 0, 0, 0));
+	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/menmov.mp3", 0, 0, 0));
+	// GSND_MENU_ENTER
+	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/menmov.mp3", 0, 0, 0));
 }
 void PlaySoundB(audiotools& Audio, int SoundID, double VolumePercent, bool Loop = false) {
 	VolumePercent /= 100;
