@@ -7,7 +7,7 @@
 #define FONT_NORMAL_THICKNESS 0
 #define FOOD_SCORE_REWARD 10
 #define SCORE_DIGITS 5
-#define SNAKE_DEFAULT_DELAY 300
+#define SNAKE_DEFAULT_DELAY 150
 #include <iostream>
 #include <Windows.h>
 #include <conio.h>

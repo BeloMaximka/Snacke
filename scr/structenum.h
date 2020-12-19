@@ -86,6 +86,7 @@ enum Keys
 	GMKEY_UP = 72,
 	GMKEY_DOWN = 80,
 	GMKEY_ENTER = 13,
+	GMKEY_ESC = 27,
 };
 enum Tiles
 {

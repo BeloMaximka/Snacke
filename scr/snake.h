@@ -480,7 +480,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Sn
 		{
 			Keycode = _getch();
 			if (Keycode == 224) Keycode = _getch();
-			if (Keycode == GMKEY_ENTER)
+			if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 			{
 				if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 				{
@@ -542,7 +542,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Sn
 			{
 				Keycode = _getch();
 				if (Keycode == 224) Keycode = _getch();
-				if (Keycode == GMKEY_ENTER)
+				if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 				{
 					if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 					{
@@ -599,7 +599,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 				{
 					Keycode = _getch();
 					if (Keycode == 224) Keycode = _getch();
-					if (Keycode == GMKEY_ENTER)
+					if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 					{
 						if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 						{
@@ -652,7 +652,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 					{
 						Keycode = _getch();
 						if (Keycode == 224) Keycode = _getch();
-						if (Keycode == GMKEY_ENTER)
+						if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 						{
 							if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 							{

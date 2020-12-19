@@ -31,7 +31,7 @@ void CreateFileData(saveddata& Data, audiotools& Audio, int& SnakeDelay, map& Ma
 	Data.FirstStart = true;
 	Audio.GameVolumePercent = 100;
 	Data.GameVolumePercent = Audio.GameVolumePercent;
-	Audio.MusicVolumePercent = 100;
+	Audio.MusicVolumePercent = 50;
 	Data.MusicVolumePercent = Audio.MusicVolumePercent;
 	SnakeDelay = SNAKE_DEFAULT_DELAY;
 	Data.SnakeDelay = SnakeDelay;

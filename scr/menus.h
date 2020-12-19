@@ -1,9 +1,10 @@
 #pragma once
 #include "includes.h"
 
-#define SNAKE_DELAY_CHANGE_STEP 50
+#define SNAKE_DELAY_CHANGE_STEP 25
 #define SNAKE_DELAY_MIN 100
-#define SNAKE_DELAY_MAX 500
+#define SNAKE_DELAY_MAX 400
+#define SNAKE_DELAY_OFFSET 0
 #define VOLUME_CHANGE_STEP 5
 
 void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeDelay);
@@ -191,6 +192,10 @@ bool PauseMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int FoodEaten,
 					exit(0); // Закрываем приложение
 				}
 			}
+			else if (Keycode == GMKEY_ESC)
+			{
+				return false;
+			}
 		}
 		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
@@ -213,7 +218,7 @@ void InfoMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 2 };	 // Положение центра линий текста
 
 	int StringsCount = 7; // Сколько будет строчек текста
-	std::string Strings[] = { "It might help you...","", "Controls for all the stuff: arrow keys and Enter", "You can pause with Enter!", "The quicker you eat, the bigger the score reward!", " ","Got it!" }; // Строчки текста
+	std::string Strings[] = { "It might help you...","", "Controls for all the stuff: arrow keys, Enter, Esc", "You can pause with Enter and Esc!", "The quicker you eat, the bigger the score reward!", " ","Got it!" }; // Строчки текста
 
 
 	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора		
@@ -236,9 +241,14 @@ void InfoMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 			else if (Keycode == GMKEY_ENTER) // Если энтер
 			{
 				PlaySoundB(Audio, GSND_MENU_ENTER, Audio.GameVolumePercent); // Проигрываем звук нажатия на опцию меню
+				return; // Возвращаемся обратно				
+			}
+			else if (Keycode == GMKEY_ESC) // Если энтер
+			{				
 
 				return; // Возвращаемся обратно				
 			}
+
 		}
 		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
@@ -263,10 +273,10 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 
 	RenderText(DrawTools, "Settings", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Рисуем слово "настройки"
 	int StringsCount = 5; // Сколько будет опций выбора
-	std::string Strings[] = { "Back", "Mode: ", "Snake delay: ", "Game volume:", "Music volume: ", }; // Названия опций выбора
+	std::string Strings[] = { "Back", "Mode: ", "Snake speed: ", "Game volume:", "Music volume: ", }; // Названия опций выбора
 	const int BufferSize = 32;
 	char Buffer[BufferSize]; // Буфер для различных именяющихся строчек
-	sprintf_s(Buffer, "Snake delay: %i", SnakeDelay); // Переводим число строку
+	sprintf_s(Buffer, "Snake speed: %i", SNAKE_DELAY_MAX + SNAKE_DELAY_MIN - SnakeDelay - SNAKE_DELAY_OFFSET); // Переводим число строку
 	Strings[2] = Buffer; // Обновляем надпись
 	sprintf_s(Buffer, "Game volume: %i", (int)Audio.GameVolumePercent); // Переводим число в строку
 	Strings[3] = Buffer; // Обновляем надпись	
@@ -337,11 +347,11 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
 				}
-				else if (Strings[SelectedButtonNum].find("Snake delay: ", 0) != std::string::npos && SnakeDelay - SNAKE_DELAY_CHANGE_STEP >= SNAKE_DELAY_MIN) // Если в строчке найдено ключевое слово
+				else if (Strings[SelectedButtonNum].find("Snake speed: ", 0) != std::string::npos && SnakeDelay + SNAKE_DELAY_CHANGE_STEP <= SNAKE_DELAY_MAX) // Если в строчке найдено ключевое слово
 				{
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
-					SnakeDelay -= SNAKE_DELAY_CHANGE_STEP; // Уменьшаяем задержку движения змейки
-					sprintf_s(Buffer, "Snake delay: %i", SnakeDelay); // Переводим число строку
+					SnakeDelay += SNAKE_DELAY_CHANGE_STEP; // Уменьшаяем задержку движения змейки
+					sprintf_s(Buffer, "Snake speed: %i", SNAKE_DELAY_MAX + SNAKE_DELAY_MIN - SnakeDelay - SNAKE_DELAY_OFFSET); // Переводим число строку
 					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
 					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
@@ -376,11 +386,11 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
 				}
-				else if (Strings[SelectedButtonNum].find("Snake delay: ", 0) != std::string::npos && SnakeDelay + SNAKE_DELAY_CHANGE_STEP <= SNAKE_DELAY_MAX) // Если в строчке найдено ключевое слово
+				else if (Strings[SelectedButtonNum].find("Snake speed: ", 0) != std::string::npos && SnakeDelay - SNAKE_DELAY_CHANGE_STEP >= SNAKE_DELAY_MIN) // Если в строчке найдено ключевое слово
 				{
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
-					SnakeDelay += SNAKE_DELAY_CHANGE_STEP; // Увеличиваем задержку движения змейки
-					sprintf_s(Buffer, "Snake delay: %i", SnakeDelay); // Переводим число в строку
+					SnakeDelay -= SNAKE_DELAY_CHANGE_STEP; // Увеличиваем задержку движения змейки
+					sprintf_s(Buffer, "Snake speed: %i", SNAKE_DELAY_MAX + SNAKE_DELAY_MIN - SnakeDelay - SNAKE_DELAY_OFFSET); // Переводим число в строку
 					Strings[SelectedButtonNum] = Buffer; // Обновляем надпись					
 					MenuClearLineTile(DrawTools, Map, ActiveButtonPos.y); // Затираем старую надпись
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Рисуем выделенным текстом
@@ -422,6 +432,11 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 					SaveFileData(Data, Audio, Map, SnakeDelay); // записываем данные настроек в файл
 					return; // Возвращаемся обратно
 				}
+			}
+			else if (Keycode == GMKEY_ESC)
+			{
+				SaveFileData(Data, Audio, Map, SnakeDelay); // записываем данные настроек в файл
+				return;
 			}
 		}
 		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
@@ -479,7 +494,7 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data
 		if (_kbhit()) // Если нажата какая-нибудь кнопка
 		{
 			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
-			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный			
 			if (Keycode == GMKEY_UP && SelectedButtonNum > 0) // Если стрелочка вверх (и проверка на выход из границ)
 			{
 				PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню
