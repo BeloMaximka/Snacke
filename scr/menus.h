@@ -196,6 +196,53 @@ bool PauseMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int FoodEaten,
 	}
 	return false;
 }
+void InfoMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
+	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	int TileSize = DrawTools.TileSize; // Передаем в новую переменную по ссылке для упрощения чтения кода
+	int BaseColor = GCLR_DARKWOOD; // Добавляем дополнительную переменную, чтобы можно было в одной строчке кода изменить цвета для обычных строчек текста	
+
+	SelectObject(cHDC, Pens[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для обводки
+	SelectObject(cHDC, Brushes[GCLR_LIGHTBURLYWOOD]); // Выбор цвета для заливки
+	DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
+
+	RECT ClientRect, WindowRect; // Переменные для определения координат центра окна
+	GetClientRect(DrawTools.Console.cHWND, &ClientRect); // Определяем ко-рды рабочей зоны
+	GetWindowRect(DrawTools.Console.cHWND, &WindowRect); // Определяем ко-рды окна		
+	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2 , (WindowRect.bottom - WindowRect.top) / 2 };	 // Положение центра линий текста
+
+	int StringsCount = 7; // Сколько будет строчек текста
+	std::string Strings[] = { "It might help you...","", "Controls for all the stuff: arrow keys and Enter", "You can pause with Enter!", "The quicker you eat, the bigger the score reward!", " ","Got it!" }; // Строчки текста
+
+
+	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора		
+
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+	while (true)
+	{
+		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
+		{
+			Sleep(WINDOW_MAXIMIZED_RENDER_DELAY); // Ждем, пока окно достаточно не развернется
+			// Далее, собсна, рисуем всё заново
+			DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
+			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста						
+		}
+		if (_kbhit()) // Если нажата какая-нибудь кнопка
+		{
+			int Keycode = _getch(); // Записываем код нажатой клавиши в переменную
+			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+
+			else if (Keycode == GMKEY_ENTER) // Если энтер
+			{
+				PlaySoundB(Audio, GSND_MENU_ENTER, Audio.GameVolumePercent); // Проигрываем звук нажатия на опцию меню
+
+				return; // Возвращаемся обратно				
+			}
+		}
+		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
+	}
+}
 void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeDelay, saveddata& Data) {
 	HDC& cHDC = DrawTools.Console.cHDC; // Передаем в новую переменную по ссылке для упрощения чтения кода
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens; // Передаем в новую переменную по ссылке для упрощения чтения кода
@@ -399,10 +446,9 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data
 	pos TextLinesCenterPos = { (WindowRect.right - WindowRect.left) / 2,((MainTitlePos.y + (WindowRect.bottom - WindowRect.top) / 8) + (WindowRect.bottom - WindowRect.top)) / 2 };	 // Положение центра линий текста
 
 	RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Рисуем название игры
-	int StringsCount = 3; // Сколько будет опций выбора
-	std::string Strings[] = { "Play", "Settings", "Exit" }; // Названия опций выбора	
-	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора	
-	RenderText(DrawTools, "Controls: Arrow keys, Enter", { MainTitlePos.x,TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем управление сверху
+	int StringsCount = 4; // Сколько будет опций выбора
+	std::string Strings[] = { "Play", "Settings", "Help", "Exit" }; // Названия опций выбора	
+	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора		
 	RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
 
 	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
@@ -428,7 +474,6 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data
 			DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
 			RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
 			RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
-			RenderText(DrawTools, "Controls: Arrow keys, Enter", { MainTitlePos.x,TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем управление сверху
 			RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
 		}
 		if (_kbhit()) // Если нажата какая-нибудь кнопка
@@ -461,8 +506,7 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data
 					DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
 					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста					
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
-					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
-					RenderText(DrawTools, "Controls: Arrow keys, Enter", { MainTitlePos.x,TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем управление сверху
+					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл					
 					RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
 				}
 				else if (Strings[SelectedButtonNum] == "Settings") // Если "Выйти"
@@ -471,10 +515,19 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data
 					DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
 					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
 					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
-					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл
-					RenderText(DrawTools, "Controls: Arrow keys, Enter", { MainTitlePos.x,TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем управление сверху
+					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл					
 					RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
 				}
+				else if (Strings[SelectedButtonNum] == "Help") // Если "Выйти"
+				{
+					InfoMenu(DrawTools, Audio, Map);
+					DrawMainMenuBackGround(DrawTools, Map); // Обновляем шахматный фон меню
+					DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Текста			
+					RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем
+					RenderText(DrawTools, "SNACKE!", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Тайтл					
+					RenderText(DrawTools, "Made by BeloMaximka", { MainTitlePos.x,(Map.Height + INFO_BAR_SIZE) * TileSize - TileSize / 2 }, DrawTools.SmallFont, SelectedButtonColor, true); // Рисуем меня снизу
+				}
+
 				else if (Strings[SelectedButtonNum] == "Exit") // Если "Выйти"
 				{
 					exit(0); // Закрываем приложение
@@ -484,3 +537,5 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data
 		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
 }
+
+//std::string Strings[] = { "It might help you...", "Controls for all the stuff: arrow keys and Enter. That's it", "You can pause with Enter!", "The quicker you eat, the bigger the score reward!", " ","Got it!"}; // Названия опций выбора

@@ -188,7 +188,13 @@ int main()
 	{
 		CreateFileData(Data, Audio, SnakeDelay, Map);
 	}
-	// Set background musci
+	if (Data.FirstStart)
+	{
+		InfoMenu(DrawTools, Audio, Map);
+		Data.FirstStart = false;
+		SaveFileData(Data, Audio, Map, SnakeDelay);
+	}
+	// Set background music
 	PlaySoundB(Audio, GSND_MUSIC, Audio.MusicVolumePercent, true);
 	MainMenu(DrawTools, Audio, Map, Data, SnakeDelay);
 	system("pause");
