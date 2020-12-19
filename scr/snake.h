@@ -101,6 +101,66 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 	}
 	return false;
 }
+void RemoveTailPart(drawtools DrawTools, map& Map, snake& Snake) {
+	//--------------РАБОТА С ХВОСТОМ--------------
+	// Закрашиваем удаляемый хвост пустой клеткой
+	DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY);
+	// Определяем новый конец
+	if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP)
+	{
+		// Заменяем удаляемый конец хвоста на пустоту
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		// Если 
+		if (Snake.TailPos.y - 1 < 0)
+		{
+			Snake.TailPos.y = Map.Height - 1;
+		}
+		else
+		{
+			Snake.TailPos.y--;
+		}
+
+	}
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN)
+	{
+		// Удаляем конец хвоста
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		if (Snake.TailPos.y + 1 >= Map.Height)
+		{
+			Snake.TailPos.y = 0;
+		}
+		else
+		{
+			Snake.TailPos.y++;
+		}
+	}
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT)
+	{
+		// Удаляем конец хвоста
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		if (Snake.TailPos.x - 1 < 0)
+		{
+			Snake.TailPos.x = Map.Width - 1;
+		}
+		else
+		{
+			Snake.TailPos.x--;
+		}
+	}
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT)
+	{
+		// Удаляем конец хвоста
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
+		if (Snake.TailPos.x + 1 >= Map.Width)
+		{
+			Snake.TailPos.x = 0;
+		}
+		else
+		{
+			Snake.TailPos.x++;
+		}
+	}
+}
 bool MoveSnake(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Snake) {
 	//--------------РАБОТА С ГОЛОВОЙ--------------
 	// Поворачиваем сегмент перед новой головой
@@ -638,6 +698,8 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 			}
 		}
 		PlaySoundB(Audio, GSND_PUNCH, Audio.GameVolumePercent);
+		RemoveTailPart(DrawTools, Map, Snake);
+		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x], true);
 		Sleep(1500);
 		if (!RetryMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
 		{

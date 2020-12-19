@@ -148,15 +148,35 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID, bool NoApples = false) 
 		Rectangle(cHDC, Pos.x * TileSize, Pos.y * TileSize, Pos.x * TileSize + TileSize, Pos.y * TileSize + TileSize);
 	}
 }
-void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmount, int SegmentNumber) {	
+void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmount, int SegmentNumber, bool Smashed = false) {	
 	Pos.y += INFO_BAR_SIZE;
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
-	int& TileSize = DrawTools.TileSize;	
-	Pos.x = Pos.x * TileSize + TileSize / 2;	
+	int& TileSize = DrawTools.TileSize;
+	Pos.x = Pos.x * TileSize + TileSize / 2;
 	Pos.y = Pos.y * TileSize + TileSize / 2;
-	
+	if (Smashed && SegmentNumber + 1 == SegmentsAmount)
+	{
+		SegmentNumber++;
+		if (TileID == TILE_SNAKE_UP)
+		{
+			Pos.y -= TileSize / 2;
+		}
+		else if (TileID == TILE_SNAKE_DOWN)
+		{
+			Pos.y += TileSize / 2;
+		}
+		else if (TileID == TILE_SNAKE_LEFT)
+		{
+			Pos.x -= TileSize / 2;
+		}
+		else if (TileID == TILE_SNAKE_RIGHT)
+		{
+			Pos.x += TileSize / 2;
+		}
+	}
+
 	int Width;
 	Width = TileSize * (0.5 + ((double)SegmentNumber / SegmentsAmount) / 4);
 	SelectObject(cHDC, Pens[GCLR_GREEN]);
@@ -174,15 +194,33 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		PolyPoints[3].y = Pos.y - TileSize / 2;
 		if (SegmentNumber == SegmentsAmount)
 		{
-			Ellipse(cHDC, Pos.x - Width / 2, Pos.y - TileSize / 2, Pos.x + Width / 2, Pos.y + TileSize / 4);
-			SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
-			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
-			Polygon(cHDC, PolyPoints, 4);
-			// глазки
-			SelectObject(cHDC, Pens[GCLR_YELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
-			Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
-			Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
+			if (Smashed)
+			{
+				int HalfHeadPosY = Pos.y / TileSize * TileSize;				
+				//Ellipse(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize/2, Pos.x + Width / 2, HalfHeadPosY + TileSize/2);
+				Pie(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x - Width / 2, HalfHeadPosY, Pos.x + Width / 2, HalfHeadPosY);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				PolyPoints[0].x = Pos.x - Width / 2;
+				PolyPoints[0].y = HalfHeadPosY;
+				PolyPoints[1].x = Pos.x + Width / 2;
+				PolyPoints[1].y = HalfHeadPosY;
+				PolyPoints[2].x = Pos.x;
+				PolyPoints[2].y = HalfHeadPosY + TileSize / 2;				
+				Polygon(cHDC, PolyPoints, 3);
+			}
+			else
+			{
+				Ellipse(cHDC, Pos.x - Width / 2, Pos.y - TileSize / 2, Pos.x + Width / 2, Pos.y + TileSize / 4);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				Polygon(cHDC, PolyPoints, 4);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
+				Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
+			}			
 		}
 		else if (SegmentNumber == 1)
 		{
@@ -316,7 +354,7 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		}
 	}
 }
-void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile) {
+void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile,  bool Smashed = false) {
 
 	int SegmentNumber = 0;
 	int SegmentTile = TailTile;
@@ -324,8 +362,12 @@ void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile) {
 	DrawTile(DrawTools, DrawPos, TILE_EMPTY);
 	while (true)
 	{
-		SegmentNumber++;
+		SegmentNumber++;		
 		DrawSnakeBodyPart(DrawTools, DrawPos, SegmentTile, Snake.Segments, SegmentNumber);
+		if (Snake.Segments == SegmentNumber + 1)
+		{
+			DrawSnakeBodyPart(DrawTools, DrawPos, SegmentTile, Snake.Segments, SegmentNumber, Smashed);
+		}
 		if (DrawPos.x == Snake.HeadPos.x && DrawPos.y == Snake.HeadPos.y)
 		{
 			break;
