@@ -171,14 +171,14 @@ void GameInit(drawtools& DrawTools, int MapHeight, int MapWidth) {
 int main()
 {
 	int SnakeDelay;
-	
+
 	// Map init
 	map Map;
 	MapInit(Map, 15, 18);
 	//
 	drawtools DrawTools;
 	GameInit(DrawTools, Map.Height, Map.Width);
-	
+
 	// Sound init
 	audiotools Audio;
 	SoundsInit(Audio);
@@ -192,5 +192,5 @@ int main()
 	PlaySoundB(Audio, GSND_MUSIC, Audio.MusicVolumePercent, true);
 	MainMenu(DrawTools, Audio, Map, Data, SnakeDelay);
 	system("pause");
-	
+
 }

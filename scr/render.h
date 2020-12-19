@@ -28,27 +28,27 @@ void DrawStar(drawtools& DrawTools, dpos Pos, double SizeMod) {
 	dpos StarInEndDir = { 0,1 };
 	POINT PolyPoints[10];
 	LONG PosX;
-	LONG PosY;	
-	double Angle =72;
+	LONG PosY;
+	double Angle = 72;
 	PosX = Pos.x + StarOutEndDir.x * TileSize * SizeMod;
 	PosY = Pos.y + StarOutEndDir.y * TileSize * SizeMod;
-	PolyPoints[0] = { PosX, PosY };	
-	RotateVector(StarInEndDir, -2 * Angle);	
+	PolyPoints[0] = { PosX, PosY };
+	RotateVector(StarInEndDir, -2 * Angle);
 	PosX = Pos.x + StarInEndDir.x * 0.5 * TileSize * SizeMod;
 	PosY = Pos.y + StarInEndDir.y * 0.5 * TileSize * SizeMod;
-	PolyPoints[1] = { PosX, PosY };	
-	RotateVector(StarOutEndDir, Angle);	
+	PolyPoints[1] = { PosX, PosY };
+	RotateVector(StarOutEndDir, Angle);
 	for (int i = 2; i < 10; i++)
 	{
 		PosX = Pos.x + StarOutEndDir.x * TileSize * SizeMod;
 		PosY = Pos.y + StarOutEndDir.y * TileSize * SizeMod;
-		PolyPoints[i] = { PosX, PosY };		
-		RotateVector(StarInEndDir, Angle);		
+		PolyPoints[i] = { PosX, PosY };
+		RotateVector(StarInEndDir, Angle);
 		i++;
 		PosX = Pos.x + StarInEndDir.x * 0.5 * TileSize * SizeMod;
 		PosY = Pos.y + StarInEndDir.y * 0.5 * TileSize * SizeMod;
-		PolyPoints[i] = { PosX, PosY};		
-		RotateVector(StarOutEndDir, Angle);		
+		PolyPoints[i] = { PosX, PosY };
+		RotateVector(StarOutEndDir, Angle);
 	}
 	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Pens[GCLR_DARKYELLOW]);
 	SelectObject(DrawTools.Console.cHDC, DrawTools.Palette.Brushes[GCLR_DARKYELLOW]);
@@ -58,14 +58,14 @@ void DrawApple(drawtools& DrawTools, dpos Pos) {
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
-	int& TileSize = DrawTools.TileSize;	
+	int& TileSize = DrawTools.TileSize;
 	int SizeMod = TileSize / 16;
 	// Выбираем коричневый цвет для обводки
 	SelectObject(cHDC, Pens[GCLR_DARKRED]);
 	// Выбираем коричневый цвет для заполнения
 	SelectObject(cHDC, Brushes[GCLR_DARKRED]);
 	// Рисуем палочку
-	Rectangle(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize + TileSize / 16 + SizeMod*2, Pos.x * TileSize + TileSize / 2 + TileSize / 16, Pos.y * TileSize + TileSize - SizeMod);
+	Rectangle(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16, Pos.y * TileSize + TileSize / 16 + SizeMod * 2, Pos.x * TileSize + TileSize / 2 + TileSize / 16, Pos.y * TileSize + TileSize - SizeMod);
 	// Выбираем красный цвет для обводки
 	//SelectObject(cHDC, Pens[GCLR_RED]);
 	// Выбираем красный цвет для заполнения
@@ -79,7 +79,7 @@ void DrawApple(drawtools& DrawTools, dpos Pos) {
 	// Выбираем зеленый цвет для заполнения
 	//SelectObject(cHDC, Brushes[GCLR_GREEN]);
 	// Рисуем листок
-	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16 + SizeMod/2, Pos.y * TileSize  + SizeMod*2, Pos.x * TileSize + TileSize - TileSize / 16 - SizeMod*2, Pos.y * TileSize + TileSize / 6 + SizeMod);
+	Ellipse(cHDC, Pos.x * TileSize + TileSize / 2 - TileSize / 16 + SizeMod / 2, Pos.y * TileSize + SizeMod * 2, Pos.x * TileSize + TileSize - TileSize / 16 - SizeMod * 2, Pos.y * TileSize + TileSize / 6 + SizeMod);
 	// Выбираем красный цвет для обводки
 	//SelectObject(cHDC, Pens[GCLR_LIGHTRED]);
 	// Выбираем красный цвет для заполнения
@@ -105,7 +105,7 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID, bool NoApples = false) 
 		std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
 		std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
 		int& TileSize = DrawTools.TileSize;
-		DrawTile(DrawTools, { Pos.x, Pos.y- INFO_BAR_SIZE }, TILE_EMPTY);
+		DrawTile(DrawTools, { Pos.x, Pos.y - INFO_BAR_SIZE }, TILE_EMPTY);
 		// Выбираем коричневый цвет для обводки
 		SelectObject(cHDC, Pens[GCLR_BROWN]);
 		// Выбираем коричневый цвет для заполнения
@@ -135,7 +135,7 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID, bool NoApples = false) 
 	}
 	else
 	{
-		if (Pos.x%2 == Pos.y%2)
+		if (Pos.x % 2 == Pos.y % 2)
 		{
 			SelectObject(cHDC, Pens[GCLR_LIGHTBURLYWOOD]);
 			SelectObject(cHDC, Brushes[GCLR_LIGHTBURLYWOOD]);
@@ -144,11 +144,11 @@ void DrawTile(drawtools& DrawTools, pos Pos, int TileID, bool NoApples = false) 
 		{
 			SelectObject(cHDC, Pens[GCLR_BURLYWOOD]);
 			SelectObject(cHDC, Brushes[GCLR_BURLYWOOD]);
-		}		
+		}
 		Rectangle(cHDC, Pos.x * TileSize, Pos.y * TileSize, Pos.x * TileSize + TileSize, Pos.y * TileSize + TileSize);
 	}
 }
-void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmount, int SegmentNumber, bool Smashed = false) {	
+void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmount, int SegmentNumber, bool Smashed = false) {
 	Pos.y += INFO_BAR_SIZE;
 	HDC& cHDC = DrawTools.Console.cHDC;
 	std::vector<HPEN>& Pens = DrawTools.Palette.Pens;
@@ -196,7 +196,7 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		{
 			if (Smashed)
 			{
-				int HalfHeadPosY = Pos.y / TileSize * TileSize;								
+				int HalfHeadPosY = Pos.y / TileSize * TileSize;
 				Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x - Width / 2, HalfHeadPosY, Pos.x + Width / 2, HalfHeadPosY);
 				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
 				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
@@ -205,16 +205,16 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 				PolyPoints[1].x = Pos.x + Width / 2;
 				PolyPoints[1].y = HalfHeadPosY;
 				PolyPoints[2].x = Pos.x;
-				PolyPoints[2].y = HalfHeadPosY + TileSize / 2;				
+				PolyPoints[2].y = HalfHeadPosY + TileSize / 2;
 				Polygon(cHDC, PolyPoints, 3);
 				// глазки
 				SelectObject(cHDC, Pens[GCLR_YELLOW]);
 				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
-				Pos.y += TileSize/4 + TileSize/24;
-				int HalfEyePosY = Pos.y + 11 * TileSize / 48 - TileSize/2;				
+				Pos.y += TileSize / 4 + TileSize / 24;
+				int HalfEyePosY = Pos.y + 11 * TileSize / 48 - TileSize / 2;
 				Chord(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3, Pos.x - Width / 2 + TileSize / 16, HalfEyePosY, Pos.x - Width / 2 + TileSize / 4, HalfEyePosY);
 				Chord(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3, Pos.x + Width / 2 - TileSize / 4, HalfEyePosY, Pos.x + Width / 2 - TileSize / 16, HalfEyePosY);
-				
+
 			}
 			else
 			{
@@ -227,7 +227,7 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 				Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
 				Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3);
-			}			
+			}
 		}
 		else if (SegmentNumber == 1)
 		{
@@ -258,9 +258,9 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		if (SegmentNumber == SegmentsAmount)
 		{
 			if (Smashed)
-			{				
+			{
 				int HalfHeadPosY = Pos.y / TileSize * TileSize;
-				Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize/2 , Pos.x + Width / 2, HalfHeadPosY + TileSize/2, Pos.x + Width / 2, HalfHeadPosY, Pos.x - Width / 2, HalfHeadPosY);
+				Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x + Width / 2, HalfHeadPosY, Pos.x - Width / 2, HalfHeadPosY);
 				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
 				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
 				PolyPoints[0].x = Pos.x - Width / 2;
@@ -290,7 +290,7 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 				Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
 				Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
 			}
-			
+
 		}
 		else if (SegmentNumber == 1)
 		{
@@ -324,14 +324,14 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 			{
 				int HalfHeadPosX = Pos.x / TileSize * TileSize;
 				//Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x + Width / 2, HalfHeadPosY, Pos.x - Width / 2, HalfHeadPosY);
-				Chord(cHDC, HalfHeadPosX - TileSize/2, Pos.y - Width / 2, HalfHeadPosX + TileSize/2, Pos.y + Width / 2, HalfHeadPosX, Pos.y + Width / 2, HalfHeadPosX , Pos.y - Width / 2);
+				Chord(cHDC, HalfHeadPosX - TileSize / 2, Pos.y - Width / 2, HalfHeadPosX + TileSize / 2, Pos.y + Width / 2, HalfHeadPosX, Pos.y + Width / 2, HalfHeadPosX, Pos.y - Width / 2);
 				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
 				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
 				PolyPoints[0].x = HalfHeadPosX;
 				PolyPoints[0].y = Pos.y - Width / 2;
 				PolyPoints[1].x = HalfHeadPosX;
 				PolyPoints[1].y = Pos.y + Width / 2;
-				PolyPoints[2].x = HalfHeadPosX + TileSize/2;
+				PolyPoints[2].x = HalfHeadPosX + TileSize / 2;
 				PolyPoints[2].y = Pos.y;
 				Polygon(cHDC, PolyPoints, 3);
 				// глазки
@@ -340,7 +340,7 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 				Pos.x += TileSize / 4 + TileSize / 24;
 				int HalfEyePosX = Pos.x + 11 * TileSize / 48 - TileSize / 2;
 				Chord(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4, HalfEyePosX, Pos.y - Width / 2 + TileSize / 4, HalfEyePosX, Pos.y - Width / 2 + TileSize / 16);
-				Chord(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4, HalfEyePosX, Pos.y + Width / 2 - TileSize / 16, HalfEyePosX, Pos.y + Width / 2 - TileSize / 4);				
+				Chord(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4, HalfEyePosX, Pos.y + Width / 2 - TileSize / 16, HalfEyePosX, Pos.y + Width / 2 - TileSize / 4);
 			}
 			else
 			{
@@ -353,7 +353,7 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 				Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
 				Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
-			}			
+			}
 		}
 		else if (SegmentNumber == 1)
 		{
@@ -417,7 +417,7 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
 				Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
 				Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
-			}			
+			}
 		}
 		else if (SegmentNumber == 1)
 		{
@@ -436,15 +436,15 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		}
 	}
 }
-void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile,  bool Smashed = false) {
+void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile, bool Smashed = false) {
 
 	int SegmentNumber = 0;
 	int SegmentTile = TailTile;
-	pos DrawPos = Snake.TailPos;	
+	pos DrawPos = Snake.TailPos;
 	DrawTile(DrawTools, DrawPos, TILE_EMPTY);
 	while (true)
 	{
-		SegmentNumber++;		
+		SegmentNumber++;
 		DrawSnakeBodyPart(DrawTools, DrawPos, SegmentTile, Snake.Segments, SegmentNumber);
 		if (Snake.Segments == SegmentNumber + 1)
 		{
@@ -507,7 +507,7 @@ void DrawSnake(drawtools& DrawTools, map& Map, snake& Snake, int TailTile,  bool
 				DrawPos.x++;
 			}
 			DrawTile(DrawTools, DrawPos, TILE_EMPTY);
-			DrawSnakeBodyPart(DrawTools,DrawPos, TILE_SNAKE_LEFT, Snake.Segments, SegmentNumber);
+			DrawSnakeBodyPart(DrawTools, DrawPos, TILE_SNAKE_LEFT, Snake.Segments, SegmentNumber);
 		}
 		SegmentTile = Map.Tiles[DrawPos.y][DrawPos.x];
 	}
@@ -583,17 +583,17 @@ void DrawInfoBar(drawtools& DrawTools, map& Map, int FoodCount, int Score) {
 	std::vector<HBRUSH>& Brushes = DrawTools.Palette.Brushes;
 	SelectObject(cHDC, Pens[GCLR_DARKWOOD]);
 	SelectObject(cHDC, Brushes[GCLR_DARKWOOD]);
-	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, INFO_BAR_SIZE * DrawTools.TileSize);	
+	Rectangle(cHDC, 0, 0, Map.Width * DrawTools.TileSize, INFO_BAR_SIZE * DrawTools.TileSize);
 	SelectObject(cHDC, Pens[GCLR_SCARLET]);
 	SelectObject(cHDC, Brushes[GCLR_SCARLET]);
-	Ellipse(cHDC, DrawTools.TileSize, 0.5* DrawTools.TileSize, 2 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
+	Ellipse(cHDC, DrawTools.TileSize, 0.5 * DrawTools.TileSize, 2 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
 	DrawApple(DrawTools, { 1, 0.5 });
 	DrawInfoFoodCount(DrawTools, FoodCount);
 	SelectObject(cHDC, Pens[GCLR_YELLOW]);
 	SelectObject(cHDC, Brushes[GCLR_YELLOW]);
-	Ellipse(cHDC, 4 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 5 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);	
+	Ellipse(cHDC, 4 * DrawTools.TileSize, 0.5 * DrawTools.TileSize, 5 * DrawTools.TileSize, 1.5 * DrawTools.TileSize);
 	DrawStar(DrawTools, { 4.5, 1 }, 0.4);
-	DrawInfoScore(DrawTools, Score);	
+	DrawInfoScore(DrawTools, Score);
 }
 void DrawMainMenuBackGround(drawtools& DrawTools, map& Map) {
 	for (int y = 0; y < Map.Height + INFO_BAR_SIZE; y++) // Рисуем фон

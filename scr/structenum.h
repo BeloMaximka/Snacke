@@ -29,11 +29,11 @@ struct snake
 	int FoodEaten;
 	int FoodReward;
 	int Score;
-	int Delay;	
+	int Delay;
 };
 struct console
 {
-	HANDLE cHANDLE;	
+	HANDLE cHANDLE;
 	HWND cHWND;
 	HDC cHDC;
 };
@@ -44,7 +44,7 @@ struct palette
 	std::vector<COLORREF> Colors;
 };
 struct drawtools
-{	
+{
 	palette Palette;
 	console Console;
 	HFONT SmallFont;
@@ -65,7 +65,7 @@ struct saveddata
 	double GameVolumePercent;
 	double MusicVolumePercent;
 	int SnakeDelay;
-	bool Walls;	
+	bool Walls;
 	bool FirstStart;
 };
 enum Sounds
