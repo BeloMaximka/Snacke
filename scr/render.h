@@ -196,9 +196,8 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		{
 			if (Smashed)
 			{
-				int HalfHeadPosY = Pos.y / TileSize * TileSize;				
-				//Ellipse(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize/2, Pos.x + Width / 2, HalfHeadPosY + TileSize/2);
-				Pie(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x - Width / 2, HalfHeadPosY, Pos.x + Width / 2, HalfHeadPosY);
+				int HalfHeadPosY = Pos.y / TileSize * TileSize;								
+				Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x - Width / 2, HalfHeadPosY, Pos.x + Width / 2, HalfHeadPosY);
 				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
 				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
 				PolyPoints[0].x = Pos.x - Width / 2;
@@ -208,6 +207,14 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 				PolyPoints[2].x = Pos.x;
 				PolyPoints[2].y = HalfHeadPosY + TileSize / 2;				
 				Polygon(cHDC, PolyPoints, 3);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Pos.y += TileSize/4 + TileSize/24;
+				int HalfEyePosY = Pos.y + 11 * TileSize / 48 - TileSize/2;				
+				Chord(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3, Pos.x - Width / 2 + TileSize / 16, HalfEyePosY, Pos.x - Width / 2 + TileSize / 4, HalfEyePosY);
+				Chord(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3, Pos.x + Width / 2 - TileSize / 4, HalfEyePosY, Pos.x + Width / 2 - TileSize / 16, HalfEyePosY);
+				
 			}
 			else
 			{
@@ -250,15 +257,40 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		PolyPoints[3].y = Pos.y - TileSize / 4;
 		if (SegmentNumber == SegmentsAmount)
 		{
-			Ellipse(cHDC, Pos.x - Width / 2, Pos.y - TileSize / 4, Pos.x + Width / 2, Pos.y + TileSize / 2);
-			SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
-			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
-			Polygon(cHDC, PolyPoints, 4);
-			// глазки
-			SelectObject(cHDC, Pens[GCLR_YELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
-			Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
-			Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
+			if (Smashed)
+			{				
+				int HalfHeadPosY = Pos.y / TileSize * TileSize;
+				Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize/2 , Pos.x + Width / 2, HalfHeadPosY + TileSize/2, Pos.x + Width / 2, HalfHeadPosY, Pos.x - Width / 2, HalfHeadPosY);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				PolyPoints[0].x = Pos.x - Width / 2;
+				PolyPoints[0].y = HalfHeadPosY;
+				PolyPoints[1].x = Pos.x + Width / 2;
+				PolyPoints[1].y = HalfHeadPosY;
+				PolyPoints[2].x = Pos.x;
+				PolyPoints[2].y = HalfHeadPosY - TileSize / 2;
+				Polygon(cHDC, PolyPoints, 3);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Pos.y += TileSize / 4 + TileSize / 24;
+				int HalfEyePosY = Pos.y + 11 * TileSize / 48 - TileSize / 2;
+				Chord(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3, Pos.x - Width / 2 + TileSize / 4, HalfEyePosY, Pos.x - Width / 2 + TileSize / 16, HalfEyePosY);
+				Chord(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y - TileSize / 2 + TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y - TileSize / 2 + TileSize / 3, Pos.x + Width / 2 - TileSize / 16, HalfEyePosY, Pos.x + Width / 2 - TileSize / 4, HalfEyePosY);
+			}
+			else
+			{
+				Ellipse(cHDC, Pos.x - Width / 2, Pos.y - TileSize / 4, Pos.x + Width / 2, Pos.y + TileSize / 2);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				Polygon(cHDC, PolyPoints, 4);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Ellipse(cHDC, Pos.x - Width / 2 + TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x - Width / 2 + TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
+				Ellipse(cHDC, Pos.x + Width / 2 - TileSize / 16, Pos.y + TileSize / 2 - TileSize / 8, Pos.x + Width / 2 - TileSize / 4, Pos.y + TileSize / 2 - TileSize / 3);
+			}
+			
 		}
 		else if (SegmentNumber == 1)
 		{
@@ -288,15 +320,40 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		PolyPoints[3].y = Pos.y - Width / 2;
 		if (SegmentNumber == SegmentsAmount)
 		{
-			Ellipse(cHDC, Pos.x - TileSize / 2, Pos.y - Width / 2, Pos.x + TileSize / 4, Pos.y + Width / 2);
-			SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
-			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
-			Polygon(cHDC, PolyPoints, 4);
-			// глазки
-			SelectObject(cHDC, Pens[GCLR_YELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
-			Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
-			Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
+			if (Smashed)
+			{
+				int HalfHeadPosX = Pos.x / TileSize * TileSize;
+				//Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x + Width / 2, HalfHeadPosY, Pos.x - Width / 2, HalfHeadPosY);
+				Chord(cHDC, HalfHeadPosX - TileSize/2, Pos.y - Width / 2, HalfHeadPosX + TileSize/2, Pos.y + Width / 2, HalfHeadPosX, Pos.y + Width / 2, HalfHeadPosX , Pos.y - Width / 2);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				PolyPoints[0].x = HalfHeadPosX;
+				PolyPoints[0].y = Pos.y - Width / 2;
+				PolyPoints[1].x = HalfHeadPosX;
+				PolyPoints[1].y = Pos.y + Width / 2;
+				PolyPoints[2].x = HalfHeadPosX + TileSize/2;
+				PolyPoints[2].y = Pos.y;
+				Polygon(cHDC, PolyPoints, 3);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Pos.x += TileSize / 4 + TileSize / 24;
+				int HalfEyePosX = Pos.x + 11 * TileSize / 48 - TileSize / 2;
+				Chord(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4, HalfEyePosX, Pos.y - Width / 2 + TileSize / 4, HalfEyePosX, Pos.y - Width / 2 + TileSize / 16);
+				Chord(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4, HalfEyePosX, Pos.y + Width / 2 - TileSize / 16, HalfEyePosX, Pos.y + Width / 2 - TileSize / 4);				
+			}
+			else
+			{
+				Ellipse(cHDC, Pos.x - TileSize / 2, Pos.y - Width / 2, Pos.x + TileSize / 4, Pos.y + Width / 2);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				Polygon(cHDC, PolyPoints, 4);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
+				Ellipse(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
+			}			
 		}
 		else if (SegmentNumber == 1)
 		{
@@ -327,15 +384,40 @@ void DrawSnakeBodyPart(drawtools DrawTools, pos Pos, int TileID, int SegmentsAmo
 		PolyPoints[3].y = Pos.y - Width / 2;
 		if (SegmentNumber == SegmentsAmount)
 		{
-			Ellipse(cHDC, Pos.x - TileSize / 4, Pos.y - Width / 2, Pos.x + TileSize / 2, Pos.y + Width / 2);
-			SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
-			SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
-			Polygon(cHDC, PolyPoints, 4);
-			// глазки
-			SelectObject(cHDC, Pens[GCLR_YELLOW]);
-			SelectObject(cHDC, Brushes[GCLR_YELLOW]);
-			Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
-			Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
+			if (Smashed)
+			{
+				int HalfHeadPosX = Pos.x / TileSize * TileSize;
+				//Chord(cHDC, Pos.x - Width / 2, HalfHeadPosY - TileSize / 2, Pos.x + Width / 2, HalfHeadPosY + TileSize / 2, Pos.x + Width / 2, HalfHeadPosY, Pos.x - Width / 2, HalfHeadPosY);
+				Chord(cHDC, HalfHeadPosX - TileSize / 2, Pos.y - Width / 2, HalfHeadPosX + TileSize / 2, Pos.y + Width / 2, HalfHeadPosX, Pos.y - Width / 2, HalfHeadPosX, Pos.y + Width / 2);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				PolyPoints[0].x = HalfHeadPosX;
+				PolyPoints[0].y = Pos.y - Width / 2;
+				PolyPoints[1].x = HalfHeadPosX;
+				PolyPoints[1].y = Pos.y + Width / 2;
+				PolyPoints[2].x = HalfHeadPosX - TileSize / 2;
+				PolyPoints[2].y = Pos.y;
+				Polygon(cHDC, PolyPoints, 3);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Pos.x += TileSize / 4 + TileSize / 24;
+				int HalfEyePosX = Pos.x + 11 * TileSize / 48 - TileSize / 2;
+				Chord(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y - Width / 2 + TileSize / 4, HalfEyePosX, Pos.y - Width / 2 + TileSize / 16, HalfEyePosX, Pos.y - Width / 2 + TileSize / 4);
+				Chord(cHDC, Pos.x - TileSize / 2 + TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x - TileSize / 2 + TileSize / 3, Pos.y + Width / 2 - TileSize / 4, HalfEyePosX, Pos.y + Width / 2 - TileSize / 4, HalfEyePosX, Pos.y + Width / 2 - TileSize / 16);
+			}
+			else
+			{
+				Ellipse(cHDC, Pos.x - TileSize / 4, Pos.y - Width / 2, Pos.x + TileSize / 2, Pos.y + Width / 2);
+				SelectObject(cHDC, Pens[GCLR_DARKGREEN]);
+				SelectObject(cHDC, Brushes[GCLR_DARKGREEN]);
+				Polygon(cHDC, PolyPoints, 4);
+				// глазки
+				SelectObject(cHDC, Pens[GCLR_YELLOW]);
+				SelectObject(cHDC, Brushes[GCLR_YELLOW]);
+				Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y - Width / 2 + TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y - Width / 2 + TileSize / 4);
+				Ellipse(cHDC, Pos.x + TileSize / 2 - TileSize / 8, Pos.y + Width / 2 - TileSize / 16, Pos.x + TileSize / 2 - TileSize / 3, Pos.y + Width / 2 - TileSize / 4);
+			}			
 		}
 		else if (SegmentNumber == 1)
 		{
