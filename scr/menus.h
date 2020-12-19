@@ -216,27 +216,27 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 
 	RenderText(DrawTools, "Settings", MainTitlePos, DrawTools.TitleFont, SelectedButtonColor, true); // Рисуем слово "настройки"
 	int StringsCount = 5; // Сколько будет опций выбора
-	std::string Strings[] = { "Mode: ", "Snake delay: ", "Game volume:", "Music volume: ", "Back" }; // Названия опций выбора
+	std::string Strings[] = { "Back", "Mode: ", "Snake delay: ", "Game volume:", "Music volume: ", }; // Названия опций выбора
 	const int BufferSize = 32;
 	char Buffer[BufferSize]; // Буфер для различных именяющихся строчек
 	sprintf_s(Buffer, "Snake delay: %i", SnakeDelay); // Переводим число строку
-	Strings[1] = Buffer; // Обновляем надпись
+	Strings[2] = Buffer; // Обновляем надпись
 	sprintf_s(Buffer, "Game volume: %i", (int)Audio.GameVolumePercent); // Переводим число в строку
-	Strings[2] = Buffer; // Обновляем надпись	
-	sprintf_s(Buffer, "Music volume: %i", (int)Audio.MusicVolumePercent); // Переводим число в строку
 	Strings[3] = Buffer; // Обновляем надпись	
+	sprintf_s(Buffer, "Music volume: %i", (int)Audio.MusicVolumePercent); // Переводим число в строку
+	Strings[4] = Buffer; // Обновляем надпись	
 	if (Map.Walls)
 	{
-		Strings[0] += "WALLS";
+		Strings[1] += "WALLS";
 	}
 	else
 	{
-		Strings[0] += "NO WALLS";
+		Strings[1] += "NO WALLS";
 	}
 	
 	DrawTextLines(DrawTools, Strings, StringsCount, TextLinesCenterPos, DrawTools.NormalFont, BaseColor, true); // Рисуем опции выбора		
 
-	int SelectedButtonNum = 4; // Выбранная опция выбора по умолчанию
+	int SelectedButtonNum = 0; // Выбранная опция выбора по умолчанию
 	pos ActiveButtonPos = TextLinesCenterPos; // Позиция выбранной опции. Начинаем с центра, будем смещать
 	if (StringsCount % 2) // В зависимости от четности будут разные формулы смещения
 	{
