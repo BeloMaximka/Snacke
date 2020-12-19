@@ -16,8 +16,8 @@ void ClearMap(map& Map) {
 		}
 	}
 }
-bool SpawnFood(drawtools& DrawTools, map& Map) {
-	pos FoodPos;
+bool SpawnFood(drawtools& DrawTools, map& Map, snake& Snake) {
+	pos FoodPos;	
 	for (int i = 0; i < Map.Height * Map.Width; i++)
 	{
 		FoodPos.y = rand() % Map.Height;
@@ -25,7 +25,8 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 		if (Map.Tiles[FoodPos.y][FoodPos.x] == TILE_EMPTY)
 		{
 			Map.Tiles[FoodPos.y][FoodPos.x] = TILE_FOOD;
-			DrawTile(DrawTools, FoodPos, TILE_FOOD);
+			DrawTile(DrawTools, FoodPos, TILE_FOOD);			
+			Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - FoodPos.x, 2) + pow(Snake.HeadPos.y - FoodPos.y, 2));
 			return true;
 		}
 	}
@@ -42,6 +43,7 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 					{
 						Map.Tiles[y][x] = TILE_FOOD;
 						DrawTile(DrawTools, { x, y }, TILE_FOOD);
+						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
 						return true;
 					}
 				}
@@ -57,7 +59,8 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 					if (Map.Tiles[y][x] == TILE_EMPTY)
 					{
 						Map.Tiles[y][x] = TILE_FOOD;
-						DrawTile(DrawTools, { x, y }, TILE_FOOD);
+						DrawTile(DrawTools, { x, y }, TILE_FOOD);		
+						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
 						return true;
 					}
 				}
@@ -76,7 +79,8 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 					if (Map.Tiles[y][x] == TILE_EMPTY)
 					{
 						Map.Tiles[y][x] = TILE_FOOD;
-						DrawTile(DrawTools, { x, y }, TILE_FOOD);
+						DrawTile(DrawTools, { x, y }, TILE_FOOD);	
+						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
 						return true;
 					}
 				}
@@ -93,6 +97,7 @@ bool SpawnFood(drawtools& DrawTools, map& Map) {
 					{
 						Map.Tiles[y][x] = TILE_FOOD;
 						DrawTile(DrawTools, { x, y }, TILE_FOOD);
+						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
 						return true;
 					}
 				}
@@ -230,6 +235,10 @@ bool MoveSnake(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Snake) 
 	// Если на пути хвост
 	if (NewHeadPos.y == Snake.TailPos.y && NewHeadPos.x == Snake.TailPos.x)
 	{
+		if (Snake.FoodReward > FOOD_SCORE_REWARD)
+		{
+			Snake.FoodReward--;
+		}		
 		//--------------РАБОТА С ХВОСТОМ--------------
 	// Закрашиваем удаляемый хвост пустой клеткой
 		DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY);
@@ -306,19 +315,23 @@ bool MoveSnake(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Snake) 
 		// Увеличиваем счетчик съеденой еды
 		Snake.FoodEaten++;
 		// Увеличиваем счет
-		Snake.Score += FOOD_SCORE_REWARD;
+		Snake.Score += Snake.FoodReward;
 		// Обновляем счетчик еды на инфобаре
 		DrawInfoFoodCount(DrawTools, Snake.FoodEaten);
 		// Обновляем счет на инфобаре
 		DrawInfoScore(DrawTools, Snake.Score);
 		// Создаём ещё одну еду
-		SpawnFood(DrawTools, Map);
+		SpawnFood(DrawTools, Map, Snake);
 		// Останавливаем функцию здесь, чтобы не хвост не удалился
-		return true;
+		return true;		
 	}
 	// Если на пути пусто
 	else
 	{
+		if (Snake.FoodReward > FOOD_SCORE_REWARD)
+		{
+			Snake.FoodReward--;
+		}
 		// Обновляем позицию головы змейки
 		Snake.HeadPos = NewHeadPos;
 		// Добавляем сегмент головы
@@ -560,7 +573,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments, SnakeDelay);
 		DrawMap(DrawTools, Map);
 		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-		SpawnFood(DrawTools, Map);
+		SpawnFood(DrawTools, Map, Snake);
 		DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);		
 		
 		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));

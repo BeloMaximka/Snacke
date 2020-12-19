@@ -27,8 +27,9 @@ struct snake
 	int Head;
 	int OldHead;
 	int FoodEaten;
+	int FoodReward;
 	int Score;
-	int Delay;
+	int Delay;	
 };
 struct console
 {
