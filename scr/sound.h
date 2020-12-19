@@ -14,7 +14,7 @@ void SoundsInit(audiotools& Audio) {
 	// GSND_MENU_MOVEMENT
 	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/menmov.mp3", 0, 0, 0));
 	// GSND_MENU_ENTER
-	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/menmov.mp3", 0, 0, 0));
+	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/menent.mp3", 0, 0, 0));
 	//GSND_PUNCH
 	Audio.Sounds.push_back(BASS_StreamCreateFile(false, "./sounds/punch.mp3", 0, 0, 0));
 }
