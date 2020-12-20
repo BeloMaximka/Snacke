@@ -462,7 +462,7 @@ void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments, 
 	Snake.Score = 0;
 	Snake.Delay = SnakeDelay;;
 }
-bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Snake) {
+bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data, snake& Snake) {
 	// Пазуа до первого нажатия
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 	int Keycode;
@@ -482,7 +482,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Sn
 			if (Keycode == 224) Keycode = _getch();
 			if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 			{
-				if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
+				if (PauseMenu(DrawTools, Audio, Map, Snake.Delay, Data, Snake.FoodEaten, Snake.Score))
 				{
 					return false;
 				}
@@ -544,7 +544,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Sn
 				if (Keycode == 224) Keycode = _getch();
 				if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 				{
-					if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
+					if (PauseMenu(DrawTools, Audio, Map, Snake.Delay, Data, Snake.FoodEaten, Snake.Score))
 					{
 						return false;
 					}
@@ -562,7 +562,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Sn
 	}
 	return true;
 }
-void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeDelay) {
+void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data, int SnakeDelay) {
 	while (true)
 	{
 		ClearMap(Map); // Очищаем карту
@@ -577,7 +577,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 		DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
 
 		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-		if (!SnakeFirstStep(DrawTools, Audio, Map, Snake))
+		if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake))
 		{
 			return;
 		}
@@ -601,14 +601,14 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 					if (Keycode == 224) Keycode = _getch();
 					if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 					{
-						if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
+						if (PauseMenu(DrawTools, Audio, Map, SnakeDelay, Data, Snake.FoodEaten, Snake.Score))
 						{
 							return;
 						}
 						DrawMap(DrawTools, Map);
 						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 						DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
-						if (!SnakeFirstStep(DrawTools, Audio, Map, Snake))
+						if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake))
 						{
 							return;
 						}
@@ -654,14 +654,14 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, int SnakeD
 						if (Keycode == 224) Keycode = _getch();
 						if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
 						{
-							if (PauseMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
+							if (PauseMenu(DrawTools, Audio, Map, SnakeDelay, Data, Snake.FoodEaten, Snake.Score))
 							{
 								return;
 							}
 							DrawMap(DrawTools, Map);
 							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
 							DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
-							if (!SnakeFirstStep(DrawTools, Audio, Map, Snake))
+							if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake))
 							{
 								return;
 							}
