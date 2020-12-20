@@ -661,16 +661,6 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata&
 					{
 						Snake.Head = TILE_SNAKE_RIGHT; // Поворичваем голову вправо
 					}
-					if (Snake.Head != Snake.OldHead) // Если новая позиция головы не совпадает со старой позицией
-					{
-						Snake.OldHead = Snake.Head; // Обновляем старую позицию головы
-						if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Двигаем змейку
-						{
-							break; // Змейка не двинулась, а значит врезаалсь - завершаем веселье
-						}
-						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
-						Sleep(Snake.Delay); // Ждем до следующего шага
-					}
 					while (_kbhit()) // Проверка остального буфера на наличие паузы
 					{
 						Keycode = _getch(); // Получаем код символа
@@ -692,6 +682,16 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata&
 							Sleep(Snake.Delay); // Ждем до следующего шага
 						}
 					}
+					if (Snake.Head != Snake.OldHead) // Если новая позиция головы не совпадает со старой позицией
+					{
+						Snake.OldHead = Snake.Head; // Обновляем старую позицию головы
+						if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Двигаем змейку
+						{
+							break; // Змейка не двинулась, а значит врезаалсь - завершаем веселье
+						}
+						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+						Sleep(Snake.Delay); // Ждем до следующего шага
+					}					
 				}
 			}
 			else  // Если ничего не было нажато
