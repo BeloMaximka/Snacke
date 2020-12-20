@@ -1,125 +1,135 @@
-#pragma once
-#include "includes.h"
+/*-------------------------------------------------------------------
+	sound.h
 
-typedef std::vector<HSTREAM> sounds;
-struct pos
+	Звуки и басы.
+-------------------------------------------------------------------*/
+
+#pragma once // Чтобы файл подключался линковщиком строго один раз
+#include "includes.h" // Подключем .h файл с инклюдами
+
+typedef std::vector<HSTREAM> sounds; // Даем типу удобный псевдоним
+
+// Структуры - пользовательские типы данных
+struct pos // Целочисленная позиция
 {
-	int x;
-	int y;
+	int x; // Позиция по оси х
+	int y; // Позиция по оси у
 };
-struct dpos
+struct dpos // Дробная позиция
 {
 	double x;
 	double y;
 };
-struct map
+struct map // Карта
 {
-	int** Tiles;
-	int Height;
-	int Width;
-	bool Walls;
+	int** Tiles; // Двумерный динамический массив клеток
+	int Height; // Высота карты
+	int Width; // Ширина карты
+	bool Walls; // Режим стен
 };
-struct snake
+struct snake // Змейка
 {
-	pos HeadPos;
-	pos TailPos;
-	int Segments;
-	int Head;
-	int OldHead;
-	int FoodEaten;
-	int FoodReward;
-	int Score;
-	int Delay;
+	pos HeadPos; // Позиция головы
+	pos TailPos; // Позиция хвоста
+	int Segments; // Количество сегментов
+	int Head; // Направление головы
+	int OldHead; // Старое направление головы
+	int FoodEaten; // Количество съеденой еды
+	int FoodReward; // Награда за следующую еду
+	int Score; // Счет
+	int Delay; // Задержка между шагами
 };
-struct console
+struct console // Дескрипторы консоли
 {
-	HANDLE cHANDLE;
-	HWND cHWND;
-	HDC cHDC;
+	HANDLE cHANDLE; // Дескриптор консоли
+	HWND cHWND; // Дескриптор окна
+	HDC cHDC; // Дескриптор дисплея
 };
-struct palette
+struct palette // Цвета
 {
-	std::vector<HPEN> Pens;
-	std::vector<HBRUSH> Brushes;
-	std::vector<COLORREF> Colors;
+	std::vector<HPEN> Pens; // Заливки
+	std::vector<HBRUSH> Brushes; // Контуры
+	std::vector<COLORREF> Colors; // Цвета RGB
 };
-struct drawtools
+struct drawtools // Инструменты, необходимые для работы с рендером
 {
-	palette Palette;
-	console Console;
-	HFONT SmallFont;
-	HFONT NormalFont;
-	HFONT BigFont;
-	HFONT TitleFont;
-	int TileSize;
-	int WindowState;
+	palette Palette; // Палитра цветов
+	console Console; // Дескрипторы консоли
+	HFONT SmallFont; // Малый шрифт
+	HFONT NormalFont; // Обычный шрифт
+	HFONT BigFont; // Большой шрифт
+	HFONT TitleFont; // Шрифт заголовков
+	int TileSize; // Размер плитки
+	int WindowState; // Состояние окна (развернутое, свернутое)
 };
-struct audiotools
+struct audiotools // Звуки, громкости
 {
-	sounds Sounds;
-	double GameVolumePercent;
-	double MusicVolumePercent;
+	sounds Sounds; // Вектор звуков
+	double GameVolumePercent; // Громкость игры
+	double MusicVolumePercent; // Громкость музыки
 };
-struct saveddata
+struct saveddata // Данные, которые сохраняются в файл
 {
-	double GameVolumePercent;
-	double MusicVolumePercent;
-	int SnakeDelay;
-	bool Walls;
-	bool FirstStart;
+	double GameVolumePercent; // Громкость игры
+	double MusicVolumePercent; // Громкость музыки
+	int SnakeDelay; // Задержка между шагами змеи
+	bool Walls; // Режим стен
+	bool FirstStart; // Первый запуск игры
 };
-enum Sounds
+
+// Перечисления
+enum Sounds // Перечисление звуков
 {
-	GSND_MUSIC,
-	GSND_CHEW1,
-	GSND_CHEW2,
-	GSND_CHEW3,
-	GSND_CHEW4,
-	GSND_MENU_MOVEMENT,
-	GSND_MENU_ENTER,
-	GSND_PUNCH
+	GSND_MUSIC, // Музыка
+	GSND_CHEW1, // Первый сэмпл хрума
+	GSND_CHEW2, // Второй хрум
+	GSND_CHEW3, // Третий хрум
+	GSND_CHEW4, // Четвертый хрум
+	GSND_MENU_MOVEMENT, // Звук перемещения по меню
+	GSND_MENU_ENTER, // Звук нажатия Ентером
+	GSND_PUNCH // Звук удара об препятствие
 };
-enum Keys
+enum Keys // Коды клавиш
 {
-	GMKEY_LEFT = 75,
-	GMKEY_RIGHT = 77,
-	GMKEY_UP = 72,
-	GMKEY_DOWN = 80,
-	GMKEY_ENTER = 13,
-	GMKEY_ESC = 27,
+	GMKEY_LEFT = 75, // Левая стрелка
+	GMKEY_RIGHT = 77, // Правая стрелка
+	GMKEY_UP = 72, // Стрелка вверх
+	GMKEY_DOWN = 80, // Стрелвка вниз
+	GMKEY_ENTER = 13, // Enter
+	GMKEY_ESC = 27, // Esc
 };
-enum Tiles
+enum Tiles // Плиточки, ячейки, клеточки
 {
-	TILE_EMPTY,
-	TILE_WALL,
-	TILE_SNAKE_UP,
-	TILE_SNAKE_DOWN,
-	TILE_SNAKE_LEFT,
-	TILE_SNAKE_RIGHT,
-	TILE_FOOD
+	TILE_EMPTY, // Пустая
+	TILE_WALL, // Стена
+	TILE_SNAKE_UP, // Сегмент змеи, направленный вверх
+	TILE_SNAKE_DOWN, // Сегмент змеи, направленный вниз
+	TILE_SNAKE_LEFT, // Сегмент змеи, направленный влево
+	TILE_SNAKE_RIGHT, // Сегмент змеи, направленный вправо
+	TILE_FOOD // Еда
 };
-enum Directions
+enum Directions // Направления
 {
-	DIR_LEFT = -1,
-	DIR_RIGHT = 1,
-	DIR_UP = -2,
-	DIR_DOWN = 2
+	DIR_LEFT = -1, // Влево
+	DIR_RIGHT = 1, // Вправо
+	DIR_UP = -2, // Вверх
+	DIR_DOWN = 2 // Вниз
 };
-enum Colors
+enum Colors // Цвета
 {
-	GCLR_BLACK,
-	GCLR_WHITE,
-	GCLR_LIGHTBURLYWOOD,
-	GCLR_BURLYWOOD,
-	GCLR_DARKBURLYWOOD,
-	GCLR_DARKWOOD,
-	GCLR_SCARLET,
-	GCLR_RED,
-	GCLR_DARKRED,
-	GCLR_GREEN,
-	GCLR_DARKGREEN,
-	GCLR_YELLOW,
-	GCLR_DARKYELLOW,
-	GCLR_BROWN,
-	GCLR_LIGHTRED
+	GCLR_BLACK, // Черный
+	GCLR_WHITE, // Белый
+	GCLR_LIGHTBURLYWOOD, // Светлый burlywood
+	GCLR_BURLYWOOD, // Burlywood
+	GCLR_DARKBURLYWOOD, // Темный burlywood
+	GCLR_DARKWOOD, // Цвет темноог дерева
+	GCLR_SCARLET, // Алый
+	GCLR_RED, // Красный
+	GCLR_DARKRED, // Темно-красный
+	GCLR_GREEN, // Зеленый
+	GCLR_DARKGREEN, // Темно-зеленый
+	GCLR_YELLOW, // Желтый
+	GCLR_DARKYELLOW, // Темно-желтый
+	GCLR_BROWN, // Коричневый
+	GCLR_LIGHTRED //Светло-красный
 };

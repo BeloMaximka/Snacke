@@ -1,723 +1,718 @@
-#pragma once
-#include "includes.h"
+/*-------------------------------------------------------------------
+	snake.h
+
+	Всё, что касается непосредственно игры
+-------------------------------------------------------------------*/
+#pragma once // Чтобы файл подключался линковщиком строго один раз
+#include "includes.h" // Подключем .h файл с инклюдами
+
+#define FOOD_SCORE_REWARD 10 // Минимальная награда за поедание яблок
+
+// Очищает карту
 void ClearMap(map& Map) {
-	for (int y = 0; y < Map.Height; y++)
+	for (int y = 0; y < Map.Height; y++) // Движемся по высоте
 	{
-		for (int x = 0; x < Map.Width; x++)
+		for (int x = 0; x < Map.Width; x++) // По ширине
 		{
-			if (Map.Walls && (x == 0 || y == 0 || x == Map.Width - 1 || y == Map.Height - 1))
+			if (Map.Walls && (x == 0 || y == 0 || x == Map.Width - 1 || y == Map.Height - 1)) // Если режим стен
 			{
-				Map.Tiles[y][x] = TILE_WALL;
+				Map.Tiles[y][x] = TILE_WALL; // Ставим стены
 			}
 			else
 			{
-				Map.Tiles[y][x] = TILE_EMPTY;
+				Map.Tiles[y][x] = TILE_EMPTY; // Ставим пустоту
 			}
 		}
 	}
 }
+
+// Создает еду в случайно точке карты
 bool SpawnFood(drawtools& DrawTools, map& Map, snake& Snake) {
-	pos FoodPos;
-	for (int i = 0; i < Map.Height * Map.Width; i++)
+	pos FoodPos; // Позиция еды
+	for (int i = 0; i < Map.Height * Map.Width; i++) // h*w раз пытается создать яблоко
 	{
-		FoodPos.y = rand() % Map.Height;
-		FoodPos.x = rand() % Map.Width;
-		if (Map.Tiles[FoodPos.y][FoodPos.x] == TILE_EMPTY)
+		FoodPos.y = rand() % Map.Height; // Выбираем случайную позицию по высоте
+		FoodPos.x = rand() % Map.Width; // Выбираем случайную позицию по ширине
+		if (Map.Tiles[FoodPos.y][FoodPos.x] == TILE_EMPTY) // Если на клетке пусто
 		{
-			Map.Tiles[FoodPos.y][FoodPos.x] = TILE_FOOD;
-			DrawTile(DrawTools, FoodPos, TILE_FOOD);
+			Map.Tiles[FoodPos.y][FoodPos.x] = TILE_FOOD; // Создаем там еду
+			DrawTile(DrawTools, FoodPos, TILE_FOOD); // Рисуем там еду
+			// Вычисляем награду за еду в зависимости от расстояния
 			Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - FoodPos.x, 2) + pow(Snake.HeadPos.y - FoodPos.y, 2));
-			return true;
+			return true; // Создание удалось - возращаем false
 		}
 	}
-	if (rand() % 2)
+	// Если ни разу не повезло создать, используем псевдо-псевдо случайный метод генерации
+	if (rand() % 2) // Выбираем вертикальное направление движения. Это сверху
 	{
-		if (rand() % 2)
+		if (rand() % 2) // Горизонтальное направление движение. Это слева
 		{
-			// двигаемся с левого верхнего угла
+			// Двигаемся с левого верхнего угла
 			for (int y = 0; y < Map.Height; y++)
 			{
 				for (int x = 0; x < Map.Width; x++)
 				{
-					if (Map.Tiles[y][x] == TILE_EMPTY)
+					if (Map.Tiles[y][x] == TILE_EMPTY) // Если на клетке пусто
 					{
-						Map.Tiles[y][x] = TILE_FOOD;
-						DrawTile(DrawTools, { x, y }, TILE_FOOD);
+						Map.Tiles[y][x] = TILE_FOOD; // Создаем там еду
+						DrawTile(DrawTools, { x, y }, TILE_FOOD); // Рисуем там еду
+						// Вычисляем награду за еду в зависимости от расстояния
 						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
-						return true;
+						return true; // Создание удалось - возращаем false
+					}
+				}
+			}
+		}
+		else // Спаава
+		{
+			// Двигаемся с правого верхнего угла
+			for (int y = 0; y < Map.Height; y++)
+			{
+				for (int x = Map.Width = 1; x > 0; x--)
+				{
+					if (Map.Tiles[y][x] == TILE_EMPTY) // Если на клетке пусто
+					{
+						Map.Tiles[y][x] = TILE_FOOD; // Создаем там еду
+						DrawTile(DrawTools, { x, y }, TILE_FOOD); // Рисуем там еду
+						// Вычисляем награду за еду в зависимости от расстояния
+						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
+						return true; // Создание удалось - возращаем false
+					}
+				}
+			}
+		}
+	}
+	else // Снизу
+	{
+		if (rand() % 2)
+		{
+			// Двигаемся с левого нижнего угла
+			for (int y = Map.Height - 1; y > 0; y--)
+			{
+				for (int x = 0; x < Map.Width; x++)
+				{
+					if (Map.Tiles[y][x] == TILE_EMPTY) // Если на клетке пусто
+					{
+						Map.Tiles[y][x] = TILE_FOOD; // Создаем там еду
+						DrawTile(DrawTools, { x, y }, TILE_FOOD); // Рисуем там еду
+						// Вычисляем награду за еду в зависимости от расстояния
+						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
+						return true; // Создание удалось - возращаем false
 					}
 				}
 			}
 		}
 		else
 		{
-			// я правого верхнего угла
-			for (int y = 0; y < Map.Height; y++)
+			// Двигаемся с правого нижнего угла
+			for (int y = Map.Height - 1; y > 0; y--)
 			{
 				for (int x = Map.Width = 1; x > 0; x--)
 				{
-					if (Map.Tiles[y][x] == TILE_EMPTY)
+					if (Map.Tiles[y][x] == TILE_EMPTY) // Если на клетке пусто
 					{
-						Map.Tiles[y][x] = TILE_FOOD;
-						DrawTile(DrawTools, { x, y }, TILE_FOOD);
+						Map.Tiles[y][x] = TILE_FOOD; // Создаем там еду
+						DrawTile(DrawTools, { x, y }, TILE_FOOD); // Рисуем там еду
+						// Вычисляем награду за еду в зависимости от расстояния
 						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
-						return true;
+						return true; // Создание удалось - возращаем false
 					}
 				}
 			}
 		}
 	}
-	else
-	{
-		if (rand() % 2)
-		{
-			// двигаемся с левого нижнего угла
-			for (int y = Map.Height - 1; y > 0; y--)
-			{
-				for (int x = 0; x < Map.Width; x++)
-				{
-					if (Map.Tiles[y][x] == TILE_EMPTY)
-					{
-						Map.Tiles[y][x] = TILE_FOOD;
-						DrawTile(DrawTools, { x, y }, TILE_FOOD);
-						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
-						return true;
-					}
-				}
-			}
-		}
-		else
-		{
-			// двигаемся с правого нижнего угла
-			for (int y = Map.Height - 1; y > 0; y--)
-			{
-				for (int x = Map.Width = 1; x > 0; x--)
-				{
-					if (Map.Tiles[y][x] == TILE_EMPTY)
-					{
-						Map.Tiles[y][x] = TILE_FOOD;
-						DrawTile(DrawTools, { x, y }, TILE_FOOD);
-						Snake.FoodReward = FOOD_SCORE_REWARD + 2 * sqrt(pow(Snake.HeadPos.x - x, 2) + pow(Snake.HeadPos.y - y, 2));
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
+	return false; // Если совсем не получилось создать - значит свободных клеток не осталось. Возращаем false
 }
+
+// Удаляет конец хвоста без изменения количества сегментов (нужно для врезания)
 void RemoveTailPart(drawtools DrawTools, map& Map, snake& Snake) {
-	//--------------РАБОТА С ХВОСТОМ--------------
-	// Закрашиваем удаляемый хвост пустой клеткой
-	DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY);
+	DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY); // Закрашиваем удаляемый хвост пустой клеткой
 	// Определяем новый конец
-	if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP)
+	if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP) // Если смотрит вверх
 	{
-		// Заменяем удаляемый конец хвоста на пустоту
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		// Если 
-		if (Snake.TailPos.y - 1 < 0)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY; // Удаляем конец хвоста
+		if (Snake.TailPos.y - 1 < 0) // Проверка на границу
 		{
-			Snake.TailPos.y = Map.Height - 1;
+			Snake.TailPos.y = Map.Height - 1; // Перескакиваем на другой конец
 		}
-		else
+		else // Если не на границе
 		{
-			Snake.TailPos.y--;
+			Snake.TailPos.y--; // Смещаемся вверх
 		}
 
 	}
-	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN)
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN) // Если смотрит вниз
 	{
-		// Удаляем конец хвоста
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		if (Snake.TailPos.y + 1 >= Map.Height)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY; // Удаляем конец хвоста
+		if (Snake.TailPos.y + 1 >= Map.Height) // Проверка на границу
 		{
-			Snake.TailPos.y = 0;
+			Snake.TailPos.y = 0; // Перескакиваем на другой конец
 		}
-		else
+		else // Если не на границе
 		{
-			Snake.TailPos.y++;
+			Snake.TailPos.y++; // Смещаемся вниз
 		}
 	}
-	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT)
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT) // Если смотрит влево
 	{
-		// Удаляем конец хвоста
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		if (Snake.TailPos.x - 1 < 0)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY; // Удаляем конец хвоста
+		if (Snake.TailPos.x - 1 < 0) // Проверка на границу
 		{
-			Snake.TailPos.x = Map.Width - 1;
+			Snake.TailPos.x = Map.Width - 1; // Перескакиваем на другой конец
 		}
-		else
+		else // Если не на границе
 		{
-			Snake.TailPos.x--;
+			Snake.TailPos.x--; // Смещаемся влево
 		}
 	}
-	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT)
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT) // Если смотрит вправо
 	{
-		// Удаляем конец хвоста
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		if (Snake.TailPos.x + 1 >= Map.Width)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY; // Удаляем конец хвоста
+		if (Snake.TailPos.x + 1 >= Map.Width) // Проверка на границу
 		{
-			Snake.TailPos.x = 0;
+			Snake.TailPos.x = 0; // Перескакиваем на другой конец
 		}
-		else
+		else // Если не на границе
 		{
-			Snake.TailPos.x++;
+			Snake.TailPos.x++; // Смещаемся вправо
 		}
 	}
 }
+
+// Передвигает змейку вперед
 bool MoveSnake(drawtools& DrawTools, audiotools& Audio, map& Map, snake& Snake) {
-	//--------------РАБОТА С ГОЛОВОЙ--------------
-	// Поворачиваем сегмент перед новой головой
-	Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
-	// Позиция новой головы
-	pos NewHeadPos = Snake.HeadPos;
-	// Определяем позицию новой головы
-	// Если голова смотрит вверх
-	if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_UP)
+	//--------------РАБОТА С ГОЛОВОЙ--------------	
+	Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head; // Поворачиваем сегмент перед новой головой	
+	pos NewHeadPos = Snake.HeadPos; // Позиция новой головы
+	// Определяем позицию новой головы	
+	if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_UP) // Если голова смотрит вверх
 	{
-		// Если змейка находится на границе карты
-		if (NewHeadPos.y - 1 < 0)
+		if (NewHeadPos.y - 1 < 0) // Если змейка находится на границе карты
 		{
-			// Перекидываем позицию на другой конец карты
-			NewHeadPos.y = Map.Height - 1;
+			NewHeadPos.y = Map.Height - 1; // Перекидываем позицию на другой конец карты
 		}
-		else
+		else // Если не на границе
 		{
-			// Смещаем позицию новой головы вверх
-			NewHeadPos.y--;
+			NewHeadPos.y--; // Смещаем позицию новой головы вверх
 		}
 	}
-	// Если голова смотрит вниз
-	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_DOWN)
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_DOWN) // Если голова смотрит вниз
 	{
-		// Если змейка находится на границе карты
-		if (NewHeadPos.y + 1 >= Map.Height)
+		if (NewHeadPos.y + 1 >= Map.Height) // Если змейка находится на границе карты
 		{
-			// Перекидываем позицию на другой конец карты
-			NewHeadPos.y = 0;
+			NewHeadPos.y = 0; // Перекидываем позицию на другой конец карты
 		}
-		else
+		else // Если не на границе
 		{
-			// Смещаем позицию новой головы вниз
-			NewHeadPos.y++;
+			NewHeadPos.y++; // Смещаем позицию новой головы вниз
 		}
 	}
-	// Если голова смотрит влево
-	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_LEFT)
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_LEFT) // Если голова смотрит влево
 	{
-		// Если змейка находится на границе карты
-		if (NewHeadPos.x - 1 < 0)
+		if (NewHeadPos.x - 1 < 0) // Если змейка находится на границе карты
 		{
-			// Перекидываем позицию на другой конец карты
-			NewHeadPos.x = Map.Width - 1;
+			NewHeadPos.x = Map.Width - 1; // Перекидываем позицию на другой конец карты
 		}
-		else
+		else // Если не на границе
 		{
-			// Смещаем позицию новой головы влево
-			NewHeadPos.x--;
+			NewHeadPos.x--; // Смещаем позицию новой головы влево
 		}
 	}
-	// Если голова смотрит влево
-	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_RIGHT)
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_SNAKE_RIGHT) // Если голова смотрит влево
 	{
-		if (Snake.HeadPos.x + 1 >= Map.Width)
+		if (Snake.HeadPos.x + 1 >= Map.Width) // Если змейка находится на границе карты
 		{
-			// Перекидываем позицию на другой конец карты
-			NewHeadPos.x = 0;
+			NewHeadPos.x = 0; // Перекидываем позицию на другой конец карты
 		}
-		else
+		else // Если не на границе
 		{
-			// Смещаем позицию новой головы вправо
-			NewHeadPos.x++;
+			NewHeadPos.x++; // Смещаем позицию новой головы вправо
 		}
 	}
-	// Если на пути хвост
-	if (NewHeadPos.y == Snake.TailPos.y && NewHeadPos.x == Snake.TailPos.x)
+	if (NewHeadPos.y == Snake.TailPos.y && NewHeadPos.x == Snake.TailPos.x) // Если на пути хвост
 	{
-		if (Snake.FoodReward > FOOD_SCORE_REWARD)
+		if (Snake.FoodReward > FOOD_SCORE_REWARD) // Если награда за еду больше минимального значения
 		{
-			Snake.FoodReward--;
+			Snake.FoodReward--; // Уменьшаем еду на один
 		}
-		//--------------РАБОТА С ХВОСТОМ--------------
-	// Закрашиваем удаляемый хвост пустой клеткой
-		DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY);
+		//--------------РАБОТА С ХВОСТОМ--------------		
+		DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY); // Закрашиваем удаляемый хвост пустой клеткой
 		// Определяем новый конец
-		if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP)
+		if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP) // Если голова смотрит вверх
 		{
-			// Если 
-			if (Snake.TailPos.y - 1 < 0)
+			if (Snake.TailPos.y - 1 < 0) // Если хвост находится на границе карты
 			{
-				Snake.TailPos.y = Map.Height - 1;
+				Snake.TailPos.y = Map.Height - 1; // Перекидываем позицию на другой конец карты
 			}
-			else
+			else // Если не на границе
 			{
-				Snake.TailPos.y--;
+				Snake.TailPos.y--; // Смещаем позицию нового хвоста вверх
 			}
 
 		}
-		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN)
+		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN) // Если голова смотрит внз
 		{
-			if (Snake.TailPos.y + 1 >= Map.Height)
+			if (Snake.TailPos.y + 1 >= Map.Height) // Если хвост находится на границе карты
 			{
-				Snake.TailPos.y = 0;
+				Snake.TailPos.y = 0; // Перекидываем позицию на другой конец карты
 			}
-			else
+			else // Если не на границе
 			{
-				Snake.TailPos.y++;
+				Snake.TailPos.y++; // Смещаем позицию нового хвоста вниз
 			}
 		}
-		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT)
+		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT) // Если голова смотрит влево
 		{
-			if (Snake.TailPos.x - 1 < 0)
+			if (Snake.TailPos.x - 1 < 0) // Если хвост находится на границе карты
 			{
-				Snake.TailPos.x = Map.Width - 1;
+				Snake.TailPos.x = Map.Width - 1; // Перекидываем позицию на другой конец карты
 			}
-			else
+			else // Если не на границе
 			{
-				Snake.TailPos.x--;
+				Snake.TailPos.x--; // Смещаем позицию нового хвоста влево
 			}
 		}
-		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT)
+		else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT) // Если голова смотрит вправо
 		{
-			if (Snake.TailPos.x + 1 >= Map.Width)
+			if (Snake.TailPos.x + 1 >= Map.Width) // Если хвост находится на границе карты
 			{
-				Snake.TailPos.x = 0;
+				Snake.TailPos.x = 0; // Перекидываем позицию на другой конец карты
 			}
-			else
+			else // Если не на границе
 			{
-				Snake.TailPos.x++;
+				Snake.TailPos.x++; // Смещаем позицию нового хвоста вправо
 			}
 		}
-		// Обновляем позицию головы змейки
-		Snake.HeadPos = NewHeadPos;
-		// Добавляем сегмент головы
-		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
-		return true;
+		Snake.HeadPos = NewHeadPos; // Обновляем позицию головы змейки		
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head; // Добавляем сегмент головы
+		return true; // Движение удалось - возвращем true
 	}
 	// Если на пути змейки препятствие (т.е не пусто и не еда)
 	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_EMPTY && Map.Tiles[NewHeadPos.y][NewHeadPos.x] != TILE_FOOD)
 	{
-		// Движение невозможно - возращаем false
-		return false;
+		return false; // Движение невозможно - возращаем false
 	}
-	// Если на пути еда
-	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_FOOD)
+	else if (Map.Tiles[NewHeadPos.y][NewHeadPos.x] == TILE_FOOD) // Если на пути еда
 	{
-		// Проигрываем звук поедания яблока
-		PlaySoundB(Audio, GSND_CHEW1 + rand() % 4, Audio.GameVolumePercent * 2);
-		// Обновляем позицию головы змейки
-		Snake.HeadPos = NewHeadPos;
-		// Добавляем сегмент головы
-		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
-		// Увеличиваем количество сегментов
-		Snake.Segments++;
-		// Увеличиваем счетчик съеденой еды
-		Snake.FoodEaten++;
-		// Увеличиваем счет
-		Snake.Score += Snake.FoodReward;
-		// Обновляем счетчик еды на инфобаре
-		DrawInfoFoodCount(DrawTools, Snake.FoodEaten);
-		// Обновляем счет на инфобаре
-		DrawInfoScore(DrawTools, Snake.Score);
-		// Создаём ещё одну еду
-		SpawnFood(DrawTools, Map, Snake);
-		// Останавливаем функцию здесь, чтобы не хвост не удалился
-		return true;
+		PlaySoundB(Audio, GSND_CHEW1 + rand() % 4, Audio.GameVolumePercent * 2); // Проигрываем звук поедания яблока		
+		Snake.HeadPos = NewHeadPos; // Обновляем позицию головы змейки		
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head; // Добавляем сегмент головы		
+		Snake.Segments++; // Увеличиваем количество сегментов		
+		Snake.FoodEaten++; // Увеличиваем счетчик съеденой еды		
+		Snake.Score += Snake.FoodReward; // Увеличиваем счет		
+		DrawInfoFoodCount(DrawTools, Snake.FoodEaten); // Обновляем счетчик еды на инфобаре		
+		DrawInfoScore(DrawTools, Snake.Score); // Обновляем счет на инфобаре		
+		SpawnFood(DrawTools, Map, Snake); // Создаём ещё одну еду		
+		return true; // Останавливаем функцию здесь, чтобы не хвост не удалился
 	}
-	// Если на пути пусто
-	else
+	else // Если на пути пусто
 	{
-		if (Snake.FoodReward > FOOD_SCORE_REWARD)
+		if (Snake.FoodReward > FOOD_SCORE_REWARD) // Если награда за еду больше минимального значения
 		{
-			Snake.FoodReward--;
+			Snake.FoodReward--; // Уменьшаем еду на один
 		}
-		// Обновляем позицию головы змейки
-		Snake.HeadPos = NewHeadPos;
-		// Добавляем сегмент головы
-		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head;
+		Snake.HeadPos = NewHeadPos; // Обновляем позицию головы змейки		
+		Map.Tiles[Snake.HeadPos.y][Snake.HeadPos.x] = Snake.Head; // Добавляем сегмент головы
 	}
-	//--------------РАБОТА С ХВОСТОМ--------------
-	// Закрашиваем удаляемый хвост пустой клеткой
-	DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY);
+	//--------------РАБОТА С ХВОСТОМ--------------	
+	DrawTile(DrawTools, Snake.TailPos, TILE_EMPTY); // Закрашиваем удаляемый хвост пустой клеткой
 	// Определяем новый конец
-	if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP)
+	if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_UP) // Если смотрит вверх
 	{
-		// Заменяем удаляемый конец хвоста на пустоту
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		// Если 
-		if (Snake.TailPos.y - 1 < 0)
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;  // Удаляем конец хвоста
+		if (Snake.TailPos.y - 1 < 0) // Проверка на границу
 		{
-			Snake.TailPos.y = Map.Height - 1;
+			Snake.TailPos.y = Map.Height - 1; // Перескакиваем на другой конец
 		}
-		else
+		else // Если не на границе
 		{
-			Snake.TailPos.y--;
+			Snake.TailPos.y--; // Смещаемся вверх
 		}
+	}
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN) // Если смотрит вниз
+	{
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY; // Удаляем конец хвоста
+		if (Snake.TailPos.y + 1 >= Map.Height) // Проверка на границу
+		{
+			Snake.TailPos.y = 0; // Перескакиваем на другой конец
+		}
+		else // Если не на границе
+		{
+			Snake.TailPos.y++; // Смещаемся вверх
+		}
+	}
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT) // Если смотрит влево
+	{
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY; // Удаляем конец хвоста
+		if (Snake.TailPos.x - 1 < 0) // Проверка на границу
+		{
+			Snake.TailPos.x = Map.Width - 1; // Перескакиваем на другой конец
+		}
+		else // Если не на границе
+		{
+			Snake.TailPos.x--; // Смещаемся вверх
+		}
+	}
+	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT) // Если смотрит вправо
+	{
+		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY; // Удаляем конец хвоста
+		if (Snake.TailPos.x + 1 >= Map.Width) // Проверка на границу
+		{
+			Snake.TailPos.x = 0; // Перескакиваем на другой конец
+		}
+		else // Если не на границе
+		{
+			Snake.TailPos.x++; // Смещаемся вверх
+		}
+	}
+	return true; // Движение удалось - возращаем true
+}
 
-	}
-	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_DOWN)
-	{
-		// Удаляем конец хвоста
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		if (Snake.TailPos.y + 1 >= Map.Height)
-		{
-			Snake.TailPos.y = 0;
-		}
-		else
-		{
-			Snake.TailPos.y++;
-		}
-	}
-	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_LEFT)
-	{
-		// Удаляем конец хвоста
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		if (Snake.TailPos.x - 1 < 0)
-		{
-			Snake.TailPos.x = Map.Width - 1;
-		}
-		else
-		{
-			Snake.TailPos.x--;
-		}
-	}
-	else if (Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] == TILE_SNAKE_RIGHT)
-	{
-		// Удаляем конец хвоста
-		Map.Tiles[Snake.TailPos.y][Snake.TailPos.x] = TILE_EMPTY;
-		if (Snake.TailPos.x + 1 >= Map.Width)
-		{
-			Snake.TailPos.x = 0;
-		}
-		else
-		{
-			Snake.TailPos.x++;
-		}
-	}
-	return true;
-}
+// Создает змейку
 void SpawnSnake(map& Map, snake& Snake, int DirTile, pos HeadPos, int Segments, int SnakeDelay) {
-	pos PlacePos = HeadPos;
-	pos PlaceDir = { 0,0 };
-	if (DirTile == TILE_SNAKE_UP)
+	pos PlacePos = HeadPos; // Начальная позици, начинаем с головы
+	pos PlaceDir = { 0,0 }; // Направление смещения
+	if (DirTile == TILE_SNAKE_UP) // Если смотрит вверх
 	{
-		PlaceDir.y = 1;
+		PlaceDir.y = 1; // Направление вниз
 	}
-	else if (DirTile == TILE_SNAKE_DOWN)
+	else if (DirTile == TILE_SNAKE_DOWN) // Если смотрит вниз
 	{
-		PlaceDir.y = -1;
+		PlaceDir.y = -1; // Направление вверх
 	}
-	else if (DirTile == TILE_SNAKE_LEFT)
+	else if (DirTile == TILE_SNAKE_LEFT) // Если смотрит влево
 	{
-		PlaceDir.x = 1;
+		PlaceDir.x = 1; // Направление вправо
 	}
-	else if (DirTile == TILE_SNAKE_RIGHT)
+	else if (DirTile == TILE_SNAKE_RIGHT) // Если смотрит вправо
 	{
-		PlaceDir.x = -1;
+		PlaceDir.x = -1; // Направление влево
 	}
-	if (PlaceDir.y != 0 && Segments >= Map.Height)
+	if (PlaceDir.y != 0 && Segments >= Map.Height) // Проверка на границу
 	{
-		Segments = Map.Height - 1;
+		Segments = Map.Height - 1; // Перескакиваем на другой конец
 	}
-	else if (Segments >= Map.Width)
+	else if (Segments >= Map.Width) // Проверка на границу
 	{
-		Segments = Map.Width - 1;
+		Segments = Map.Width - 1; // Перескакиваем на другой конец
 	}
-	for (int i = 0; i < Segments - 1; i++)
+	for (int i = 0; i < Segments - 1; i++) // Начинам размещать змейку
 	{
-		Map.Tiles[PlacePos.y][PlacePos.x] = DirTile;
-		if (PlacePos.x + PlaceDir.x < 0)
+		Map.Tiles[PlacePos.y][PlacePos.x] = DirTile; // Размещаем на карте сегмент
+		if (PlacePos.x + PlaceDir.x < 0) // Проверка на одну границу
 		{
-			PlacePos.x = Map.Width - 1;
+			PlacePos.x = Map.Width - 1; // Перескакиваем
 		}
-		else if (PlacePos.x + PlaceDir.x >= Map.Width)
+		else if (PlacePos.x + PlaceDir.x >= Map.Width) // Проверка на другую границу
 		{
-			PlacePos.x = 0;
+			PlacePos.x = 0; // Перескакиваем
 		}
-		else
+		else // Если не на границе
 		{
-			PlacePos.x += PlaceDir.x;
+			PlacePos.x += PlaceDir.x; // Смещаем позицию
 		}
-		if (PlacePos.y + PlaceDir.y < 0)
+		if (PlacePos.y + PlaceDir.y < 0) // Проверка на одну границу
 		{
-			PlacePos.y = Map.Height - 1;
+			PlacePos.y = Map.Height - 1; // Перескакиваем
 		}
-		else if (PlacePos.y + PlaceDir.y >= Map.Height)
+		else if (PlacePos.y + PlaceDir.y >= Map.Height) // Проверка на другую границу
 		{
-			PlacePos.y = 0;
+			PlacePos.y = 0; // Перескакиваем
 		}
-		else
+		else // Если не на границе
 		{
-			PlacePos.y += PlaceDir.y;
+			PlacePos.y += PlaceDir.y; // Смещаем позицию
 		}
 	}
-	Map.Tiles[PlacePos.y][PlacePos.x] = DirTile;
-	Snake.Head = DirTile;
-	Snake.HeadPos = HeadPos;
-	Snake.OldHead = DirTile;
-	Snake.Segments = Segments;
-	Snake.TailPos = PlacePos;
-	Snake.FoodEaten = 0;
-	Snake.Score = 0;
-	Snake.Delay = SnakeDelay;;
+	Map.Tiles[PlacePos.y][PlacePos.x] = DirTile; // Размещаем последний сегмент
+	Snake.Head = DirTile; // Задаем направление головы
+	Snake.HeadPos = HeadPos; // Задаем позицию головы
+	Snake.OldHead = DirTile; // Задаем старое направление головы. В данном случае это то же направление
+	Snake.Segments = Segments; // Задаем количество сегментов змейки
+	Snake.TailPos = PlacePos; // Задаем позицию хвоста
+	Snake.FoodEaten = 0; // Количество съеденой еды
+	Snake.Score = 0; // Счет
+	Snake.Delay = SnakeDelay; // Задержка между шагами
 }
+
+// Первый шаг змейки. Пауза до первого нажатия
 bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data, snake& Snake) {
-	// Пазуа до первого нажатия
-	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-	int Keycode;
-	bool EndLoop = false;
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE)); // Очищаем буфер ввода от предыдущих
+	int Keycode; // Код нажатой клавиши
+	bool EndLoop = false; // Окончание цикла
 	while (true)
 	{
-		if (WindowMaximized(DrawTools))
+		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потому что при сворачивании картинка почему-то затирается)
 		{
-			Sleep(WINDOW_MAXIMIZED_RENDER_DELAY);
-			DrawMap(DrawTools, Map);
-			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-			DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
+			Sleep(WINDOW_MAXIMIZED_RENDER_DELAY); // Ждем, чтобы окно успело развернуться
+			// Отрисовываем:
+			DrawMap(DrawTools, Map); // Фон
+			DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Змейка
+			DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Инфобар
 		}
-		if (_kbhit())
+		if (_kbhit()) // Если была нажат клавиша
 		{
-			Keycode = _getch();
-			if (Keycode == 224) Keycode = _getch();
-			if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
+			Keycode = _getch(); // Получаем код нажатой клавиши
+			if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+			if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC) // Если Enter или Esc
 			{
-				if (PauseMenu(DrawTools, Audio, Map, Snake.Delay, Data, Snake.FoodEaten, Snake.Score))
+				if (PauseMenu(DrawTools, Audio, Map, Data, Snake.FoodEaten, Snake.Score)) // Ставим паузу
 				{
-					return false;
+					return false; // Возвращаем false, ибо PauseMenu вернула true
 				}
-				DrawMap(DrawTools, Map);
-				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
+				// Заново отрисовываем:
+				DrawMap(DrawTools, Map); // Фон
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Змейку
+				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Инфобар
 			}
-			else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
+			else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN) // Если вверх и голова не смотрит вниз
 			{
-				Snake.Head = TILE_SNAKE_UP;
-				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools, Audio, Map, Snake))
+				Snake.Head = TILE_SNAKE_UP; // Поворачиваем голову
+				Snake.OldHead = Snake.Head; // Обновляем позицию старой головы
+				if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Если змейка не сдвинулась
 				{
-					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-					//dead
+					// Данное действие исключено, но оставил для будущего
+					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку					
 				}
-				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				EndLoop = true;;
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+				EndLoop = true; // Заканичваем цикл
 			}
-			else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP)
+			else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP) // Если вниз и голова не смотрит вверх
 			{
-				Snake.Head = TILE_SNAKE_DOWN;
-				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools, Audio, Map, Snake))
+				Snake.Head = TILE_SNAKE_DOWN; // Поворачиваем голову
+				Snake.OldHead = Snake.Head; // Обновляем позицию старой головы
+				if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Если змейка не сдвинулась
 				{
-					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-					//dead
+					// Данное действие исключено, но оставил для будущего
+					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
 				}
-				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				EndLoop = true;
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+				EndLoop = true; // Заканичваем цикл
 			}
-			else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT)
+			else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT) // Если влево и голова не смотрит вправо
 			{
-				Snake.Head = TILE_SNAKE_LEFT;
-				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools, Audio, Map, Snake))
+				Snake.Head = TILE_SNAKE_LEFT; // Поворачиваем голову
+				Snake.OldHead = Snake.Head; // Обновляем позицию старой головы
+				if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Если змейка не сдвинулась
 				{
-					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-					//dead
+					// Данное действие исключено, но оставил для будущего
+					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
 				}
-				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				EndLoop = true;
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+				EndLoop = true; // Заканичваем цикл
 			}
-			else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
+			else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT) // Если влево и голова не смотрит вправо
 			{
-				Snake.Head = TILE_SNAKE_RIGHT;
-				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools, Audio, Map, Snake))
+				Snake.Head = TILE_SNAKE_RIGHT; // Поворачиваем голову
+				Snake.OldHead = Snake.Head; // Обновляем позицию старой головы
+				if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Если змейка не сдвинулась
 				{
-					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-					//dead
+					// Данное действие исключено, но оставил для будущего
+					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку					
 				}
-				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				EndLoop = true;
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+				EndLoop = true; // Заканичваем цикл
 			}
-			while (_kbhit())
+			while (_kbhit()) // Проверка на нажатие паузы
 			{
-				Keycode = _getch();
-				if (Keycode == 224) Keycode = _getch();
-				if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
+				Keycode = _getch(); // Получаем код клавиши
+				if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+				if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC) // Если Enter или Esc
 				{
-					if (PauseMenu(DrawTools, Audio, Map, Snake.Delay, Data, Snake.FoodEaten, Snake.Score))
+					if (PauseMenu(DrawTools, Audio, Map, Data, Snake.FoodEaten, Snake.Score)) // Ставим паузу
 					{
-						return false;
+						return false; // Возвращаем false, ибо PauseMenu вернула true
 					}
-					DrawMap(DrawTools, Map);
-					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-					DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
+					// Заново отрисовываем:
+					DrawMap(DrawTools, Map); // Фон
+					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Змейку
+					DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Инфобар
 				}
 			}
-			if (EndLoop)
+			if (EndLoop) // Если конец цикла
 			{
-				break;
+				break; // Остановочка
 			}
 		}
-		Sleep(1);
+		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
-	return true;
+	return true; // Успешно сделали первый шаг - возвращаем true
 }
+
+// Сама функция игры, main loop
 void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data, int SnakeDelay) {
 	while (true)
 	{
-		ClearMap(Map); // Очищаем карту
-		// Snake init
-		snake Snake;
-		int SnakeSpawnSegments = 3;
-		pos SnakeSpawnPos = { SnakeSpawnSegments,Map.Height / 2 };
-		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments, SnakeDelay);
-		DrawMap(DrawTools, Map);
-		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-		SpawnFood(DrawTools, Map, Snake);
-		DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
+		ClearMap(Map); // Очищаем карту		
+		snake Snake; // Змея
+		int SnakeSpawnSegments = 3; // Количество сегментов змеки
+		pos SnakeSpawnPos = { SnakeSpawnSegments,Map.Height / 2 }; // Начальная позиция змеи
+		SpawnSnake(Map, Snake, TILE_SNAKE_RIGHT, SnakeSpawnPos, SnakeSpawnSegments, SnakeDelay); // Создаем змею
 
-		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-		if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake))
+		DrawMap(DrawTools, Map); // Рисуем карту
+		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змею
+		SpawnFood(DrawTools, Map, Snake); // Создаем еду
+		DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Рисуем инфобар
+
+		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE)); // Очищаем буфер ввода от предыдущих
+
+		if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake)) // Первый шаг змеи
 		{
-			return;
+			return; // Возвращаемся в главное меню
 		}
-		Sleep(Snake.Delay);
-		int Keycode; // Переменная для храения кода символа
-		// Main loop		
+		Sleep(Snake.Delay); // Движение было сделано - ждем до следующего шага
+
+		int Keycode; // Переменная для храения кода символа		
 		while (true)
 		{
-			if (WindowMaximized(DrawTools))
+			if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потому что при сворачивании картинка почему-то затирается)
 			{
-				Sleep(WINDOW_MAXIMIZED_RENDER_DELAY);
-				DrawMap(DrawTools, Map);
-				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
+				Sleep(WINDOW_MAXIMIZED_RENDER_DELAY); // Ждем, чтобы окно успело развернуться
+				// Отрисовываем:
+				DrawMap(DrawTools, Map); // Фон
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Змейку
+				DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Инфобар
 			}
-			if (_kbhit())
+			if (_kbhit()) // Если было нажатие
 			{
-				if (_kbhit())
+				if (_kbhit()) // Проверка первого нажатия
 				{
-					Keycode = _getch();
-					if (Keycode == 224) Keycode = _getch();
-					if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
+					Keycode = _getch(); // Получаем код символа
+					if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+
+					if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC) // Если Enter или Esc
 					{
-						if (PauseMenu(DrawTools, Audio, Map, SnakeDelay, Data, Snake.FoodEaten, Snake.Score))
+						if (PauseMenu(DrawTools, Audio, Map, Data, Snake.FoodEaten, Snake.Score)) // Ставим паузу
 						{
-							return;
+							return; // Возвращаемся в главное меню
 						}
-						DrawMap(DrawTools, Map);
-						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-						DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
-						if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake))
+						// Заново отрисовываем:
+						DrawMap(DrawTools, Map); // Фон
+						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Змейку
+						DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Инфобар
+						if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake)) // Запускам паузу до шага змеи
 						{
-							return;
+							return; // Возвращаемся в главное меню
 						}
-						Sleep(Snake.Delay);
+						Sleep(Snake.Delay); // Ждем до следующего шага
 					}
-					else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
+					else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN) // Если вверх и голова не смотрит вниз
 					{
-						Snake.Head = TILE_SNAKE_UP;
+						Snake.Head = TILE_SNAKE_UP; // Поворачиваем голову вверх
 					}
-					else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP)
+					else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP) // Если вниз и голова не смотрит вверх
 					{
-						Snake.Head = TILE_SNAKE_DOWN;
+						Snake.Head = TILE_SNAKE_DOWN; // Поворачиваем голову вниз
 					}
-					else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT)
+					else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT) // Если влево и голова не смотрит вправо
 					{
-						Snake.Head = TILE_SNAKE_LEFT;
+						Snake.Head = TILE_SNAKE_LEFT; // Поворачиваем голову влево
 					}
-					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
+					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT) // Если вправо и голова не смотрит влево
 					{
-						Snake.Head = TILE_SNAKE_RIGHT;
+						Snake.Head = TILE_SNAKE_RIGHT; // Поворичваем голову вправо
 					}
-					if (Snake.Head != Snake.OldHead)
+					if (Snake.Head != Snake.OldHead) // Если новая позиция головы не совпадает со старой позицией
 					{
-						Snake.OldHead = Snake.Head;
-						if (!MoveSnake(DrawTools, Audio, Map, Snake))
+						Snake.OldHead = Snake.Head; // Обновляем старую позицию головы
+						if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Двигаем змейку
 						{
-							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-							break;
+							break; // Змейка не двинулась, а значит врезаалсь - завершаем веселье
 						}
-						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-						Sleep(Snake.Delay);
+						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+						Sleep(Snake.Delay); // Ждем до следующего шага
 					}
 				}
-				if (_kbhit())
+				if (_kbhit()) // Проверка первого нажатия подряд 
 				{
-					Keycode = _getch();
-					if (Keycode == 224) Keycode = _getch();
-					// чистим буфер, чтобы не задать огромное количетсво действий напереёд
-					//FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-					while (_kbhit())
+					Keycode = _getch(); // Получаем код символа
+					if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+
+
+					if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC) // Если Enter или Esc
 					{
-						Keycode = _getch();
-						if (Keycode == 224) Keycode = _getch();
-						if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC)
+						if (PauseMenu(DrawTools, Audio, Map, Data, Snake.FoodEaten, Snake.Score)) // Ставим паузу
 						{
-							if (PauseMenu(DrawTools, Audio, Map, SnakeDelay, Data, Snake.FoodEaten, Snake.Score))
-							{
-								return;
-							}
-							DrawMap(DrawTools, Map);
-							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-							DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score);
-							if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake))
-							{
-								return;
-							}
-							Sleep(Snake.Delay);
-							continue;
+							return; // Возвращаемся в главное меню
 						}
-					}
-					if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN)
-					{
-						Snake.Head = TILE_SNAKE_UP;
-					}
-					else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP)
-					{
-						Snake.Head = TILE_SNAKE_DOWN;
-					}
-					else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT)
-					{
-						Snake.Head = TILE_SNAKE_LEFT;
-					}
-					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT)
-					{
-						Snake.Head = TILE_SNAKE_RIGHT;
-					}
-					if (Snake.Head != Snake.OldHead)
-					{
-						Snake.OldHead = Snake.Head;
-						if (!MoveSnake(DrawTools, Audio, Map, Snake))
+						// Заново отрисовываем:
+						DrawMap(DrawTools, Map); // Фон
+						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Змейку
+						DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Инфобар
+						if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake)) // Запускам паузу до шага змеи
 						{
-							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-							break;
+							return; // Возвращаемся в главное меню
 						}
-						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-						Sleep(Snake.Delay);
+						Sleep(Snake.Delay); // Ждем до следующего шага
+					}
+					else if (Keycode == GMKEY_UP && Snake.OldHead != TILE_SNAKE_DOWN) // Если вверх и голова не смотрит вниз
+					{
+						Snake.Head = TILE_SNAKE_UP; // Поворачиваем голову вверх
+					}
+					else if (Keycode == GMKEY_DOWN && Snake.OldHead != TILE_SNAKE_UP) // Если вниз и голова не смотрит вверх
+					{
+						Snake.Head = TILE_SNAKE_DOWN; // Поворачиваем голову вниз
+					}
+					else if (Keycode == GMKEY_LEFT && Snake.OldHead != TILE_SNAKE_RIGHT) // Если влево и голова не смотрит вправо
+					{
+						Snake.Head = TILE_SNAKE_LEFT; // Поворачиваем голову влево
+					}
+					else if (Keycode == GMKEY_RIGHT && Snake.OldHead != TILE_SNAKE_LEFT) // Если вправо и голова не смотрит влево
+					{
+						Snake.Head = TILE_SNAKE_RIGHT; // Поворичваем голову вправо
+					}
+					if (Snake.Head != Snake.OldHead) // Если новая позиция головы не совпадает со старой позицией
+					{
+						Snake.OldHead = Snake.Head; // Обновляем старую позицию головы
+						if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Двигаем змейку
+						{
+							break; // Змейка не двинулась, а значит врезаалсь - завершаем веселье
+						}
+						DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+						Sleep(Snake.Delay); // Ждем до следующего шага
+					}
+					while (_kbhit()) // Проверка остального буфера на наличие паузы
+					{
+						Keycode = _getch(); // Получаем код символа
+						if (Keycode == 224) Keycode = _getch(); // Особенность со стрелочками: она даёт сразу два кода. Берем второй, нужный
+						if (Keycode == GMKEY_ENTER || Keycode == GMKEY_ESC) // Если Enter или Esc
+						{
+							if (PauseMenu(DrawTools, Audio, Map, Data, Snake.FoodEaten, Snake.Score)) // Ставим паузу
+							{
+								return; // Возвращаемся в главное меню
+							}
+							// Заново отрисовываем:
+							DrawMap(DrawTools, Map); // Фон
+							DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Змейку
+							DrawInfoBar(DrawTools, Map, Snake.FoodEaten, Snake.Score); // Инфобар
+							if (!SnakeFirstStep(DrawTools, Audio, Map, Data, Snake)) // Запускам паузу до шага змеи
+							{
+								return; // Возвращаемся в главное меню
+							}
+							Sleep(Snake.Delay); // Ждем до следующего шага
+						}
 					}
 				}
 			}
-			else
+			else  // Если ничего не было нажато
 			{
-				Snake.OldHead = Snake.Head;
-				if (!MoveSnake(DrawTools, Audio, Map, Snake))
+				Snake.OldHead = Snake.Head; // Обновляем старую позицию головы
+				if (!MoveSnake(DrawTools, Audio, Map, Snake)) // Двигаем змейку
 				{
-					DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-					break;
+					break; // Змейка не двинулась, а значит врезаалсь - завершаем веселье
 				}
-				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]);
-				Sleep(Snake.Delay);
+				DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x]); // Рисуем змейку
+				Sleep(Snake.Delay); // Ждем до следующего шага
 			}
 		}
-		PlaySoundB(Audio, GSND_PUNCH, Audio.GameVolumePercent);
-		RemoveTailPart(DrawTools, Map, Snake);
-		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x], true);
-		Sleep(1500);
-		if (!RetryMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score))
+		// Когда врезались, попадаем сюда
+		PlaySoundB(Audio, GSND_PUNCH, Audio.GameVolumePercent); // Проигрываем звук удара
+		RemoveTailPart(DrawTools, Map, Snake); // Удаляем хвост
+		DrawSnake(DrawTools, Map, Snake, Map.Tiles[Snake.TailPos.y][Snake.TailPos.x], true); // Рисуем смятую змейку
+		Sleep(1500); // Ждем 1.5 секунды
+		if (!RetryMenu(DrawTools, Audio, Map, Snake.FoodEaten, Snake.Score)) // Открываем меню ретрая
 		{
-			return;
+			return; // Если не выбрали заново, возвращаемся в главное меню
 		}
 	}
 }
-

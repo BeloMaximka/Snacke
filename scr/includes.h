@@ -1,30 +1,34 @@
-#pragma once
-#define TILESIZE 32
-#define WINDOW_STATE_MAXIMIZED 1
-#define WINDOW_STATE_MINIMIZED 2
-#define WINDOW_MAXIMIZED_RENDER_DELAY 200
-#define INFO_BAR_SIZE 2
-#define FONT_NORMAL_THICKNESS 0
-#define FOOD_SCORE_REWARD 10
-#define SCORE_DIGITS 5
-#define SNAKE_DEFAULT_DELAY 150
+/*-------------------------------------------------------------------
+	includes.h
+
+	В этот файл подключаются все остальные
+-------------------------------------------------------------------*/
+
+#pragma once // Чтобы файл подключался линковщиком строго один раз
+
+// Дефайны, которые используются в нескольких файлах
+#define WINDOW_MAXIMIZED_RENDER_DELAY 200 // Задержка перед рендером изображение (используется при разворачивании окна)
+#define INFO_BAR_SIZE 2 // Высота инфобара в плитках
+#define M_PI 3.14159265358979323846 // Число пи
+
+// Стандартные библиотеки
 #include <iostream>
 #include <Windows.h>
 #include <conio.h>
 #include <vector>
 #include <string>
-#define M_PI 3.14159265358979323846
 #include <cmath>
-#include <thread>
+
+// Библиотека BASS
 #include "bass.h"
 
+// Собственные .h файлы
 #include "structenum.h"
 #include "files.h"
 #include "render.h"
-#include "cpptimer.h"
 #include "sound.h"
 #include "menus.h"
 #include "snake.h"
 
-#pragma comment(lib,"msimg32.lib")
+// Подключение lib файла
 #pragma comment(lib,"bass.lib")
