@@ -18,7 +18,7 @@ void SnakeMainGame(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata&
 
 // Затирает строку текста фоном
 void MenuClearLineTile(drawtools& DrawTools, map& Map, int PosY) {	
-	PosY = (PosY-DrawTools.TileSize) / DrawTools.TileSize - INFO_BAR_SIZE; // Конвертируем координаты окна в координаты карты
+	PosY = (PosY-DrawTools.TileSize/2) / DrawTools.TileSize - INFO_BAR_SIZE; // Конвертируем координаты окна в координаты карты
 	for (int x = 1; x < Map.Width - 1; x++) // Затираем на указаной линии
 	{
 		DrawTile(DrawTools, { x, PosY }, TILE_EMPTY); // Поплиточно рисуем фон
