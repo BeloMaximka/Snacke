@@ -403,6 +403,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 	RenderText(DrawTools, Strings[SelectedButtonNum].c_str(), ActiveButtonPos, DrawTools.NormalFont, SelectedButtonColor, true); // Обновляем текст
 
 	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE)); // Очищаем буфер от предыдущих вводов
+	bool AnyChanges = false; // Переменная для фиксация каких-либо изменений настроек
 	while (true)
 	{
 		if (WindowMaximized(DrawTools)) // Обновляем кадр, если окно развернули (потмоу что при сворачивании картинка почему-то затирается)
@@ -438,6 +439,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 			{
 				if (Strings[SelectedButtonNum].find("Mode: ", 0) != std::string::npos) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
 					Map.Walls = Map.Walls ? false : true; // Переключаем режим стен
 					Strings[SelectedButtonNum] = Map.Walls ? "Mode: WALLS" : "Mode: NO WALLS"; // Переключаем надпись					
@@ -446,6 +448,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				}
 				else if (Strings[SelectedButtonNum].find("Snake speed: ", 0) != std::string::npos && SnakeDelay + SNAKE_DELAY_CHANGE_STEP <= SNAKE_DELAY_MAX) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
 					SnakeDelay += SNAKE_DELAY_CHANGE_STEP; // Уменьшаяем задержку движения змейки
 					sprintf_s(Buffer, "Snake speed: %i", SNAKE_DELAY_MAX + SNAKE_DELAY_MIN - SnakeDelay); // Переводим число строку
@@ -455,6 +458,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				}
 				else if (Strings[SelectedButtonNum].find("Game volume: ", 0) != std::string::npos && Audio.GameVolumePercent - VOLUME_CHANGE_STEP >= 0) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					Audio.GameVolumePercent -= VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
 					sprintf_s(Buffer, "Game volume: %i", (int)Audio.GameVolumePercent); // Переводим число в строку
@@ -464,6 +468,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				}
 				else if (Strings[SelectedButtonNum].find("Music volume: ", 0) != std::string::npos && Audio.MusicVolumePercent - VOLUME_CHANGE_STEP >= 0) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					Audio.MusicVolumePercent -= VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
 					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent / 100); // Обновляем громкость музыки
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
@@ -477,6 +482,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 			{
 				if (Strings[SelectedButtonNum].find("Mode: ", 0) != std::string::npos) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук перемещения по меню					
 					Map.Walls = Map.Walls ? false : true; // Переключаем режим стен
 					Strings[SelectedButtonNum] = Map.Walls ? "Mode: WALLS" : "Mode: NO WALLS"; // Переключаем надпись		
@@ -485,6 +491,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				}
 				else if (Strings[SelectedButtonNum].find("Snake speed: ", 0) != std::string::npos && SnakeDelay - SNAKE_DELAY_CHANGE_STEP >= SNAKE_DELAY_MIN) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
 					SnakeDelay -= SNAKE_DELAY_CHANGE_STEP; // Увеличиваем задержку движения змейки
 					sprintf_s(Buffer, "Snake speed: %i", SNAKE_DELAY_MAX + SNAKE_DELAY_MIN - SnakeDelay); // Переводим число в строку
@@ -494,6 +501,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				}
 				else if (Strings[SelectedButtonNum].find("Game volume: ", 0) != std::string::npos && Audio.GameVolumePercent + VOLUME_CHANGE_STEP <= 100) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					Audio.GameVolumePercent += VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции
 					sprintf_s(Buffer, "Game volume: %i", (int)Audio.GameVolumePercent); // Переводим число в строку
@@ -503,6 +511,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				}
 				else if (Strings[SelectedButtonNum].find("Music volume: ", 0) != std::string::npos && Audio.MusicVolumePercent + VOLUME_CHANGE_STEP <= 100) // Если в строчке найдено ключевое слово
 				{
+					AnyChanges = true; // Сделали изменения в настройках
 					Audio.MusicVolumePercent += VOLUME_CHANGE_STEP; // Увеличиваем громкость игрового звука
 					BASS_ChannelSetAttribute(Audio.Sounds[GSND_MUSIC], BASS_ATTRIB_VOL, Audio.MusicVolumePercent / 100); // Обновляем громкость музыки
 					PlaySoundB(Audio, GSND_MENU_MOVEMENT, Audio.GameVolumePercent); // Проигрываем звук изменения опции					
@@ -517,13 +526,19 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				if (Strings[SelectedButtonNum] == "Back") // Если "Выйти"
 				{
 					PlaySoundB(Audio, GSND_MENU_ENTER, Audio.GameVolumePercent); // Проигрываем звук нажатия на опцию меню
-					SaveFileData(Data, Audio, Map, SnakeDelay); // записываем данные настроек в файл
+					if (AnyChanges) // Если были какие-либо изменения в настройках
+					{
+						SaveFileData(Data, Audio, Map, SnakeDelay); // записываем данные настроек в файл
+					}					
 					return; // Возвращаемся обратно
 				}
 			}
 			else if (Keycode == GMKEY_ESC)
 			{
-				SaveFileData(Data, Audio, Map, SnakeDelay); // записываем данные настроек в файл
+				if (AnyChanges) // Если были какие-либо изменения в настройках
+				{
+					SaveFileData(Data, Audio, Map, SnakeDelay); // записываем данные настроек в файл
+				}			
 				return; // Возвращаемся обратно
 			}
 		}
