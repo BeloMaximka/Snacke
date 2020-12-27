@@ -23,7 +23,8 @@ void MapInit(map& Map, int MapHeight, int MapWidth) {
 // Создание шрифта в памяти
 void InitFont(HFONT& HFont, int FontSize, int Thickness) {
 	LOGFONTA Font; // Создаем шрифт, вручную задаем ему параметры	
-	Font.lfHeight = FontSize; // Высота		
+	Font.lfHeight = FontSize; // Высота
+	Font.lfWidth = 0; // Ширина. Если 0, то определяет по высоте
 	Font.lfEscapement = 0; // Наклон строки текста
 	Font.lfOrientation = 0; // Поворот букв 
 	Font.lfWeight = Thickness; // Толщина, 0 - базовое значение
