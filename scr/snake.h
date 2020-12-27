@@ -534,7 +534,7 @@ bool SnakeFirstStep(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata
 				break; // ќстановочка
 			}
 		}
-		Sleep(1); // ∆дЄм чуть-чуть, уменшить количество проверок на разворачивание
+		Sleep(WINDOW_MAXIMIZED_CHECK_DELAY); // ∆дЄм чуть-чуть, уменшить количество проверок на разворачивание
 	}
 	return true; // ”спешно сделали первый шаг - возвращаем true
 }

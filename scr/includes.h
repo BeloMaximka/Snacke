@@ -8,6 +8,7 @@
 
 // Дефайны, которые используются в нескольких файлах
 #define WINDOW_MAXIMIZED_RENDER_DELAY 200 // Задержка перед рендером изображение (используется при разворачивании окна)
+#define WINDOW_MAXIMIZED_CHECK_DELAY 50
 #define INFO_BAR_SIZE 2 // Высота инфобара в плитках
 #define M_PI 3.14159265358979323846 // Число пи
 

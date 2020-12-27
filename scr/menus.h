@@ -124,7 +124,7 @@ bool RetryMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int FoodEaten,
 				}
 			}
 		}
-		Sleep(1); // Ждём чуть-чуть, чтобы уменшить количество проверок на разворачивание
+		Sleep(WINDOW_MAXIMIZED_CHECK_DELAY); // Ждём чуть-чуть, чтобы уменшить количество проверок на разворачивание
 	}
 	return false; // false - в главное меню
 }
@@ -290,7 +290,7 @@ bool PauseMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Dat
 				return false; // false - продолжаем игру
 			}
 		}
-		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
+		Sleep(WINDOW_MAXIMIZED_CHECK_DELAY); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
 	return false; // false - продолжаем игру
 }
@@ -344,7 +344,7 @@ void InfoMenu(drawtools& DrawTools, audiotools& Audio, map& Map) {
 				return; // Возвращаемся обратно				
 			}
 		}
-		Sleep(1); // Ждём чуть-чуть, чтобы уменьшить количество проверок на разворачивание
+		Sleep(WINDOW_MAXIMIZED_CHECK_DELAY); // Ждём чуть-чуть, чтобы уменьшить количество проверок на разворачивание
 	}
 }
 
@@ -542,7 +542,7 @@ void SettingsMenu(drawtools& DrawTools, audiotools& Audio, map& Map, int& SnakeD
 				return; // Возвращаемся обратно
 			}
 		}
-		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
+		Sleep(WINDOW_MAXIMIZED_CHECK_DELAY); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
 }
 
@@ -655,6 +655,6 @@ void MainMenu(drawtools& DrawTools, audiotools& Audio, map& Map, saveddata& Data
 				}
 			}
 		}
-		Sleep(1); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
+		Sleep(WINDOW_MAXIMIZED_CHECK_DELAY); // Ждём чуть-чуть, уменшить количество проверок на разворачивание
 	}
 }
